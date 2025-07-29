@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - MedConnect</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="header">
+    <h1 class="logo">MedConnect</h1>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/donate">Donate Medicine</a>
+      <a href="/request">Request Medicine</a>
+      <form action="/auth/logout" method="POST" style="display:inline;"><button class="logout-btn">Logout</button></form>
+    </nav>
+  </header>
+  <main class="main-content">
+    <section class="dashboard-section">
+      <h2>Your Donations</h2>
+      <div class="donations-list">
+        <% if (donations.length === 0) { %>
+          <p>You have not donated any medicines yet.</p>
+        <% } %>
+        <% donations.forEach(function(med) { %>
+          <div class="medicine-card">
+            <img src="<%= med.imageUrl %>" alt="<%= med.name %>" class="medicine-img">
+            <div class="medicine-info">
+              <h3><%= med.name %></h3>
+              <p>Quantity: <%= med.quantity %></p>
+              <p>Expiry: <%= med.expiry.toISOString().slice(0,10) %></p>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+      <h2>Your Requests</h2>
+      <div class="requests-list">
+        <% if (requests.length === 0) { %>
+          <p>You have not requested any medicines yet.</p>
+        <% } %>
+        <% requests.forEach(function(req) { %>
+          <div class="request-card">
+            <div class="medicine-info">
+              <h3><%= req.medicine.name %></h3>
+              <p>Status: <span class="status <%= req.status.toLowerCase() %>"><%= req.status %></span></p>
+              <form action="/dashboard/cancel/<%= req._id %>" method="POST">
+                <% if (req.status === 'Pending') { %>
+                  <button type="submit" class="cancel-btn">Cancel</button>
+                <% } %>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+    <% if (success) { %><div class="flash success"><%= success %></div><% } %>
+    <% if (error) { %><div class="flash error"><%= error %></div><% } %>
+  </main>
+  <footer class="footer">&copy; <%= new Date().getFullYear() %> MedConnect</footer>
+</body>
+</html> 

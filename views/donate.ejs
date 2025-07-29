@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donate Medicine - MedConnect</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="header">
+    <h1 class="logo">MedConnect</h1>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/request">Request Medicine</a>
+      <form action="/auth/logout" method="POST" style="display:inline;"><button class="logout-btn">Logout</button></form>
+    </nav>
+  </header>
+  <main class="main-content">
+    <section class="form-section">
+      <h2>Donate Medicine</h2>
+      <% if (success) { %><div class="flash success"><%= success %></div><% } %>
+      <% if (error) { %><div class="flash error"><%= error %></div><% } %>
+      <form action="/donate" method="POST" enctype="multipart/form-data" class="form">
+        <label for="name">Medicine Name</label>
+        <input type="text" name="name" id="name" required>
+        <label for="quantity">Quantity</label>
+        <input type="number" name="quantity" id="quantity" min="1" required>
+        <label for="expiry">Expiry Date</label>
+        <input type="date" name="expiry" id="expiry" required>
+        <label for="image">Medicine Image</label>
+        <input type="file" name="image" id="image" accept="image/*" required>
+        <button type="submit" class="cta-btn">Donate</button>
+      </form>
+    </section>
+  </main>
+  <footer class="footer">&copy; <%= new Date().getFullYear() %> MedConnect</footer>
+</body>
+</html> 
