@@ -1,39 +1,269 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Donate Medicine - MedConnect</title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-  <header class="header">
-    <h1 class="logo">MedConnect</h1>
-    <nav class="nav">
-      <a href="/">Home</a>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/request">Request Medicine</a>
-      <form action="/auth/logout" method="POST" style="display:inline;"><button class="logout-btn">Logout</button></form>
-    </nav>
-  </header>
-  <main class="main-content">
-    <section class="form-section">
-      <h2>Donate Medicine</h2>
-      <% if (success) { %><div class="flash success"><%= success %></div><% } %>
-      <% if (error) { %><div class="flash error"><%= error %></div><% } %>
-      <form action="/donate" method="POST" enctype="multipart/form-data" class="form">
-        <label for="name">Medicine Name</label>
-        <input type="text" name="name" id="name" required>
-        <label for="quantity">Quantity</label>
-        <input type="number" name="quantity" id="quantity" min="1" required>
-        <label for="expiry">Expiry Date</label>
-        <input type="date" name="expiry" id="expiry" required>
-        <label for="image">Medicine Image</label>
-        <input type="file" name="image" id="image" accept="image/*" required>
-        <button type="submit" class="cta-btn">Donate</button>
-      </form>
-    </section>
-  </main>
-  <footer class="footer">&copy; <%= new Date().getFullYear() %> MedConnect</footer>
+<link rel="stylesheet" href="/css/donate.css">
+    <!-- Donate Medicines Section -->
+     <div class="main-content">
+    <div class="donate-container " style="padding-top: 0px; margin-top: 0px;">
+        <!-- Form Header -->
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="fas fa-pills"></i>
+            </div>
+            <div>
+                <h2 class="form-title">Donate Medicines</h2>
+                <p class="form-subtitle">Help others by donating unused medicines. Your contribution can save lives.</p>
+            </div>
+        </div>
+        
+        <!-- Donate Form Container -->
+        <div class="donate-form-container">
+            <div class="form-content">
+                <form id="donate-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="medicine-name">
+                                <i class="fas fa-capsules"></i> Medicine Name<span class="required-star">*</span>
+                            </label>
+                            <input type="text" id="medicine-name" class="form-input" placeholder="e.g., Paracetamol 500mg" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="quantity">
+                                <i class="fas fa-calculator"></i> Quantity<span class="required-star">*</span>
+                            </label>
+                            <input type="number" id="quantity" class="form-input" placeholder="Number of tablets/capsules" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="expiry-date">
+                                <i class="fas fa-calendar"></i> Expiry Date<span class="required-star">*</span>
+                            </label>
+                            <input type="date" id="expiry-date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="dosage">
+                                <i class="fas fa-prescription-bottle"></i> Dosage
+                            </label>
+                            <input type="text" id="dosage" class="form-input" placeholder="e.g., 500mg per tablet">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="manufacturer">
+                                <i class="fas fa-industry"></i> Manufacturer
+                            </label>
+                            <input type="text" id="manufacturer" class="form-input" placeholder="Pharmaceutical company">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="category">
+                                <i class="fas fa-tag"></i> Category
+                            </label>
+                            <select id="category" class="form-select">
+                                <option value="">Select category</option>
+                                <option value="pain-relief">Pain Relief</option>
+                                <option value="antibiotics">Antibiotics</option>
+                                <option value="vitamins">Vitamins & Supplements</option>
+                                <option value="chronic">Chronic Conditions</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-box-open"></i> Condition<span class="required-star">*</span>
+                            </label>
+                            <div class="condition-options">
+                                <div class="condition-option">
+                                    <input type="radio" id="condition-new" name="condition" value="new" required>
+                                    <label for="condition-new">
+                                        <i class="fas fa-box"></i>
+                                        <div class="condition-name">Unopened</div>
+                                        <div class="condition-desc">Sealed and intact packaging</div>
+                                    </label>
+                                </div>
+                                <div class="condition-option">
+                                    <input type="radio" id="condition-opened" name="condition" value="opened">
+                                    <label for="condition-opened">
+                                        <i class="fas fa-box-open"></i>
+                                        <div class="condition-name">Opened but Unused</div>
+                                        <div class="condition-desc">Packaging opened but pills untouched</div>
+                                    </label>
+                                </div>
+                                <div class="condition-option">
+                                    <input type="radio" id="condition-partial" name="condition" value="partial">
+                                    <label for="condition-partial">
+                                        <i class="fas fa-pills"></i>
+                                        <div class="condition-name">Partially Used</div>
+                                        <div class="condition-desc">Some pills used from the package</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label class="form-label" for="notes">
+                                <i class="fas fa-notes-medical"></i> Additional Notes
+                            </label>
+                            <textarea id="notes" class="form-textarea" placeholder="Any special instructions or details about the medicine"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-images"></i> Upload Photos (Optional)
+                            </label>
+                            <div class="image-upload-container">
+                                <div class="upload-area" id="upload-area">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="upload-text">Drag & drop or click to upload photos</div>
+                                    <div class="upload-hint">Max 3 photos (JPG, PNG, max 5MB each)</div>
+                                    <div class="upload-button">Select Images</div>
+                                    <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+                                </div>
+                                <div class="preview-container" id="preview-container">
+                                    <!-- Image previews will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="submit-container">
+                        <button type="submit" class="submit-button">
+                            <i class="fas fa-paper-plane"></i> Submit Donation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Success Message (Initially Hidden) -->
+        <div class="success-message" id="success-message">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="success-title">Thank You for Your Donation!</h3>
+            <p class="success-text">
+                Your medicine donation has been submitted successfully. Our team will review your donation 
+                and contact you within 24 hours to arrange pickup. Your contribution will help those in need.
+            </p>
+            <a href="#" class="back-to-dashboard">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('donate-form');
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const previewContainer = document.getElementById('preview-container');
+            const successMessage = document.getElementById('success-message');
+            
+            // File upload handling
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary)';
+                uploadArea.style.backgroundColor = 'rgba(42, 124, 199, 0.1)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'var(--light-gray)';
+                uploadArea.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--light-gray)';
+                uploadArea.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                
+                if (e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+            
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    handleFiles(fileInput.files);
+                }
+            });
+            
+            function handleFiles(files) {
+                // Clear previous previews if any
+                previewContainer.innerHTML = '';
+                
+                // Limit to 3 images
+                const filesToProcess = Array.from(files).slice(0, 3);
+                
+                filesToProcess.forEach(file => {
+                    if (!file.type.match('image.*')) {
+                        alert('Please upload only image files (JPG, PNG)');
+                        return;
+                    }
+                    
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('File size should be less than 5MB');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('image-preview');
+                        previewContainer.appendChild(img);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Basic validation
+                const medicineName = document.getElementById('medicine-name').value;
+                const quantity = document.getElementById('quantity').value;
+                const expiryDate = document.getElementById('expiry-date').value;
+                const condition = document.querySelector('input[name="condition"]:checked');
+                
+                if (!medicineName || !quantity || !expiryDate || !condition) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                // Simulate form processing
+                form.reset();
+                previewContainer.innerHTML = '';
+                
+                // Show success message
+                successMessage.style.display = 'block';
+                document.querySelector('.donate-form-container').style.display = 'none';
+                
+                // Scroll to success message
+                successMessage.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Back to dashboard button
+            document.querySelector('.back-to-dashboard').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Returning to dashboard...');
+                // In a real app, you would navigate back to the dashboard view
+            });
+        });
+    </script>
 </body>
-</html> 
+</html>

@@ -8,7 +8,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // GET donate form
 router.get('/', isLoggedIn, (req, res) => {
-  res.render('donate');
+  res.render('donate', { layout: 'layouts/dashboard_layout', activePage: 'donate' });
 });
 
 // POST donate

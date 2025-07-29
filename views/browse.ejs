@@ -1,0 +1,457 @@
+ <link rel="stylesheet" href="/css/browse.css">
+
+    <!-- Browse Medicines Section -->
+     <div class="main-content">
+    <div class="browse-container">
+        <!-- Browse Header -->
+        <div class="browse-header">
+            <div>
+                <h2 class="browse-title">Browse Available Medicines</h2>
+                <p class="browse-subtitle">Find medicines donated by others near you</p>
+            </div>
+            <div class="results-count">12 available medicines</div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-container">
+            <div class="filter-group">
+                <label class="filter-label">Medicine Name</label>
+                <input type="text" class="filter-input" placeholder="Search by name">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Category</label>
+                <select class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="pain-relief">Pain Relief</option>
+                    <option value="antibiotics">Antibiotics</option>
+                    <option value="vitamins">Vitamins & Supplements</option>
+                    <option value="chronic">Chronic Conditions</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Distance</label>
+                <select class="filter-select">
+                    <option value="">Any Distance</option>
+                    <option value="5">Within 5 miles</option>
+                    <option value="10">Within 10 miles</option>
+                    <option value="25">Within 25 miles</option>
+                </select>
+            </div>
+            
+            <button class="filter-button">
+                <i class="fas fa-filter"></i> Apply Filters
+            </button>
+        </div>
+        
+        <!-- Medicines Grid -->
+        <div class="medicines-grid">
+            <!-- Medicine Card 1 -->
+            <div class="medicine-card">
+                <div class="medicine-image">
+                    <i class="fas fa-capsules"></i>
+                    <div class="medicine-status status-available">Available</div>
+                </div>
+                <div class="medicine-details">
+                    <h4 class="medicine-name">Paracetamol 500mg</h4>
+                    <div class="medicine-info">
+                        <div class="info-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>24 tablets</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Expires: Dec 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Donated by: Sarah M.</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Seattle, WA (2.3 miles)</span>
+                        </div>
+                        <div class="distance-badge">
+                            <i class="fas fa-location-arrow"></i> 2.3 miles from you
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-button btn-details view-details" data-id="1">
+                            View Details
+                        </button>
+                        <button class="action-button btn-request">
+                            Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medicine Card 2 -->
+            <div class="medicine-card">
+                <div class="medicine-image">
+                    <i class="fas fa-pills"></i>
+                    <div class="medicine-status status-available">Available</div>
+                </div>
+                <div class="medicine-details">
+                    <h4 class="medicine-name">Vitamin D3 1000 IU</h4>
+                    <div class="medicine-info">
+                        <div class="info-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>60 capsules</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Expires: Mar 2025</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Donated by: Robert T.</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Bellevue, WA (5.1 miles)</span>
+                        </div>
+                        <div class="distance-badge">
+                            <i class="fas fa-location-arrow"></i> 5.1 miles from you
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-button btn-details view-details" data-id="2">
+                            View Details
+                        </button>
+                        <button class="action-button btn-request">
+                            Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medicine Card 3 -->
+            <div class="medicine-card">
+                <div class="medicine-image">
+                    <i class="fas fa-tablets"></i>
+                    <div class="medicine-status status-available">Available</div>
+                </div>
+                <div class="medicine-details">
+                    <h4 class="medicine-name">Amoxicillin 500mg</h4>
+                    <div class="medicine-info">
+                        <div class="info-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>20 capsules</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Expires: Oct 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Donated by: Michael K.</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Redmond, WA (3.7 miles)</span>
+                        </div>
+                        <div class="distance-badge">
+                            <i class="fas fa-location-arrow"></i> 3.7 miles from you
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-button btn-details view-details" data-id="3">
+                            View Details
+                        </button>
+                        <button class="action-button btn-request">
+                            Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medicine Card 4 -->
+            <div class="medicine-card">
+                <div class="medicine-image">
+                    <i class="fas fa-prescription-bottle"></i>
+                    <div class="medicine-status status-available">Available</div>
+                </div>
+                <div class="medicine-details">
+                    <h4 class="medicine-name">Lisinopril 10mg</h4>
+                    <div class="medicine-info">
+                        <div class="info-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>30 tablets</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Expires: Nov 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Donated by: Jennifer L.</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Kirkland, WA (4.2 miles)</span>
+                        </div>
+                        <div class="distance-badge">
+                            <i class="fas fa-location-arrow"></i> 4.2 miles from you
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-button btn-details view-details" data-id="4">
+                            View Details
+                        </button>
+                        <button class="action-button btn-request">
+                            Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medicine Card 5 -->
+            <div class="medicine-card">
+                <div class="medicine-image">
+                    <i class="fas fa-capsules"></i>
+                    <div class="medicine-status status-available">Available</div>
+                </div>
+                <div class="medicine-details">
+                    <h4 class="medicine-name">Metformin 500mg</h4>
+                    <div class="medicine-info">
+                        <div class="info-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>90 tablets</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Expires: Jan 2025</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Donated by: David W.</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Seattle, WA (1.8 miles)</span>
+                        </div>
+                        <div class="distance-badge">
+                            <i class="fas fa-location-arrow"></i> 1.8 miles from you
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-button btn-details view-details" data-id="5">
+                            View Details
+                        </button>
+                        <button class="action-button btn-request">
+                            Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medicine Card 6 -->
+            <div class="medicine-card">
+                <div class="medicine-image">
+                    <i class="fas fa-pills"></i>
+                    <div class="medicine-status status-available">Available</div>
+                </div>
+                <div class="medicine-details">
+                    <h4 class="medicine-name">Atorvastatin 20mg</h4>
+                    <div class="medicine-info">
+                        <div class="info-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>45 tablets</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Expires: Feb 2025</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Donated by: Emily R.</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Renton, WA (6.5 miles)</span>
+                        </div>
+                        <div class="distance-badge">
+                            <i class="fas fa-location-arrow"></i> 6.5 miles from you
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-button btn-details view-details" data-id="6">
+                            View Details
+                        </button>
+                        <button class="action-button btn-request">
+                            Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Medicine Details Modal -->
+    <div class="modal-overlay" id="medicineModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Medicine Details</h3>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-image">
+                    <i class="fas fa-capsules"></i>
+                </div>
+                <div class="modal-details">
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-capsules"></i> Medicine Name</span>
+                        <span class="detail-value" id="medName">Paracetamol 500mg</span>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-info-circle"></i> Description</span>
+                        <span class="detail-value" id="medDesc">Pain reliever and fever reducer. Unopened package, stored properly.</span>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-calculator"></i> Quantity</span>
+                        <span class="detail-value" id="medQty">24 tablets</span>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-calendar"></i> Expiry Date</span>
+                        <span class="detail-value" id="medExpiry">December 15, 2024</span>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-tag"></i> Category</span>
+                        <span class="detail-value" id="medCategory">Pain Relief</span>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-user"></i> Donated By</span>
+                        <span class="detail-value" id="medDonor">Sarah M.</span>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Pickup Location</span>
+                        <div class="address-card">
+                            <div class="detail-value" id="medAddress">123 Wellness Street, Apt 4B</div>
+                            <div class="detail-value">Seattle, WA 98101</div>
+                            <div class="detail-value">United States</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-clock"></i> Availability</span>
+                        <span class="detail-value">Weekdays: 5 PM - 8 PM<br>Weekends: 10 AM - 4 PM</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closeModalBtn">
+                    Close
+                </button>
+                <button class="action-button btn-request">
+                    Request This Medicine
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('medicineModal');
+            const closeModal = document.getElementById('closeModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const viewButtons = document.querySelectorAll('.view-details');
+            
+            // Open modal function
+            function openModal(medicineId) {
+                // In a real app, you would fetch medicine details based on ID
+                // For demo, we'll use static data based on the ID
+                const medicines = {
+                    1: {
+                        name: "Paracetamol 500mg",
+                        desc: "Pain reliever and fever reducer. Unopened package, stored properly.",
+                        qty: "24 tablets",
+                        expiry: "December 15, 2024",
+                        category: "Pain Relief",
+                        donor: "Sarah M.",
+                        address: "123 Wellness Street, Apt 4B\nSeattle, WA 98101\nUnited States"
+                    },
+                    2: {
+                        name: "Vitamin D3 1000 IU",
+                        desc: "Vitamin supplement for bone health. Unopened bottle.",
+                        qty: "60 capsules",
+                        expiry: "March 22, 2025",
+                        category: "Vitamins & Supplements",
+                        donor: "Robert T.",
+                        address: "456 Health Avenue\nBellevue, WA 98004\nUnited States"
+                    },
+                    3: {
+                        name: "Amoxicillin 500mg",
+                        desc: "Antibiotic for bacterial infections. Unopened package.",
+                        qty: "20 capsules",
+                        expiry: "October 10, 2024",
+                        category: "Antibiotics",
+                        donor: "Michael K.",
+                        address: "789 Recovery Road\nRedmond, WA 98052\nUnited States"
+                    }
+                };
+                
+                const med = medicines[medicineId] || medicines[1];
+                
+                document.getElementById('medName').textContent = med.name;
+                document.getElementById('medDesc').textContent = med.desc;
+                document.getElementById('medQty').textContent = med.qty;
+                document.getElementById('medExpiry').textContent = med.expiry;
+                document.getElementById('medCategory').textContent = med.category;
+                document.getElementById('medDonor').textContent = med.donor;
+                document.getElementById('medAddress').innerHTML = med.address.replace(/\n/g, '<br>');
+                
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Close modal function
+            function closeModalFunc() {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            // Event listeners
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = parseInt(this.getAttribute('data-id'));
+                    openModal(medicineId);
+                });
+            });
+            
+            closeModal.addEventListener('click', closeModalFunc);
+            closeModalBtn.addEventListener('click', closeModalFunc);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModalFunc();
+                }
+            });
+            
+            // Request button functionality
+            const requestButtons = document.querySelectorAll('.btn-request');
+            requestButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineCard = this.closest('.medicine-card');
+                    const medicineName = medicineCard.querySelector('.medicine-name').textContent;
+                    alert(`Request submitted for: ${medicineName}\nThe donor will contact you to arrange pickup.`);
+                });
+            });
+            
+            // Filter button functionality
+            document.querySelector('.filter-button').addEventListener('click', function() {
+                alert('Filters applied! In a real application, this would update the medicine listings.');
+            });
+        });
+    </script>
+</div>

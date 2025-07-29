@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedConnect | Modern Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/dashboard-sidebar.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h1>MedConnect</h1>
+            </div>
+            <div class="user-info">
+                <div class="notifications">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">3</div>
+                </div>
+                <div class="user-avatar">JD</div>
+            </div>
+        </div>
+    </header>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="/dashboard" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'dashboard') ? ' active' : '' %>">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/donate" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'donate') ? ' active' : '' %>">
+                <i class="fas fa-pills"></i>
+                <span>Donate Medicines</span>
+            </a>
+            <a href="/dashboard/browse" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'browse') ? ' active' : '' %>">
+                <i class="fas fa-search"></i>
+                <span>Browse Medicines</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>Donation History</span>
+            </a>
+            <a href="/dashboard/requests" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'requests') ? ' active' : '' %>">
+                <i class="fas fa-hand-holding-medical"></i>
+                <span>My Requests</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>My Profile</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </aside>
+        <%- body %>
+    </div>
+</body>
+</html>

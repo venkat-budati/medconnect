@@ -9,7 +9,22 @@ router.get('/', isLoggedIn, async (req, res) => {
   const userId = req.session.user.id;
   const donations = await Medicine.find({ donor: userId });
   const requests = await Request.find({ requester: userId }).populate('medicine');
-  res.render('dashboard', { donations, requests });
+  res.render('dashboard', { 
+    donations, 
+    requests, 
+    layout: 'layouts/dashboard_layout',
+    activePage: 'dashboard'
+  });
+});
+
+// Browse Medicines
+router.get('/browse', isLoggedIn, async (req, res) => {
+  res.render('browse', { layout: 'layouts/dashboard_layout', activePage: 'browse' });
+});
+
+// My Requests
+router.get('/requests', isLoggedIn, async (req, res) => {
+  res.render('requests', { layout: 'layouts/dashboard_layout', activePage: 'requests' });
 });
 
 // Cancel request
