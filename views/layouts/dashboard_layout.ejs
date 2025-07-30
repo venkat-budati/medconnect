@@ -42,7 +42,7 @@
                 <i class="fas fa-search"></i>
                 <span>Browse Medicines</span>
             </a>
-            <a href="/donor" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'donor') ? ' active' : '' %>">
+            <a href="/dashboard/donor" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'donor') ? ' active' : '' %>">
                 <i class="fas fa-history"></i>
                 <span>Donation History</span>
             </a>
@@ -50,11 +50,11 @@
                 <i class="fas fa-hand-holding-medical"></i>
                 <span>My Requests</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="/dashboard/profile" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'profile') ? ' active' : '' %>">
                 <i class="fas fa-user"></i>
                 <span>My Profile</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="/dashboard/settings" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'settings') ? ' active' : '' %>">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>

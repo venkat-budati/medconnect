@@ -27,6 +27,18 @@ router.get('/requests', isLoggedIn, async (req, res) => {
   res.render('requests', { layout: 'layouts/dashboard_layout', activePage: 'requests' });
 });
 
+router.get('/donor', isLoggedIn, async (req, res) => {
+  res.render('donor', { layout: 'layouts/dashboard_layout', activePage: 'donor' });
+});
+
+router.get('/profile', isLoggedIn, async (req, res) => {
+  res.render('profile', { layout: 'layouts/dashboard_layout', activePage: 'profile' });
+});
+
+router.get('/settings', isLoggedIn, async (req, res) => {
+  res.render('settings', { layout: 'layouts/dashboard_layout', activePage: 'settings' });
+});
+
 // Cancel request
 router.post('/cancel/:id', isLoggedIn, async (req, res) => {
   await Request.deleteOne({ _id: req.params.id, requester: req.session.user.id });

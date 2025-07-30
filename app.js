@@ -58,7 +58,6 @@ app.use('/auth', require('./routes/auth'));
 app.use('/donate', require('./routes/donate'));
 app.use('/request', require('./routes/request'));
 app.use('/dashboard', require('./routes/dashboard'));
-app.use('/donor', require('./routes/donor'));
 
 // 404
 app.use((req, res) => {

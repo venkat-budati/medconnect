@@ -1,0 +1,212 @@
+<link rel="stylesheet" href="/css/settings.css">
+<div class="main-content">
+    <!-- Settings Container -->
+    <div class="settings-container">
+        <div class="settings-card">
+            <div class="settings-content">
+                <h2 class="section-title">Security Settings</h2>
+                
+                <form class="password-form" id="passwordForm">
+                    <div class="form-group">
+                        <label class="form-label" for="currentPassword">
+                            <i class="fas fa-lock"></i> Current Password
+                        </label>
+                        <div class="input-container">
+                            <input type="password" id="currentPassword" class="form-input" placeholder="Enter your current password" required>
+                            <button type="button" class="toggle-password" data-target="currentPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="newPassword">
+                            <i class="fas fa-key"></i> New Password
+                        </label>
+                        <div class="input-container">
+                            <input type="password" id="newPassword" class="form-input" placeholder="Create a new password" required>
+                            <button type="button" class="toggle-password" data-target="newPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-meter" id="strengthMeter"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText">Password strength: None</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">
+                            <i class="fas fa-redo"></i> Confirm New Password
+                        </label>
+                        <div class="input-container">
+                            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your new password" required>
+                            <button type="button" class="toggle-password" data-target="confirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="requirements">
+                        <div class="requirements-title">
+                            <i class="fas fa-shield-alt"></i> Password Requirements
+                        </div>
+                        <ul class="requirements-list">
+                            <li id="reqLength"><i class="fas fa-circle"></i> Minimum 8 characters</li>
+                            <li id="reqUppercase"><i class="fas fa-circle"></i> At least one uppercase letter</li>
+                            <li id="reqLowercase"><i class="fas fa-circle"></i> At least one lowercase letter</li>
+                            <li id="reqNumber"><i class="fas fa-circle"></i> At least one number</li>
+                            <li id="reqSpecial"><i class="fas fa-circle"></i> At least one special character</li>
+                        </ul>
+                    </div>
+                    
+                    <button type="submit" class="submit-button">
+                        <i class="fas fa-save"></i> Change Password
+                    </button>
+                </form>
+                
+                <div class="success-message" id="successMessage">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="success-title">Password Changed Successfully!</h3>
+                    <p class="success-text">
+                        Your password has been updated. For security reasons, you'll be logged out of all other sessions.
+                        Please log in again with your new password.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordForm = document.getElementById('passwordForm');
+            const currentPassword = document.getElementById('currentPassword');
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const strengthMeter = document.getElementById('strengthMeter');
+            const strengthText = document.getElementById('strengthText');
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Toggle password visibility
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+            
+            // Password strength checker
+            newPassword.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                
+                // Reset requirement indicators
+                document.querySelectorAll('.requirements-list li').forEach(li => {
+                    li.classList.remove('valid');
+                });
+                
+                // Check password length
+                if (password.length >= 8) {
+                    strength += 20;
+                    document.getElementById('reqLength').classList.add('valid');
+                }
+                
+                // Check uppercase letters
+                if (/[A-Z]/.test(password)) {
+                    strength += 20;
+                    document.getElementById('reqUppercase').classList.add('valid');
+                }
+                
+                // Check lowercase letters
+                if (/[a-z]/.test(password)) {
+                    strength += 20;
+                    document.getElementById('reqLowercase').classList.add('valid');
+                }
+                
+                // Check numbers
+                if (/\d/.test(password)) {
+                    strength += 20;
+                    document.getElementById('reqNumber').classList.add('valid');
+                }
+                
+                // Check special characters
+                if (/[^A-Za-z0-9]/.test(password)) {
+                    strength += 20;
+                    document.getElementById('reqSpecial').classList.add('valid');
+                }
+                
+                // Update strength meter
+                strengthMeter.style.width = `${strength}%`;
+                
+                // Update strength text
+                if (strength < 40) {
+                    strengthMeter.style.background = 'var(--accent)';
+                    strengthText.textContent = 'Password strength: Weak';
+                    strengthText.style.color = 'var(--accent)';
+                } else if (strength < 80) {
+                    strengthMeter.style.background = '#ffc107';
+                    strengthText.textContent = 'Password strength: Medium';
+                    strengthText.style.color = '#ffc107';
+                } else {
+                    strengthMeter.style.background = 'var(--secondary)';
+                    strengthText.textContent = 'Password strength: Strong';
+                    strengthText.style.color = 'var(--secondary)';
+                }
+            });
+            
+            // Form submission
+            passwordForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Basic validation
+                if (newPassword.value !== confirmPassword.value) {
+                    alert('New passwords do not match. Please try again.');
+                    return;
+                }
+                
+                if (newPassword.value.length < 8) {
+                    alert('Password must be at least 8 characters long.');
+                    return;
+                }
+                
+                // In a real app, you would send this to your backend
+                // For this demo, we'll just show a success message
+                
+                // Reset form
+                passwordForm.reset();
+                strengthMeter.style.width = '0';
+                strengthText.textContent = 'Password strength: None';
+                strengthText.style.color = 'var(--gray)';
+                
+                // Hide requirement validations
+                document.querySelectorAll('.requirements-list li').forEach(li => {
+                    li.classList.remove('valid');
+                });
+                
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Scroll to success message
+                successMessage.scrollIntoView({ behavior: 'smooth' });
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+            });
+        });
+    </script>

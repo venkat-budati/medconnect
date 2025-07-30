@@ -1,0 +1,259 @@
+ <link rel="stylesheet" href="/css/profile.css">
+ <div class="main-content">
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar">JD</div>
+                <h2 class="profile-title">John Doe</h2>
+                <p class="profile-subtitle">MedConnect member since July 2022. Your contributions have helped 12 people receive essential medicines.</p>
+            </div>
+        </div>
+        
+        <!-- Profile Info -->
+        <div class="profile-info">
+            <button class="edit-button" id="editButton">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+            
+            <div class="info-content">
+                <h3 class="section-title">Personal Information</h3>
+                
+                <div class="info-grid">
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-user"></i> First Name</span>
+                        <div class="info-value" id="firstName">John</div>
+                        <input type="text" class="info-input" id="firstNameInput" value="John" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-user"></i> Last Name</span>
+                        <div class="info-value" id="lastName">Doe</div>
+                        <input type="text" class="info-input" id="lastNameInput" value="Doe" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-at"></i> Username</span>
+                        <div class="info-value">johndoe_med</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-envelope"></i> Email</span>
+                        <div class="info-value">john.doe@example.com</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-mobile-alt"></i> Mobile Number</span>
+                        <div class="info-value" id="mobile">+1 (555) 123-4567</div>
+                        <input type="text" class="info-input" id="mobileInput" value="+1 (555) 123-4567" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-map-marker-alt"></i> Address Line 1</span>
+                        <div class="info-value" id="addressLine1">123 Wellness Street</div>
+                        <input type="text" class="info-input" id="addressLine1Input" value="123 Wellness Street" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-globe"></i> Country</span>
+                        <div class="info-value" id="country">United States</div>
+                        <input type="text" class="info-input" id="countryInput" value="United States" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-map"></i> State</span>
+                        <div class="info-value" id="state">Washington</div>
+                        <input type="text" class="info-input" id="stateInput" value="Washington" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-city"></i> City</span>
+                        <div class="info-value" id="city">Seattle</div>
+                        <input type="text" class="info-input" id="cityInput" value="Seattle" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-mail-bulk"></i> Pincode</span>
+                        <div class="info-value" id="pincode">98101</div>
+                        <input type="text" class="info-input" id="pincodeInput" value="98101" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="button-group" id="saveButtons" style="display: none;">
+                    <button class="save-button" id="saveButton">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button class="cancel-button" id="cancelButton">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <h3 class="section-title">Your MedConnect Stats</h3>
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon-card">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-number">24</div>
+                    <div class="stat-title">Medicines Donated</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon-card">
+                    <i class="fas fa-hand-holding-medical"></i>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-number">18</div>
+                    <div class="stat-title">Medicines Received</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon-card">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-number">12</div>
+                    <div class="stat-title">People Helped</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon-card">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-number">4.9</div>
+                    <div class="stat-title">Average Rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButton = document.getElementById('editButton');
+            const saveButton = document.getElementById('saveButton');
+            const cancelButton = document.getElementById('cancelButton');
+            const saveButtons = document.getElementById('saveButtons');
+            
+            // Editable fields
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            const mobile = document.getElementById('mobile');
+            const addressLine1 = document.getElementById('addressLine1');
+            const country = document.getElementById('country');
+            const state = document.getElementById('state');
+            const city = document.getElementById('city');
+            const pincode = document.getElementById('pincode');
+            
+            // Input fields
+            const firstNameInput = document.getElementById('firstNameInput');
+            const lastNameInput = document.getElementById('lastNameInput');
+            const mobileInput = document.getElementById('mobileInput');
+            const addressLine1Input = document.getElementById('addressLine1Input');
+            const countryInput = document.getElementById('countryInput');
+            const stateInput = document.getElementById('stateInput');
+            const cityInput = document.getElementById('cityInput');
+            const pincodeInput = document.getElementById('pincodeInput');
+            
+            // Edit mode function
+            function enableEditMode() {
+                // Hide static values
+                firstName.style.display = 'none';
+                lastName.style.display = 'none';
+                mobile.style.display = 'none';
+                addressLine1.style.display = 'none';
+                country.style.display = 'none';
+                state.style.display = 'none';
+                city.style.display = 'none';
+                pincode.style.display = 'none';
+                
+                // Show input fields
+                firstNameInput.style.display = 'block';
+                lastNameInput.style.display = 'block';
+                mobileInput.style.display = 'block';
+                addressLine1Input.style.display = 'block';
+                countryInput.style.display = 'block';
+                stateInput.style.display = 'block';
+                cityInput.style.display = 'block';
+                pincodeInput.style.display = 'block';
+                
+                // Show save buttons
+                saveButtons.style.display = 'flex';
+                
+                // Hide edit button
+                editButton.style.display = 'none';
+            }
+            
+            // Cancel edit function
+            function cancelEdit() {
+                // Show static values
+                firstName.style.display = 'block';
+                lastName.style.display = 'block';
+                mobile.style.display = 'block';
+                addressLine1.style.display = 'block';
+                country.style.display = 'block';
+                state.style.display = 'block';
+                city.style.display = 'block';
+                pincode.style.display = 'block';
+                
+                // Hide input fields
+                firstNameInput.style.display = 'none';
+                lastNameInput.style.display = 'none';
+                mobileInput.style.display = 'none';
+                addressLine1Input.style.display = 'none';
+                countryInput.style.display = 'none';
+                stateInput.style.display = 'none';
+                cityInput.style.display = 'none';
+                pincodeInput.style.display = 'none';
+                
+                // Hide save buttons
+                saveButtons.style.display = 'none';
+                
+                // Show edit button
+                editButton.style.display = 'flex';
+                
+                // Reset input values
+                firstNameInput.value = firstName.textContent;
+                lastNameInput.value = lastName.textContent;
+                mobileInput.value = mobile.textContent;
+                addressLine1Input.value = addressLine1.textContent;
+                countryInput.value = country.textContent;
+                stateInput.value = state.textContent;
+                cityInput.value = city.textContent;
+                pincodeInput.value = pincode.textContent;
+            }
+            
+            // Save changes function
+            function saveChanges() {
+                // Update static values
+                firstName.textContent = firstNameInput.value;
+                lastName.textContent = lastNameInput.value;
+                mobile.textContent = mobileInput.value;
+                addressLine1.textContent = addressLine1Input.value;
+                country.textContent = countryInput.value;
+                state.textContent = stateInput.value;
+                city.textContent = cityInput.value;
+                pincode.textContent = pincodeInput.value;
+                
+                // Show confirmation
+                alert('Profile updated successfully!');
+                
+                // Exit edit mode
+                cancelEdit();
+            }
+            
+            // Event listeners
+            editButton.addEventListener('click', enableEditMode);
+            saveButton.addEventListener('click', saveChanges);
+            cancelButton.addEventListener('click', cancelEdit);
+        });
+    </script>
