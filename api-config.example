@@ -1,0 +1,34 @@
+# Geocoding and Distance Matrix APIs Configuration
+# Add these to your .env file
+
+# Google Maps API (Recommended - Most comprehensive)
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+
+# Mapbox API (Alternative - Good for distance calculations)
+MAPBOX_API_KEY=your_mapbox_api_key_here
+
+# HERE API (Alternative - Good for routing)
+HERE_API_KEY=your_here_api_key_here
+
+# API Setup Instructions:
+# 
+# 1. Google Maps API:
+#    - Go to Google Cloud Console
+#    - Enable Geocoding API and Distance Matrix API
+#    - Create API key with restrictions
+#    - Cost: $5 per 1000 requests
+#
+# 2. Mapbox API:
+#    - Sign up at mapbox.com
+#    - Get access token
+#    - Enable Geocoding and Matrix APIs
+#    - Cost: Free tier available
+#
+# 3. HERE API:
+#    - Sign up at developer.here.com
+#    - Get API key
+#    - Enable Geocoding and Routing APIs
+#    - Cost: Free tier available
+#
+# Note: You only need to configure one API. The system will try them in order:
+# Google Maps -> Mapbox -> HERE 

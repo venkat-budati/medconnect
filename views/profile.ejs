@@ -39,8 +39,8 @@
         cursor: not-allowed;
     }
 </style>
-<link rel="stylesheet" href="/css/profile.css">
-<div class="main-content">
+ <link rel="stylesheet" href="/css/profile.css">
+ <div class="main-content">
 
     <!-- Profile Container -->
     <div class="profile-container">
@@ -94,7 +94,25 @@
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-map-marker-alt"></i> Address Line 1</span>
                         <div class="info-value" id="addressLine1"><%= user.addressLine1 || '' %></div>
-                        <input type="text" class="info-input" id="addressLine1Input" value="<%= user.addressLine1 || '' %>" style="display: none;">
+                        <div style="position: relative;">
+                            <input type="text" class="info-input" id="addressLine1Input" value="<%= user.addressLine1 || '' %>" placeholder="Start typing your address..." style="display: none;">
+                            <div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #6c757d; pointer-events: none; display: none;" id="autocompleteIcon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div id="addressSuggestions" class="address-suggestions" style="display: none;"></div>
+                        </div>
+                        <div class="search-options" style="margin-top: 10px; display: none;">
+                            <label style="font-size: 12px; color: #6c757d; display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="internationalSearch" style="margin: 0;">
+                                Include international locations
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-building"></i> Address Line 2 (Optional)</span>
+                        <div class="info-value" id="addressLine2"><%= user.addressLine2 || '' %></div>
+                        <input type="text" class="info-input" id="addressLine2Input" value="<%= user.addressLine2 || '' %>" placeholder="Apartment, suite, unit, etc." style="display: none;">
                     </div>
                     
                     <div class="info-group">
@@ -104,7 +122,7 @@
                     </div>
                     
                     <div class="info-group">
-                        <span class="info-label"><i class="fas fa-map"></i> State</span>
+                        <span class="info-label"><i class="fas fa-map"></i> State/Province</span>
                         <div class="info-value" id="state"><%= user.state || '' %></div>
                         <input type="text" class="info-input" id="stateInput" value="<%= user.state || '' %>" style="display: none;">
                     </div>
@@ -116,9 +134,44 @@
                     </div>
                     
                     <div class="info-group">
-                        <span class="info-label"><i class="fas fa-mail-bulk"></i> Pincode</span>
+                        <span class="info-label"><i class="fas fa-mail-bulk"></i> Postal Code</span>
                         <div class="info-value" id="pincode"><%= user.pincode || '' %></div>
                         <input type="text" class="info-input" id="pincodeInput" value="<%= user.pincode || '' %>" style="display: none;">
+                    </div>
+                    
+                    <!-- Location Services Section -->
+                    <div class="info-group location-services" style="grid-column: 1 / -1; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                        <span class="info-label"><i class="fas fa-location-arrow"></i> Location Services</span>
+                        <div class="location-content">
+                            <p style="margin: 0 0 15px 0; color: #6c757d; font-size: 14px;">
+                                Use your current location to automatically fill your address details. This helps us show you nearby medicines.
+                            </p>
+                            <div class="location-buttons">
+                                <button type="button" class="btn btn-primary" id="shareLocationBtn" style="display: none;">
+                                    <i class="fas fa-location-arrow"></i> Share My Location
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="detectLocationBtn">
+                                    <i class="fas fa-crosshairs"></i> Detect My Location
+                                </button>
+                                <button type="button" class="btn btn-primary" id="testAutofillBtn" style="margin-left: 10px;">
+                                    <i class="fas fa-search"></i> Test Autofill
+                                </button>
+                                <div id="locationStatus" style="margin-top: 10px; font-size: 14px;"></div>
+                            </div>
+                            
+                            <div style="margin-top: 20px; padding: 15px; background: rgba(42, 124, 199, 0.05); border-radius: 8px; border-left: 3px solid #2a7cc7;">
+                                <h4 style="margin: 0 0 10px 0; color: #2a7cc7; font-size: 16px;">
+                                    <i class="fas fa-lightbulb"></i> Pro Tips:
+                                </h4>
+                                <ul style="margin: 0; padding-left: 20px; color: #6c757d; font-size: 13px; line-height: 1.5;">
+                                    <li><strong>Type to Search:</strong> Start typing in "Address Line 1" to see address suggestions</li>
+                                    <li><strong>Villages & Cities:</strong> Search for cities, towns, villages, and rural areas</li>
+                                    <li><strong>Keyboard Navigation:</strong> Use ↑↓ arrows to navigate suggestions, Enter to select</li>
+                                    <li><strong>Auto-fill:</strong> Selecting a suggestion will fill all address fields automatically</li>
+                                    <li><strong>Location Detection:</strong> Use "Detect My Location" for precise GPS-based address</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -179,33 +232,34 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
         console.log('Profile page loaded');
         
-        const editButton = document.getElementById('editButton');
-        const saveButton = document.getElementById('saveButton');
-        const cancelButton = document.getElementById('cancelButton');
-        const saveButtons = document.getElementById('saveButtons');
+            const editButton = document.getElementById('editButton');
+            const saveButton = document.getElementById('saveButton');
+            const cancelButton = document.getElementById('cancelButton');
+            const saveButtons = document.getElementById('saveButtons');
         
         console.log('Edit button:', editButton);
         console.log('Save button:', saveButton);
         console.log('Cancel button:', cancelButton);
-        
-        // Editable fields
-        const firstName = document.getElementById('firstName');
-        const lastName = document.getElementById('lastName');
-        const mobile = document.getElementById('mobile');
+            
+            // Editable fields
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            const mobile = document.getElementById('mobile');
         const addressLine1 = document.getElementById('addressLine1');
+        const addressLine2 = document.getElementById('addressLine2');
         const country = document.getElementById('country');
         const state = document.getElementById('state');
         const city = document.getElementById('city');
         const pincode = document.getElementById('pincode');
-        
-        // Input fields
-        const firstNameInput = document.getElementById('firstNameInput');
-        const lastNameInput = document.getElementById('lastNameInput');
-        const mobileInput = document.getElementById('mobileInput');
+            
+            // Input fields
+            const firstNameInput = document.getElementById('firstNameInput');
+            const lastNameInput = document.getElementById('lastNameInput');
+            const mobileInput = document.getElementById('mobileInput');
         const addressLine1Input = document.getElementById('addressLine1Input');
         const countryInput = document.getElementById('countryInput');
         const stateInput = document.getElementById('stateInput');
@@ -223,6 +277,7 @@
             lastName: lastName.textContent,
             mobile: mobile.textContent,
             addressLine1: addressLine1.textContent,
+            addressLine2: addressLine2.textContent,
             country: country.textContent,
             state: state.textContent,
             city: city.textContent,
@@ -230,9 +285,9 @@
         };
         
         console.log('Original values:', originalValues);
-        
-        // Edit mode function
-        function enableEditMode() {
+            
+            // Edit mode function
+            function enableEditMode() {
             console.log('Enabling edit mode');
             
             try {
@@ -268,6 +323,11 @@
                 
                 console.log('Edit mode enabled successfully');
                 
+                // Initialize address autocomplete after input is visible
+                setTimeout(() => {
+                    initializeAddressAutocomplete();
+                }, 100);
+                
                 // Visual confirmation
                 document.body.style.border = '3px solid green';
                 setTimeout(() => {
@@ -277,10 +337,10 @@
             } catch (error) {
                 console.error('Error in enableEditMode:', error);
             }
-        }
-        
-        // Cancel edit function
-        function cancelEdit() {
+            }
+            
+            // Cancel edit function
+            function cancelEdit() {
             console.log('Canceling edit');
             
             try {
@@ -394,9 +454,9 @@
                     
                     // Show success message
                     showNotification('Profile updated successfully!', 'success');
-                    
-                    // Exit edit mode
-                    cancelEdit();
+                
+                // Exit edit mode
+                cancelEdit();
                 } else {
                     throw new Error(data.error || 'Failed to update profile');
                 }
@@ -433,9 +493,9 @@
                 notification.classList.remove('show');
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
-        }
-        
-        // Event listeners
+            }
+            
+            // Event listeners
         if (editButton) {
             // Multiple event listeners to ensure it works
             editButton.addEventListener('click', function(e) {
@@ -477,7 +537,7 @@
         }
         
         // Handle Enter key in input fields
-        const inputs = [firstNameInput, lastNameInput, mobileInput, addressLine1Input, countryInput, stateInput, cityInput, pincodeInput];
+        const inputs = [firstNameInput, lastNameInput, mobileInput, addressLine1Input, addressLine2Input, countryInput, stateInput, cityInput, pincodeInput];
         inputs.forEach(input => {
             if (input) {
                 input.addEventListener('keypress', function(e) {
@@ -497,7 +557,637 @@
         
         // Test if button is clickable
         
-    });
-</script>
+        // Location Services Functionality
+        const detectLocationBtn = document.getElementById('detectLocationBtn');
+        const shareLocationBtn = document.getElementById('shareLocationBtn');
+        const locationStatus = document.getElementById('locationStatus');
+        
+        // Detect location button functionality
+        if (detectLocationBtn) {
+            detectLocationBtn.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    showLocationStatus('Geolocation is not supported by this browser.', 'error');
+                    return;
+                }
+                
+                showLocationStatus('Detecting your location...', 'info');
+                detectLocationBtn.disabled = true;
+                detectLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const { latitude, longitude } = position.coords;
+                        showLocationStatus('Location detected! Fetching address details...', 'success');
+                        
+                        // Reverse geocode to get address
+                        reverseGeocode(latitude, longitude);
+                    },
+                    function(error) {
+                        let errorMessage = 'Unable to detect your location.';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'Location access denied. Please allow location access and try again.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'Location information unavailable.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = 'Location request timed out.';
+                                break;
+                        }
+                        showLocationStatus(errorMessage, 'error');
+                        resetLocationButton();
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            });
+        }
+        
+        // Share location button functionality
+        if (shareLocationBtn) {
+            shareLocationBtn.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    showLocationStatus('Geolocation is not supported by this browser.', 'error');
+                    return;
+                }
+                
+                showLocationStatus('Sharing your location...', 'info');
+                shareLocationBtn.disabled = true;
+                shareLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sharing...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const { latitude, longitude } = position.coords;
+                        showLocationStatus('Location shared successfully!', 'success');
+                        
+                        // Reverse geocode to get address
+                        reverseGeocode(latitude, longitude);
+                    },
+                    function(error) {
+                        showLocationStatus('Failed to share location. Please try again.', 'error');
+                        resetLocationButton();
+                    }
+                );
+            });
+        }
+        
+        // Reverse geocoding function
+        async function reverseGeocode(lat, lng) {
+            try {
+                const response = await fetch(`/dashboard/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0) {
+                    const addressComponents = data.results[0].address_components;
+                    const formattedAddress = data.results[0].formatted_address;
+                    
+                    // Parse address components
+                    const addressData = parseAddressComponents(addressComponents);
+                    
+                    // Auto-fill address fields if in edit mode
+                    if (document.getElementById('addressLine1Input').style.display !== 'none') {
+                        fillAddressFields(addressData, formattedAddress);
+                        showLocationStatus('Address auto-filled successfully!', 'success');
+                    } else {
+                        // Store for when user enters edit mode
+                        window.pendingAddressData = { addressData, formattedAddress };
+                        showLocationStatus('Address detected! Click "Edit Profile" to fill in your details.', 'success');
+                    }
+                } else {
+                    showLocationStatus('Could not find address for this location.', 'error');
+                }
+            } catch (error) {
+                console.error('Reverse geocoding error:', error);
+                showLocationStatus('Error fetching address details.', 'error');
+            } finally {
+                resetLocationButton();
+            }
+        }
+        
+        // Parse address components
+        function parseAddressComponents(components) {
+            console.log('Parsing address components:', components);
+            const addressData = {};
+            
+            components.forEach(component => {
+                const types = component.types;
+                console.log('Component:', component.long_name, 'Types:', types);
+                
+                if (types.includes('street_number')) {
+                    addressData.streetNumber = component.long_name;
+                } else if (types.includes('route')) {
+                    addressData.streetName = component.long_name;
+                } else if (types.includes('locality')) {
+                    addressData.city = component.long_name;
+                } else if (types.includes('administrative_area_level_1')) {
+                    addressData.state = component.long_name;
+                } else if (types.includes('country')) {
+                    addressData.country = component.long_name;
+                } else if (types.includes('postal_code')) {
+                    addressData.postalCode = component.long_name;
+                } else if (types.includes('sublocality_level_1')) {
+                    addressData.neighborhood = component.long_name;
+                }
+            });
+            
+            console.log('Parsed address data:', addressData);
+            return addressData;
+        }
+        
+        // Fill address fields
+        function fillAddressFields(addressData, formattedAddress) {
+            const addressLine1Input = document.getElementById('addressLine1Input');
+            const cityInput = document.getElementById('cityInput');
+            const stateInput = document.getElementById('stateInput');
+            const countryInput = document.getElementById('countryInput');
+            const pincodeInput = document.getElementById('pincodeInput');
+            
+            // Fill address line 1
+            if (addressData.streetNumber && addressData.streetName) {
+                addressLine1Input.value = `${addressData.streetNumber} ${addressData.streetName}`;
+            } else if (formattedAddress) {
+                // Extract first line from formatted address
+                const lines = formattedAddress.split(',');
+                addressLine1Input.value = lines[0] || '';
+            }
+            
+            // Fill other fields
+            if (addressData.city) cityInput.value = addressData.city;
+            if (addressData.state) stateInput.value = addressData.state;
+            if (addressData.country) countryInput.value = addressData.country;
+            if (addressData.postalCode) pincodeInput.value = addressData.postalCode;
+        }
+        
+        // Show location status
+        function showLocationStatus(message, type) {
+            if (locationStatus) {
+                locationStatus.innerHTML = `<span class="status-${type}">${message}</span>`;
+                locationStatus.style.display = 'block';
+            }
+        }
+        
+        // Reset location button
+        function resetLocationButton() {
+            if (detectLocationBtn) {
+                detectLocationBtn.disabled = false;
+                detectLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect My Location';
+            }
+            if (shareLocationBtn) {
+                shareLocationBtn.disabled = false;
+                shareLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Share My Location';
+            }
+        }
+        
+        // Enhanced enableEditMode to handle pending address data
+        const originalEnableEditMode = enableEditMode;
+        enableEditMode = function() {
+            originalEnableEditMode();
+            
+            // Check if there's pending address data
+            if (window.pendingAddressData) {
+                fillAddressFields(window.pendingAddressData.addressData, window.pendingAddressData.formattedAddress);
+                showLocationStatus('Address auto-filled! Please review and save.', 'success');
+                delete window.pendingAddressData;
+            }
+            
+            // Initialize address autocomplete
+            initializeAddressAutocomplete();
+        };
+        
+        // Address Autocomplete Functionality
+        let addressAutocompleteTimeout;
+        let selectedSuggestionIndex = -1;
+        
+        function initializeAddressAutocomplete() {
+            const addressInput = document.getElementById('addressLine1Input');
+            const suggestionsContainer = document.getElementById('addressSuggestions');
+            const autocompleteIcon = document.getElementById('autocompleteIcon');
+            
+            if (!addressInput || !suggestionsContainer) {
+                console.log('Address autocomplete elements not found');
+                return;
+            }
+            
+            console.log('Initializing address autocomplete');
+            
+            // Show autocomplete icon
+            if (autocompleteIcon) {
+                autocompleteIcon.style.display = 'block';
+            }
+            
+            // Add event listeners for address input
+            addressInput.addEventListener('input', handleAddressInput);
+            addressInput.addEventListener('keydown', handleAddressKeydown);
+            addressInput.addEventListener('focus', handleAddressFocus);
+            addressInput.addEventListener('blur', handleAddressBlur);
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!addressInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+            
+            // Add event listener for international search checkbox
+            const internationalSearch = document.getElementById('internationalSearch');
+            if (internationalSearch) {
+                internationalSearch.addEventListener('change', function() {
+                    const query = addressInput.value.trim();
+                    if (query.length >= 3) {
+                        searchAddresses(query);
+                    }
+                });
+            }
+            
+            // Add test autofill button event listener
+            const testAutofillBtn = document.getElementById('testAutofillBtn');
+            if (testAutofillBtn) {
+                testAutofillBtn.addEventListener('click', function() {
+                    console.log('Test autofill button clicked');
+                    // Simulate selecting a suggestion
+                    const testAddressData = {
+                        city: 'Karnal',
+                        state: 'Haryana',
+                        country: 'India',
+                        postalCode: '132001',
+                        formattedAddress: 'Karnal, Haryana, India'
+                    };
+                    fillAddressFieldsFromAutocomplete(testAddressData);
+                });
+            }
+        }
+        
+        function handleAddressInput(e) {
+            const query = e.target.value.trim();
+            console.log('Address input:', query);
+            
+            // Clear previous timeout
+            if (addressAutocompleteTimeout) {
+                clearTimeout(addressAutocompleteTimeout);
+            }
+            
+            // Hide suggestions if query is too short
+            if (query.length < 3) {
+                console.log('Query too short, hiding suggestions');
+                hideSuggestions();
+                return;
+            }
+            
+            console.log('Query length:', query.length, 'showing suggestions');
+            
+            // Show typing indicator
+            const suggestionsContainer = document.getElementById('addressSuggestions');
+            if (suggestionsContainer) {
+                suggestionsContainer.innerHTML = `
+                    <div class="address-suggestion-loading">
+                        <i class="fas fa-spinner"></i> Searching for addresses...
+                    </div>
+                `;
+                showSuggestions();
+            }
+            
+            // Debounce the API call
+            addressAutocompleteTimeout = setTimeout(() => {
+                console.log('Calling searchAddresses with:', query);
+                searchAddresses(query);
+            }, 300);
+        }
+        
+        function handleAddressKeydown(e) {
+            const suggestionsContainer = document.getElementById('addressSuggestions');
+            const suggestions = suggestionsContainer.querySelectorAll('.address-suggestion-item');
+            
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1);
+                    updateSelectedSuggestion(suggestions);
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                    updateSelectedSuggestion(suggestions);
+                    break;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
+                        selectAddressSuggestion(suggestions[selectedSuggestionIndex]);
+                    }
+                    break;
+                    
+                case 'Escape':
+                    hideSuggestions();
+                    break;
+            }
+        }
+        
+        function handleAddressFocus() {
+            const query = document.getElementById('addressLine1Input').value.trim();
+            if (query.length >= 3) {
+                searchAddresses(query);
+            }
+        }
+        
+        function handleAddressBlur() {
+            // Delay hiding to allow for clicks on suggestions
+            setTimeout(() => {
+                hideSuggestions();
+            }, 200);
+        }
+        
+        async function searchAddresses(query) {
+            console.log('Searching addresses for:', query);
+            const suggestionsContainer = document.getElementById('addressSuggestions');
+            
+            if (!suggestionsContainer) {
+                console.error('Suggestions container not found');
+                return;
+            }
+            
+            // Show loading state
+            suggestionsContainer.innerHTML = `
+                <div class="address-suggestion-loading">
+                    <i class="fas fa-spinner"></i> Searching for addresses...
+                </div>
+            `;
+            showSuggestions();
+            
+            try {
+                // Add international parameter if checkbox is checked
+                const internationalSearch = document.getElementById('internationalSearch');
+                const internationalParam = internationalSearch && internationalSearch.checked ? '&international=true' : '';
+                const url = `/dashboard/api/address-autocomplete?input=${encodeURIComponent(query)}${internationalParam}`;
+                console.log('Fetching from:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('API response:', data);
+                
+                if (data.status === 'OK' && data.predictions && data.predictions.length > 0) {
+                    displayAddressSuggestions(data.predictions);
+                } else {
+                    suggestionsContainer.innerHTML = `
+                        <div class="address-suggestion-item">
+                            <i class="fas fa-info-circle address-suggestion-icon"></i>
+                            <div class="address-suggestion-text">
+                                <div class="address-suggestion-main">No addresses found</div>
+                                <div class="address-suggestion-secondary">Try a different search term or enable international search</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Address search error:', error);
+                suggestionsContainer.innerHTML = `
+                    <div class="address-suggestion-item">
+                        <i class="fas fa-exclamation-triangle address-suggestion-icon"></i>
+                        <div class="address-suggestion-text">
+                            <div class="address-suggestion-main">Search error</div>
+                            <div class="address-suggestion-secondary">Please try again</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayAddressSuggestions(predictions) {
+            console.log('Displaying suggestions:', predictions.length);
+            const suggestionsContainer = document.getElementById('addressSuggestions');
+            
+            if (!suggestionsContainer) {
+                console.error('Suggestions container not found');
+                return;
+            }
+            
+            console.log('Suggestions container found:', suggestionsContainer);
+            console.log('Container display style:', suggestionsContainer.style.display);
+            
+            suggestionsContainer.innerHTML = predictions.map((prediction, index) => {
+                const mainText = prediction.structured_formatting?.main_text || prediction.description;
+                const secondaryText = prediction.structured_formatting?.secondary_text || '';
+                
+                // Determine icon based on types
+                let icon = 'fas fa-map-marker-alt';
+                if (prediction.types && prediction.types.length > 0) {
+                    if (prediction.types.includes('locality') || prediction.types.includes('administrative_area_level_1')) {
+                        icon = 'fas fa-city'; // City/State
+                    } else if (prediction.types.includes('political')) {
+                        icon = 'fas fa-flag'; // Administrative area
+                    } else if (prediction.types.includes('sublocality') || prediction.types.includes('sublocality_level_1')) {
+                        icon = 'fas fa-home'; // Village/Neighborhood
+                    } else if (prediction.types.includes('route')) {
+                        icon = 'fas fa-road'; // Street
+                    } else if (prediction.types.includes('establishment')) {
+                        icon = 'fas fa-building'; // Landmark/Business
+                    } else if (prediction.types.includes('premise')) {
+                        icon = 'fas fa-building'; // Specific location
+                    } else if (prediction.types.includes('intersection')) {
+                        icon = 'fas fa-crosshairs'; // Intersection
+                    }
+                }
+                
+                return `
+                    <div class="address-suggestion-item" data-place-id="${prediction.place_id}" data-index="${index}" onclick="console.log('Direct click on suggestion:', '${mainText}')">
+                        <i class="${icon} address-suggestion-icon"></i>
+                        <div class="address-suggestion-text">
+                            <div class="address-suggestion-main">${mainText}</div>
+                            ${secondaryText ? `<div class="address-suggestion-secondary">${secondaryText}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            console.log('Generated HTML length:', suggestionsContainer.innerHTML.length);
+            console.log('First 200 chars of HTML:', suggestionsContainer.innerHTML.substring(0, 200));
+            
+            // Use event delegation for click handling
+            console.log('Setting up event delegation for suggestions');
+            suggestionsContainer.addEventListener('click', (e) => {
+                console.log('Click event on suggestions container:', e.target);
+                const suggestionItem = e.target.closest('.address-suggestion-item');
+                if (suggestionItem) {
+                    console.log('Suggestion item clicked via delegation!', suggestionItem);
+                    selectAddressSuggestion(suggestionItem);
+                } else {
+                    console.log('Click was not on a suggestion item');
+                }
+            });
+            
+            showSuggestions();
+            selectedSuggestionIndex = -1;
+        }
+        
+        function selectAddressSuggestion(suggestionItem) {
+            const placeId = suggestionItem.dataset.placeId;
+            console.log('Selected place ID:', placeId);
+            
+            // Get place details
+            getPlaceDetails(placeId, (addressData) => {
+                if (addressData) {
+                    console.log('Address data received:', addressData);
+                    fillAddressFieldsFromAutocomplete(addressData);
+                    hideSuggestions();
+                    showLocationStatus('Address auto-filled successfully!', 'success');
+                } else {
+                    console.error('Failed to get address details');
+                    showLocationStatus('Failed to get address details', 'error');
+                }
+            });
+        }
+        
+        async function getPlaceDetails(placeId, callback) {
+            try {
+                const response = await fetch(`/dashboard/api/place-details?place_id=${placeId}`);
+                const data = await response.json();
+                
+                if (data.result) {
+                    const addressData = parseAddressComponents(data.result.address_components);
+                    addressData.formattedAddress = data.result.formatted_address;
+                    callback(addressData);
+                } else {
+                    callback(null);
+                }
+            } catch (error) {
+                console.error('Place details error:', error);
+                callback(null);
+            }
+        }
+        
+        function fillAddressFieldsFromAutocomplete(addressData) {
+            console.log('Filling address fields with:', addressData);
+            const addressLine1Input = document.getElementById('addressLine1Input');
+            const cityInput = document.getElementById('cityInput');
+            const stateInput = document.getElementById('stateInput');
+            const countryInput = document.getElementById('countryInput');
+            const pincodeInput = document.getElementById('pincodeInput');
+            
+            console.log('Input elements found:');
+            console.log('addressLine1Input:', addressLine1Input);
+            console.log('cityInput:', cityInput);
+            console.log('stateInput:', stateInput);
+            console.log('countryInput:', countryInput);
+            console.log('pincodeInput:', pincodeInput);
+            
+            // Check if we're in edit mode
+            if (addressLine1Input.style.display === 'none') {
+                console.log('Not in edit mode, enabling edit mode first');
+                enableEditMode();
+                // Wait a bit for edit mode to be enabled
+                setTimeout(() => {
+                    fillAddressFieldsFromAutocomplete(addressData);
+                }, 100);
+                return;
+            }
+            
+            console.log('In edit mode, filling fields');
+            
+            // Fill address line 1 with street address
+            if (addressData.streetNumber && addressData.streetName) {
+                addressLine1Input.value = `${addressData.streetNumber} ${addressData.streetName}`;
+                console.log('Set address line 1 to:', addressLine1Input.value);
+            } else if (addressData.formattedAddress) {
+                // Extract first line from formatted address
+                const lines = addressData.formattedAddress.split(',');
+                addressLine1Input.value = lines[0] || '';
+                console.log('Set address line 1 to:', addressLine1Input.value);
+            }
+            
+            // Fill other fields
+            if (addressData.city && cityInput) {
+                cityInput.value = addressData.city;
+                console.log('Set city to:', cityInput.value);
+            }
+            if (addressData.state && stateInput) {
+                stateInput.value = addressData.state;
+                console.log('Set state to:', stateInput.value);
+            }
+            if (addressData.country && countryInput) {
+                countryInput.value = addressData.country;
+                console.log('Set country to:', countryInput.value);
+            }
+            if (addressData.postalCode && pincodeInput) {
+                pincodeInput.value = addressData.postalCode;
+                console.log('Set postal code to:', pincodeInput.value);
+            }
+            
+            console.log('Address fields filled successfully');
+        }
+        
+        function updateSelectedSuggestion(suggestions) {
+            suggestions.forEach((suggestion, index) => {
+                if (index === selectedSuggestionIndex) {
+                    suggestion.classList.add('selected');
+                    suggestion.scrollIntoView({ block: 'nearest' });
+                } else {
+                    suggestion.classList.remove('selected');
+                }
+            });
+        }
+        
+        function showSuggestions() {
+            console.log('Showing suggestions');
+            const suggestionsContainer = document.getElementById('addressSuggestions');
+            const searchOptions = document.querySelector('.search-options');
+            
+            if (suggestionsContainer) {
+                suggestionsContainer.style.display = 'block';
+                suggestionsContainer.style.border = '2px solid red'; // Temporary visual test
+                console.log('Suggestions container displayed');
+                
+                // Add a test click handler to the container itself
+                suggestionsContainer.onclick = function(e) {
+                    console.log('Container clicked:', e.target);
+                };
+                
+                // Also add a mousedown handler to test
+                suggestionsContainer.onmousedown = function(e) {
+                    console.log('Container mousedown:', e.target);
+                };
+                
+                // Add a subtle highlight to the input field
+                const addressInput = document.getElementById('addressLine1Input');
+                if (addressInput) {
+                    addressInput.style.borderColor = '#2a7cc7';
+                    addressInput.style.boxShadow = '0 0 0 3px rgba(42, 124, 199, 0.1)';
+                }
+            } else {
+                console.error('Suggestions container not found in showSuggestions');
+            }
+            
+            // Show search options
+            if (searchOptions) {
+                searchOptions.style.display = 'block';
+            }
+        }
+        
+        function hideSuggestions() {
+            const suggestionsContainer = document.getElementById('addressSuggestions');
+            const searchOptions = document.querySelector('.search-options');
+            
+            if (suggestionsContainer) {
+                suggestionsContainer.style.display = 'none';
+                selectedSuggestionIndex = -1;
+                // Remove highlight from input field
+                const addressInput = document.getElementById('addressLine1Input');
+                if (addressInput) {
+                    addressInput.style.borderColor = '';
+                    addressInput.style.boxShadow = '';
+                }
+            }
+            
+            // Hide search options
+            if (searchOptions) {
+                searchOptions.style.display = 'none';
+            }
+        }
+        
+        }); // Close DOMContentLoaded event listener
+    </script>
 
 

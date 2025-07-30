@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const fetch = require('node-fetch');
 const Medicine = require('../models/Medicine');
 const Request = require('../models/Request');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const Review = require('../models/Review');
 const { isLoggedIn } = require('./middleware');
+const { geocodeAddress, calculateHaversineDistance, formatDistance } = require('../utils/geocoding');
 
 // Main Dashboard
 router.get('/', isLoggedIn, async (req, res) => {
@@ -103,8 +105,17 @@ async function getUserStats(userId) {
 // Browse Medicines
 router.get('/browse', isLoggedIn, async (req, res) => {
   try {
-    const { category, search, sort = 'newest' } = req.query;
+    const { 
+      category, 
+      search, 
+      sort = 'distance', 
+      distance = '50',
+      lat,
+      lng 
+    } = req.query;
+    
     const userId = req.session.user.id;
+    const user = await User.findById(userId);
     
     let query = { status: 'Available' };
     
@@ -122,35 +133,64 @@ router.get('/browse', isLoggedIn, async (req, res) => {
       ];
     }
     
-    // Sort options
-    let sortOption = {};
+    // Get all available medicines with donor info
+    let medicines = await Medicine.find(query)
+      .populate('donor', 'firstName lastName city state pincode addressLine1')
+      .sort({ createdAt: -1 });
+    
+    // Calculate distances if user location is provided
+    if (lat && lng && user.addressLine1 && user.city && user.state) {
+      console.log('📍 Calculating distances for', medicines.length, 'medicines...');
+      medicines = await calculateDistances(medicines, lat, lng);
+      
+      // Filter by distance
+      const maxDistance = parseInt(distance);
+      const beforeFilter = medicines.length;
+      medicines = medicines.filter(medicine => medicine.distance && medicine.distance <= maxDistance);
+      console.log(`📏 Filtered ${beforeFilter} → ${medicines.length} medicines within ${maxDistance} miles`);
+      
+      // Sort by distance
+      if (sort === 'distance') {
+        medicines.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+      }
+    } else {
+      console.log('⚠️ No user location provided - showing medicines without distance filtering');
+    }
+    
+    // Apply other sort options
     switch (sort) {
       case 'newest':
-        sortOption = { createdAt: -1 };
+        medicines.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
       case 'oldest':
-        sortOption = { createdAt: 1 };
+        medicines.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         break;
       case 'expiry':
-        sortOption = { expiry: 1 };
+        medicines.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
         break;
       case 'name':
-        sortOption = { name: 1 };
+        medicines.sort((a, b) => a.name.localeCompare(b.name));
         break;
     }
     
-    const medicines = await Medicine.find(query)
-      .populate('donor', 'firstName lastName city state')
-      .sort(sortOption)
-      .limit(20);
+    // Limit results
+    medicines = medicines.slice(0, 20);
     
     // Get categories for filter
     const categories = await Medicine.distinct('category');
     
+    // Get user's location for distance calculation
+    const userLocation = user.addressLine1 && user.city && user.state ? {
+      address: `${user.addressLine1}, ${user.city}, ${user.state} ${user.pincode || ''}`,
+      city: user.city,
+      state: user.state
+    } : null;
+    
     res.render('browse', {
       medicines,
       categories,
-      currentFilters: { category, search, sort },
+      userLocation,
+      currentFilters: { category, search, sort, distance },
       layout: 'layouts/dashboard_layout',
       activePage: 'browse'
     });
@@ -158,6 +198,159 @@ router.get('/browse', isLoggedIn, async (req, res) => {
     console.error('Browse error:', error);
     req.flash('error', 'Error loading medicines.');
     res.redirect('/dashboard');
+  }
+});
+
+// Calculate distances between user and medicine locations
+async function calculateDistances(medicines, userLat, userLng) {
+  const userLocation = `${userLat},${userLng}`;
+  let processedCount = 0;
+  
+  for (let medicine of medicines) {
+    if (medicine.donor && medicine.donor.addressLine1 && medicine.donor.city) {
+      try {
+        // Get coordinates for medicine location
+        const medicineAddress = `${medicine.donor.addressLine1}, ${medicine.donor.city}, ${medicine.donor.state}`;
+        console.log(`📍 Geocoding: ${medicineAddress}`);
+        
+        const coordinates = await geocodeAddress(medicineAddress);
+        
+        if (coordinates) {
+          // Calculate distance using Haversine formula
+          medicine.distance = calculateHaversineDistance(
+            parseFloat(userLat), 
+            parseFloat(userLng), 
+            coordinates.lat, 
+            coordinates.lng
+          );
+          medicine.distanceFormatted = formatDistance(medicine.distance);
+          console.log(`✅ ${medicine.name}: ${medicine.distanceFormatted}`);
+        } else {
+          medicine.distance = null;
+          medicine.distanceFormatted = 'Distance unknown';
+          console.log(`❌ ${medicine.name}: Geocoding failed`);
+        }
+        processedCount++;
+      } catch (error) {
+        console.error('Error calculating distance for medicine:', medicine._id, error);
+        medicine.distance = null;
+        medicine.distanceFormatted = 'Distance unknown';
+      }
+    } else {
+      medicine.distance = null;
+      medicine.distanceFormatted = 'Location not available';
+    }
+  }
+  
+  console.log(`🎯 Processed ${processedCount} medicines with distance calculations`);
+  return medicines;
+}
+
+// Note: Geocoding functions are now imported from utils/geocoding.js
+
+// Request Medicine
+router.post('/request-medicine/:medicineId', isLoggedIn, async (req, res) => {
+  try {
+    const { medicineId } = req.params;
+    const { quantity, message } = req.body;
+    const requesterId = req.session.user.id;
+    
+    // Validate medicine exists and is available
+    const medicine = await Medicine.findById(medicineId).populate('donor');
+    if (!medicine) {
+      return res.status(404).json({ error: 'Medicine not found' });
+    }
+    
+    if (medicine.status !== 'Available') {
+      return res.status(400).json({ error: 'Medicine is not available for request' });
+    }
+    
+    if (medicine.donor._id.toString() === requesterId) {
+      return res.status(400).json({ error: 'You cannot request your own medicine' });
+    }
+    
+    // Check if user already has a pending request for this medicine
+    const existingRequest = await Request.findOne({
+      requester: requesterId,
+      medicine: medicineId,
+      status: { $in: ['Pending', 'Accepted'] }
+    });
+    
+    if (existingRequest) {
+      return res.status(400).json({ error: 'You already have a pending request for this medicine' });
+    }
+    
+    // Create request
+    const request = new Request({
+      requester: requesterId,
+      donor: medicine.donor._id,
+      medicine: medicineId,
+      quantity: quantity || medicine.quantity,
+      message: message || '',
+      status: 'Pending'
+    });
+    
+    await request.save();
+    
+    // Update medicine status to requested
+    medicine.status = 'Requested';
+    await medicine.save();
+    
+    // Create notifications
+    const notifications = [
+      // Notify donor
+      new Notification({
+        recipient: medicine.donor._id,
+        sender: requesterId,
+        type: 'request_received',
+        title: 'New Medicine Request',
+        message: `Someone has requested your ${medicine.name}`,
+        relatedMedicine: medicineId,
+        relatedRequest: request._id
+      }),
+      // Notify requester
+      new Notification({
+        recipient: requesterId,
+        sender: medicine.donor._id,
+        type: 'request_sent',
+        title: 'Request Sent',
+        message: `Your request for ${medicine.name} has been sent to the donor`,
+        relatedMedicine: medicineId,
+        relatedRequest: request._id
+      })
+    ];
+    
+    await Notification.insertMany(notifications);
+    
+    res.json({ 
+      success: true, 
+      message: 'Request sent successfully',
+      requestId: request._id 
+    });
+    
+  } catch (error) {
+    console.error('Request medicine error:', error);
+    res.status(500).json({ error: 'Error processing request' });
+  }
+});
+
+// Get medicine details for modal
+router.get('/medicine/:medicineId', isLoggedIn, async (req, res) => {
+  try {
+    const { medicineId } = req.params;
+    
+    const medicine = await Medicine.findById(medicineId)
+      .populate('donor', 'firstName lastName city state pincode addressLine1');
+    
+    if (!medicine) {
+      return res.status(404).json({ error: 'Medicine not found' });
+    }
+    
+    res.json({ medicine });
+    
+  } catch (error) {
+    console.error('Get medicine error:', error);
+    res.status(500).json({ error: 'Error fetching medicine details' });
   }
 });
 
@@ -292,6 +485,7 @@ router.post('/profile/update', isLoggedIn, async (req, res) => {
       lastName,
       mobile,
       addressLine1,
+      addressLine2,
       country,
       state,
       city,
@@ -308,6 +502,7 @@ router.post('/profile/update', isLoggedIn, async (req, res) => {
     user.lastName = lastName || user.lastName;
     user.mobile = mobile || user.mobile;
     user.addressLine1 = addressLine1 || user.addressLine1;
+    user.addressLine2 = addressLine2 || user.addressLine2;
     user.country = country || user.country;
     user.state = state || user.state;
     user.city = city || user.city;
@@ -454,6 +649,75 @@ router.post('/notifications/read-all', isLoggedIn, async (req, res) => {
   } catch (error) {
     console.error('Mark all notifications read error:', error);
     res.status(500).json({ error: 'Error marking all notifications as read' });
+  }
+});
+
+// Google Maps API Proxy Routes
+router.get('/api/address-autocomplete', isLoggedIn, async (req, res) => {
+  try {
+    const { input, international } = req.query;
+    
+    if (!input || input.length < 3) {
+      return res.json({ predictions: [] });
+    }
+    
+    // Build URL based on international search preference
+    let url;
+    if (international === 'true') {
+      // International search - no country restriction
+      url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&types=geocode&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+    } else {
+      // India-focused search with country restriction
+      url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&types=geocode&components=country:in&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+    }
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Address autocomplete error:', error);
+    res.status(500).json({ error: 'Failed to fetch address suggestions' });
+  }
+});
+
+router.get('/api/place-details', isLoggedIn, async (req, res) => {
+  try {
+    const { place_id } = req.query;
+    
+    if (!place_id) {
+      return res.status(400).json({ error: 'Place ID is required' });
+    }
+    
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=address_component,formatted_address&key=${process.env.GOOGLE_MAPS_API_KEY}`
+    );
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Place details error:', error);
+    res.status(500).json({ error: 'Failed to fetch place details' });
+  }
+});
+
+router.get('/api/reverse-geocode', isLoggedIn, async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+    
+    if (!lat || !lng) {
+      return res.status(400).json({ error: 'Latitude and longitude are required' });
+    }
+    
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+    );
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Reverse geocoding error:', error);
+    res.status(500).json({ error: 'Failed to fetch address details' });
   }
 });
 
