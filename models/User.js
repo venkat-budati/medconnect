@@ -57,11 +57,6 @@ const userSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
-  addressLine2: {
-    type: String,
-    trim: true,
-    default: ''
-  },
   country: {
     type: String,
     trim: true,
@@ -73,6 +68,11 @@ const userSchema = new mongoose.Schema({
     default: ''
   },
   city: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  district: {
     type: String,
     trim: true,
     default: ''

@@ -485,10 +485,10 @@ router.post('/profile/update', isLoggedIn, async (req, res) => {
       lastName,
       mobile,
       addressLine1,
-      addressLine2,
       country,
       state,
       city,
+      district,
       pincode
     } = req.body;
     
@@ -502,10 +502,10 @@ router.post('/profile/update', isLoggedIn, async (req, res) => {
     user.lastName = lastName || user.lastName;
     user.mobile = mobile || user.mobile;
     user.addressLine1 = addressLine1 || user.addressLine1;
-    user.addressLine2 = addressLine2 || user.addressLine2;
     user.country = country || user.country;
     user.state = state || user.state;
     user.city = city || user.city;
+    user.district = district || user.district;
     user.pincode = pincode || user.pincode;
     
     await user.save();
@@ -673,7 +673,7 @@ router.get('/api/address-autocomplete', isLoggedIn, async (req, res) => {
     
     const response = await fetch(url);
     const data = await response.json();
-    
+    console.log(data);
     res.json(data);
   } catch (error) {
     console.error('Address autocomplete error:', error);

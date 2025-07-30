@@ -109,35 +109,37 @@
                         </div>
                     </div>
                     
-                    <div class="info-group">
-                        <span class="info-label"><i class="fas fa-building"></i> Address Line 2 (Optional)</span>
-                        <div class="info-value" id="addressLine2"><%= user.addressLine2 || '' %></div>
-                        <input type="text" class="info-input" id="addressLine2Input" value="<%= user.addressLine2 || '' %>" placeholder="Apartment, suite, unit, etc." style="display: none;">
-                    </div>
+
                     
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-globe"></i> Country</span>
                         <div class="info-value" id="country"><%= user.country || '' %></div>
-                        <input type="text" class="info-input" id="countryInput" value="<%= user.country || '' %>" style="display: none;">
+                        <input type="text" class="info-input" id="countryInput" value="<%= user.country || '' %>" style="display: none;" readonly>
                     </div>
                     
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-map"></i> State/Province</span>
                         <div class="info-value" id="state"><%= user.state || '' %></div>
-                        <input type="text" class="info-input" id="stateInput" value="<%= user.state || '' %>" style="display: none;">
+                        <input type="text" class="info-input" id="stateInput" value="<%= user.state || '' %>" style="display: none;" readonly>
                     </div>
-                    
+
                     <div class="info-group">
-                        <span class="info-label"><i class="fas fa-city"></i> City</span>
-                        <div class="info-value" id="city"><%= user.city || '' %></div>
-                        <input type="text" class="info-input" id="cityInput" value="<%= user.city || '' %>" style="display: none;">
+                        <span class="info-label"><i class="fas fa-globe"></i> District</span>
+                        <div class="info-value" id="district"><%= user.district || '' %></div>
+                        <input type="text" class="info-input" id="districtInput" value="<%= user.district || '' %>" style="display: none;">
                     </div>
-                    
-                    <div class="info-group">
-                        <span class="info-label"><i class="fas fa-mail-bulk"></i> Postal Code</span>
-                        <div class="info-value" id="pincode"><%= user.pincode || '' %></div>
-                        <input type="text" class="info-input" id="pincodeInput" value="<%= user.pincode || '' %>" style="display: none;">
-                    </div>
+
+                                         <div class="info-group">
+                         <span class="info-label"><i class="fas fa-city"></i> City</span>
+                         <div class="info-value" id="city"><%= user.city || '' %></div>
+                         <input type="text" class="info-input" id="cityInput" value="<%= user.city || '' %>" style="display: none;">
+                     </div>
+                     
+                     <div class="info-group">
+                         <span class="info-label"><i class="fas fa-mail-bulk"></i> Postal Code</span>
+                         <div class="info-value" id="pincode"><%= user.pincode || '' %></div>
+                         <input type="text" class="info-input" id="pincodeInput" value="<%= user.pincode || '' %>" style="display: none;">
+                     </div>
                     
                     <!-- Location Services Section -->
                     <div class="info-group location-services" style="grid-column: 1 / -1; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
@@ -152,9 +154,6 @@
                                 </button>
                                 <button type="button" class="btn btn-secondary" id="detectLocationBtn">
                                     <i class="fas fa-crosshairs"></i> Detect My Location
-                                </button>
-                                <button type="button" class="btn btn-primary" id="testAutofillBtn" style="margin-left: 10px;">
-                                    <i class="fas fa-search"></i> Test Autofill
                                 </button>
                                 <div id="locationStatus" style="margin-top: 10px; font-size: 14px;"></div>
                             </div>
@@ -249,27 +248,29 @@
             const firstName = document.getElementById('firstName');
             const lastName = document.getElementById('lastName');
             const mobile = document.getElementById('mobile');
-        const addressLine1 = document.getElementById('addressLine1');
-        const addressLine2 = document.getElementById('addressLine2');
-        const country = document.getElementById('country');
-        const state = document.getElementById('state');
-        const city = document.getElementById('city');
-        const pincode = document.getElementById('pincode');
+                     const addressLine1 = document.getElementById('addressLine1');
+             const country = document.getElementById('country');
+             const state = document.getElementById('state');
+             const city = document.getElementById('city');
+             const district = document.getElementById('district');
+             const pincode = document.getElementById('pincode');
             
             // Input fields
             const firstNameInput = document.getElementById('firstNameInput');
             const lastNameInput = document.getElementById('lastNameInput');
             const mobileInput = document.getElementById('mobileInput');
-        const addressLine1Input = document.getElementById('addressLine1Input');
-        const countryInput = document.getElementById('countryInput');
-        const stateInput = document.getElementById('stateInput');
-        const cityInput = document.getElementById('cityInput');
-        const pincodeInput = document.getElementById('pincodeInput');
+                     const addressLine1Input = document.getElementById('addressLine1Input');
+             const countryInput = document.getElementById('countryInput');
+             const stateInput = document.getElementById('stateInput');
+             const cityInput = document.getElementById('cityInput');
+             const districtInput = document.getElementById('districtInput');
+             const pincodeInput = document.getElementById('pincodeInput');
         
         console.log('DOM elements found:');
         console.log('firstName:', firstName);
         console.log('firstNameInput:', firstNameInput);
         console.log('saveButtons:', saveButtons);
+        console.log('districtInput:', districtInput);
         
         // Store original values
         const originalValues = {
@@ -277,10 +278,10 @@
             lastName: lastName.textContent,
             mobile: mobile.textContent,
             addressLine1: addressLine1.textContent,
-            addressLine2: addressLine2.textContent,
             country: country.textContent,
             state: state.textContent,
             city: city.textContent,
+            district: district.textContent,
             pincode: pincode.textContent
         };
         
@@ -299,6 +300,7 @@
                 if (country) country.style.display = 'none';
                 if (state) state.style.display = 'none';
                 if (city) city.style.display = 'none';
+                if (district) district.style.display = 'none';
                 if (pincode) pincode.style.display = 'none';
                 
                 console.log('Static values hidden');
@@ -311,6 +313,7 @@
                 if (countryInput) countryInput.style.display = 'block';
                 if (stateInput) stateInput.style.display = 'block';
                 if (cityInput) cityInput.style.display = 'block';
+                if (districtInput) districtInput.style.display = 'block';
                 if (pincodeInput) pincodeInput.style.display = 'block';
                 
                 console.log('Input fields shown');
@@ -352,6 +355,7 @@
                 if (country) country.style.display = 'block';
                 if (state) state.style.display = 'block';
                 if (city) city.style.display = 'block';
+                if (district) district.style.display = 'block';
                 if (pincode) pincode.style.display = 'block';
                 
                 // Hide input fields
@@ -362,6 +366,7 @@
                 if (countryInput) countryInput.style.display = 'none';
                 if (stateInput) stateInput.style.display = 'none';
                 if (cityInput) cityInput.style.display = 'none';
+                if (districtInput) districtInput.style.display = 'none';
                 if (pincodeInput) pincodeInput.style.display = 'none';
                 
                 // Hide save buttons
@@ -378,6 +383,7 @@
                 if (countryInput) countryInput.value = originalValues.country;
                 if (stateInput) stateInput.value = originalValues.state;
                 if (cityInput) cityInput.value = originalValues.city;
+                if (districtInput) districtInput.value = originalValues.district;
                 if (pincodeInput) pincodeInput.value = originalValues.pincode;
                 
                 console.log('Edit mode canceled successfully');
@@ -399,6 +405,7 @@
                 country: countryInput.value.trim(),
                 state: stateInput.value.trim(),
                 city: cityInput.value.trim(),
+                district: districtInput.value.trim(),
                 pincode: pincodeInput.value.trim()
             };
             
@@ -435,6 +442,7 @@
                     country.textContent = formData.country;
                     state.textContent = formData.state;
                     city.textContent = formData.city;
+                    district.textContent = formData.district;
                     pincode.textContent = formData.pincode;
                     
                     // Update original values
@@ -537,7 +545,7 @@
         }
         
         // Handle Enter key in input fields
-        const inputs = [firstNameInput, lastNameInput, mobileInput, addressLine1Input, addressLine2Input, countryInput, stateInput, cityInput, pincodeInput];
+        const inputs = [firstNameInput, lastNameInput, mobileInput, addressLine1Input, countryInput, stateInput, cityInput, districtInput, pincodeInput];
         inputs.forEach(input => {
             if (input) {
                 input.addEventListener('keypress', function(e) {
@@ -685,7 +693,10 @@
                     addressData.city = component.long_name;
                 } else if (types.includes('administrative_area_level_1')) {
                     addressData.state = component.long_name;
-                } else if (types.includes('country')) {
+                } else if (types.includes('administrative_area_level_2')||types.includes('administrative_area_level_3')) {
+                    if(!addressData.district)
+                    addressData.district = component.long_name;
+                }else if (types.includes('country')) {
                     addressData.country = component.long_name;
                 } else if (types.includes('postal_code')) {
                     addressData.postalCode = component.long_name;
@@ -700,27 +711,46 @@
         
         // Fill address fields
         function fillAddressFields(addressData, formattedAddress) {
-            const addressLine1Input = document.getElementById('addressLine1Input');
-            const cityInput = document.getElementById('cityInput');
-            const stateInput = document.getElementById('stateInput');
-            const countryInput = document.getElementById('countryInput');
-            const pincodeInput = document.getElementById('pincodeInput');
-            
-            // Fill address line 1
-            if (addressData.streetNumber && addressData.streetName) {
-                addressLine1Input.value = `${addressData.streetNumber} ${addressData.streetName}`;
-            } else if (formattedAddress) {
-                // Extract first line from formatted address
-                const lines = formattedAddress.split(',');
-                addressLine1Input.value = lines[0] || '';
-            }
-            
-            // Fill other fields
-            if (addressData.city) cityInput.value = addressData.city;
-            if (addressData.state) stateInput.value = addressData.state;
-            if (addressData.country) countryInput.value = addressData.country;
-            if (addressData.postalCode) pincodeInput.value = addressData.postalCode;
+    const addressLine1Input = document.getElementById('addressLine1Input');
+    const cityInput = document.getElementById('cityInput');
+    const districtInput = document.getElementById('districtInput');
+    const stateInput = document.getElementById('stateInput');
+    const countryInput = document.getElementById('countryInput');
+    const pincodeInput = document.getElementById('pincodeInput');
+
+    // --- NEW LOGIC TO BUILD A BETTER ADDRESS LINE 1 ---
+    let constructedAddress = '';
+    
+    // 1. Prioritize street name if available
+    if (addressData.streetName) {
+        constructedAddress = addressData.streetName;
+    
+    // 2. Use neighborhood as the next best option
+    } else if (addressData.neighborhood) {
+        constructedAddress = addressData.neighborhood;
+
+    // 3. As a last resort, use the formattedAddress but clean it up
+    } else if (formattedAddress) {
+        const parts = formattedAddress.split(',');
+        // Check if the first part is a Plus Code (it contains a '+')
+        if (parts[0].includes('+') && parts.length > 1) {
+            // If it is, use the next part of the address instead (e.g., the city or town)
+            constructedAddress = parts[1].trim();
+        } else {
+            // Otherwise, use the first part as is
+            constructedAddress = parts[0].trim();
         }
+    }
+    
+    addressLine1Input.value = constructedAddress;
+    
+    // --- Fill other fields as before ---
+    if (cityInput) cityInput.value = addressData.city || '';
+    if (districtInput) districtInput.value = addressData.district || '';
+    if (stateInput) stateInput.value = addressData.state || '';
+    if (countryInput) countryInput.value = addressData.country || '';
+    if (pincodeInput) pincodeInput.value = addressData.postalCode || '';
+}
         
         // Show location status
         function showLocationStatus(message, type) {
@@ -803,22 +833,7 @@
                 });
             }
             
-            // Add test autofill button event listener
-            const testAutofillBtn = document.getElementById('testAutofillBtn');
-            if (testAutofillBtn) {
-                testAutofillBtn.addEventListener('click', function() {
-                    console.log('Test autofill button clicked');
-                    // Simulate selecting a suggestion
-                    const testAddressData = {
-                        city: 'Karnal',
-                        state: 'Haryana',
-                        country: 'India',
-                        postalCode: '132001',
-                        formattedAddress: 'Karnal, Haryana, India'
-                    };
-                    fillAddressFieldsFromAutocomplete(testAddressData);
-                });
-            }
+
         }
         
         function handleAddressInput(e) {
@@ -898,7 +913,7 @@
             // Delay hiding to allow for clicks on suggestions
             setTimeout(() => {
                 hideSuggestions();
-            }, 200);
+            }, 5000);
         }
         
         async function searchAddresses(query) {
@@ -1008,7 +1023,7 @@
             
             // Use event delegation for click handling
             console.log('Setting up event delegation for suggestions');
-            suggestionsContainer.addEventListener('mousedown', (e) => {
+            suggestionsContainer.addEventListener('click', (e) => {
                 console.log('Click event on suggestions container:', e.target);
                 const suggestionItem = e.target.closest('.address-suggestion-item');
                 if (suggestionItem) {
@@ -1045,10 +1060,10 @@
             try {
                 const response = await fetch(`/dashboard/api/place-details?place_id=${placeId}`);
                 const data = await response.json();
-                
                 if (data.result) {
                     const addressData = parseAddressComponents(data.result.address_components);
                     addressData.formattedAddress = data.result.formatted_address;
+                    console.log(data.result.address_components);
                     callback(addressData);
                 } else {
                     callback(null);
@@ -1059,21 +1074,23 @@
             }
         }
         
-        function fillAddressFieldsFromAutocomplete(addressData) {
-            console.log('Filling address fields with:', addressData);
-            const addressLine1Input = document.getElementById('addressLine1Input');
-            const cityInput = document.getElementById('cityInput');
-            const stateInput = document.getElementById('stateInput');
-            const countryInput = document.getElementById('countryInput');
-            const pincodeInput = document.getElementById('pincodeInput');
+                 function fillAddressFieldsFromAutocomplete(addressData) {
+             console.log('Filling address fields with:', addressData);
+             const addressLine1Input = document.getElementById('addressLine1Input');
+             const cityInput = document.getElementById('cityInput');
+             const stateInput = document.getElementById('stateInput');
+                          const districtInput = document.getElementById('districtInput');
+             const countryInput = document.getElementById('countryInput');
+             const pincodeInput = document.getElementById('pincodeInput');
             
-            console.log('Input elements found:');
-            console.log('addressLine1Input:', addressLine1Input);
-            console.log('cityInput:', cityInput);
-            console.log('stateInput:', stateInput);
-            console.log('countryInput:', countryInput);
-            console.log('pincodeInput:', pincodeInput);
-            
+                         console.log('Input elements found:');
+             console.log('addressLine1Input:', addressLine1Input);
+             console.log('cityInput:', cityInput);
+             console.log('stateInput:', stateInput);
+                          console.log('districtInput:', districtInput);
+             console.log('countryInput:', countryInput);
+             console.log('pincodeInput:', pincodeInput);
+
             // Check if we're in edit mode
             if (addressLine1Input.style.display === 'none') {
                 console.log('Not in edit mode, enabling edit mode first');
@@ -1102,6 +1119,10 @@
             if (addressData.city && cityInput) {
                 cityInput.value = addressData.city;
                 console.log('Set city to:', cityInput.value);
+            }
+            if (addressData.district && districtInput) {
+                districtInput.value = addressData.district;
+                console.log('Set district to:', districtInput.value);
             }
             if (addressData.state && stateInput) {
                 stateInput.value = addressData.state;
