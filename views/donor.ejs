@@ -1,0 +1,600 @@
+<link rel="stylesheet" href="css/donor.css">
+    <!-- Header -->
+<div class="main-content">
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h1>MedConnect</h1>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Donation History Section -->
+    <div class="history-container">
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tab active" id="requestsTab">
+                <i class="fas fa-hand-holding-medical"></i>
+                Requests Received
+            </div>
+            <div class="tab" id="historyTab">
+                <i class="fas fa-history"></i>
+                Donation History
+            </div>
+        </div>
+        
+        <!-- Requests Received Section -->
+        <div class="requests-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Donation Requests</h2>
+                    <p class="section-subtitle">Manage requests for your donated medicines</p>
+                </div>
+                <div class="results-count">5 active requests</div>
+            </div>
+            
+            <div class="requests-grid">
+                <!-- Request Card 1 (Pending) -->
+                <div class="request-card">
+                    <div class="card-header">
+                        <div class="medicine-icon">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                        <div class="medicine-info">
+                            <div class="medicine-name">Paracetamol 500mg</div>
+                            <div class="request-date">
+                                <i class="fas fa-calendar"></i> Requested: Jul 28, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Quantity</span>
+                            <span class="info-value">20 tablets</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Expiry Date</span>
+                            <span class="info-value">Dec 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="status-badge status-pending">Pending</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Distance</span>
+                            <span class="info-value">1.2 miles</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="requester-info">
+                            <div class="requester-avatar">MJ</div>
+                            <div>
+                                <div class="requester-name">Michael Johnson</div>
+                                <div class="requester-location">Seattle, WA</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-button btn-accept">Accept</button>
+                            <button class="action-button btn-reject">Reject</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Request Card 2 (Accepted) -->
+                <div class="request-card">
+                    <div class="card-header">
+                        <div class="medicine-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="medicine-info">
+                            <div class="medicine-name">Vitamin C 1000mg</div>
+                            <div class="request-date">
+                                <i class="fas fa-calendar"></i> Requested: Jul 25, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Quantity</span>
+                            <span class="info-value">30 capsules</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Expiry Date</span>
+                            <span class="info-value">Mar 2025</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="status-badge status-accepted">Accepted</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Distance</span>
+                            <span class="info-value">3.5 miles</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="requester-info">
+                            <div class="requester-avatar">SR</div>
+                            <div>
+                                <div class="requester-name">Sarah Roberts</div>
+                                <div class="requester-location">Bellevue, WA</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-button btn-complete">Completed</button>
+                            <button class="action-button btn-failed">Failed</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Request Card 3 (Pending) -->
+                <div class="request-card">
+                    <div class="card-header">
+                        <div class="medicine-icon">
+                            <i class="fas fa-tablets"></i>
+                        </div>
+                        <div class="medicine-info">
+                            <div class="medicine-name">Amoxicillin 500mg</div>
+                            <div class="request-date">
+                                <i class="fas fa-calendar"></i> Requested: Jul 24, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Quantity</span>
+                            <span class="info-value">15 capsules</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Expiry Date</span>
+                            <span class="info-value">Oct 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="status-badge status-pending">Pending</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Distance</span>
+                            <span class="info-value">2.8 miles</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="requester-info">
+                            <div class="requester-avatar">DW</div>
+                            <div>
+                                <div class="requester-name">David Wilson</div>
+                                <div class="requester-location">Redmond, WA</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-button btn-accept">Accept</button>
+                            <button class="action-button btn-reject">Reject</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Request Card 4 (Rejected) -->
+                <div class="request-card">
+                    <div class="card-header">
+                        <div class="medicine-icon">
+                            <i class="fas fa-prescription-bottle"></i>
+                        </div>
+                        <div class="medicine-info">
+                            <div class="medicine-name">Lisinopril 10mg</div>
+                            <div class="request-date">
+                                <i class="fas fa-calendar"></i> Requested: Jul 20, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Quantity</span>
+                            <span class="info-value">25 tablets</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Expiry Date</span>
+                            <span class="info-value">Nov 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Distance</span>
+                            <span class="info-value">4.2 miles</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="requester-info">
+                            <div class="requester-avatar">JL</div>
+                            <div>
+                                <div class="requester-name">Jennifer Lee</div>
+                                <div class="requester-location">Kirkland, WA</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-button btn-accept">Accept</button>
+                            <button class="action-button btn-reject">Reject</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Request Card 5 (Failed) -->
+                <div class="request-card">
+                    <div class="card-header">
+                        <div class="medicine-icon">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                        <div class="medicine-info">
+                            <div class="medicine-name">Metformin 500mg</div>
+                            <div class="request-date">
+                                <i class="fas fa-calendar"></i> Requested: Jul 18, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Quantity</span>
+                            <span class="info-value">45 tablets</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Expiry Date</span>
+                            <span class="info-value">Jan 2025</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="status-badge status-failed">Failed</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Distance</span>
+                            <span class="info-value">1.8 miles</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="requester-info">
+                            <div class="requester-avatar">DW</div>
+                            <div>
+                                <div class="requester-name">David Wilson</div>
+                                <div class="requester-location">Seattle, WA</div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-button btn-complete">Completed</button>
+                            <button class="action-button btn-failed">Failed</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Donation History Section -->
+        <div class="donation-history" id="donationHistory">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Your Donation History</h2>
+                    <p class="section-subtitle">All your successful donations</p>
+                </div>
+                <div class="results-count">12 donations made</div>
+            </div>
+            
+            <div class="history-grid">
+                <!-- Donation Card 1 -->
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="donation-info">
+                            <div class="donation-title">Paracetamol 500mg</div>
+                            <div class="donation-date">
+                                <i class="fas fa-calendar"></i> Donated: Jul 15, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
+                            <span class="donation-value">24 tablets</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Received By</span>
+                            <span class="donation-value">Michael Johnson</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Location</span>
+                            <span class="donation-value">Seattle, WA</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Distance</span>
+                            <span class="donation-value">1.2 miles</span>
+                        </div>
+                        <div class="donation-status">Completed</div>
+                    </div>
+                </div>
+                
+                <!-- Donation Card 2 -->
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                        <div class="donation-info">
+                            <div class="donation-title">Vitamin D3 1000 IU</div>
+                            <div class="donation-date">
+                                <i class="fas fa-calendar"></i> Donated: Jul 10, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
+                            <span class="donation-value">30 capsules</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Received By</span>
+                            <span class="donation-value">Sarah Roberts</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Location</span>
+                            <span class="donation-value">Bellevue, WA</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Distance</span>
+                            <span class="donation-value">3.5 miles</span>
+                        </div>
+                        <div class="donation-status">Completed</div>
+                    </div>
+                </div>
+                
+                <!-- Donation Card 3 -->
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-tablets"></i>
+                        </div>
+                        <div class="donation-info">
+                            <div class="donation-title">Amoxicillin 500mg</div>
+                            <div class="donation-date">
+                                <i class="fas fa-calendar"></i> Donated: Jul 5, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
+                            <span class="donation-value">20 capsules</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Received By</span>
+                            <span class="donation-value">David Wilson</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Location</span>
+                            <span class="donation-value">Redmond, WA</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Distance</span>
+                            <span class="donation-value">2.8 miles</span>
+                        </div>
+                        <div class="donation-status">Completed</div>
+                    </div>
+                </div>
+                
+                <!-- Donation Card 4 -->
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-prescription-bottle"></i>
+                        </div>
+                        <div class="donation-info">
+                            <div class="donation-title">Lisinopril 10mg</div>
+                            <div class="donation-date">
+                                <i class="fas fa-calendar"></i> Donated: Jun 28, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
+                            <span class="donation-value">25 tablets</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Received By</span>
+                            <span class="donation-value">Jennifer Lee</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Location</span>
+                            <span class="donation-value">Kirkland, WA</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Distance</span>
+                            <span class="donation-value">4.2 miles</span>
+                        </div>
+                        <div class="donation-status">Completed</div>
+                    </div>
+                </div>
+                
+                <!-- Donation Card 5 -->
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                        <div class="donation-info">
+                            <div class="donation-title">Metformin 500mg</div>
+                            <div class="donation-date">
+                                <i class="fas fa-calendar"></i> Donated: Jun 20, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
+                            <span class="donation-value">45 tablets</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Received By</span>
+                            <span class="donation-value">David Wilson</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Location</span>
+                            <span class="donation-value">Seattle, WA</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Distance</span>
+                            <span class="donation-value">1.8 miles</span>
+                        </div>
+                        <div class="donation-status">Completed</div>
+                    </div>
+                </div>
+                
+                <!-- Donation Card 6 -->
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="donation-info">
+                            <div class="donation-title">Atorvastatin 20mg</div>
+                            <div class="donation-date">
+                                <i class="fas fa-calendar"></i> Donated: Jun 12, 2023
+                            </div>
+                        </div>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
+                            <span class="donation-value">30 tablets</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Received By</span>
+                            <span class="donation-value">Emily Roberts</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Location</span>
+                            <span class="donation-value">Renton, WA</span>
+                        </div>
+                        <div class="donation-item">
+                            <span class="donation-label">Distance</span>
+                            <span class="donation-value">6.5 miles</span>
+                        </div>
+                        <div class="donation-status">Completed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const requestsTab = document.getElementById('requestsTab');
+            const historyTab = document.getElementById('historyTab');
+            const donationHistory = document.getElementById('donationHistory');
+            
+            // Tab switching functionality
+            requestsTab.addEventListener('click', function() {
+                requestsTab.classList.add('active');
+                historyTab.classList.remove('active');
+                document.querySelector('.requests-section').style.display = 'block';
+                donationHistory.style.display = 'none';
+            });
+            
+            historyTab.addEventListener('click', function() {
+                historyTab.classList.add('active');
+                requestsTab.classList.remove('active');
+                document.querySelector('.requests-section').style.display = 'none';
+                donationHistory.style.display = 'block';
+            });
+            
+            // Action button functionality
+            const acceptButtons = document.querySelectorAll('.btn-accept');
+            const rejectButtons = document.querySelectorAll('.btn-reject');
+            const completeButtons = document.querySelectorAll('.btn-complete');
+            const failedButtons = document.querySelectorAll('.btn-failed');
+            
+            acceptButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const card = this.closest('.request-card');
+                    const medicineName = card.querySelector('.medicine-name').textContent;
+                    const statusBadge = card.querySelector('.status-badge');
+                    
+                    // Change status to accepted
+                    statusBadge.textContent = 'Accepted';
+                    statusBadge.className = 'status-badge status-accepted';
+                    
+                    // Change action buttons to completed/failed
+                    const actionButtons = card.querySelector('.action-buttons');
+                    actionButtons.innerHTML = `
+                        <button class="action-button btn-complete">Completed</button>
+                        <button class="action-button btn-failed">Failed</button>
+                    `;
+                    
+                    // Add event listeners to new buttons
+                    actionButtons.querySelector('.btn-complete').addEventListener('click', completeDonation);
+                    actionButtons.querySelector('.btn-failed').addEventListener('click', failDonation);
+                    
+                    alert(`You accepted the request for ${medicineName}. Please arrange pickup with the requester.`);
+                });
+            });
+            
+            rejectButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const card = this.closest('.request-card');
+                    const medicineName = card.querySelector('.medicine-name').textContent;
+                    const statusBadge = card.querySelector('.status-badge');
+                    
+                    // Change status to rejected
+                    statusBadge.textContent = 'Rejected';
+                    statusBadge.className = 'status-badge status-rejected';
+                    
+                    alert(`You rejected the request for ${medicineName}. The requester has been notified.`);
+                });
+            });
+            
+            function completeDonation() {
+                const card = this.closest('.request-card');
+                const medicineName = card.querySelector('.medicine-name').textContent;
+                const statusBadge = card.querySelector('.status-badge');
+                
+                // Change status to completed
+                statusBadge.textContent = 'Completed';
+                statusBadge.className = 'status-badge status-completed';
+                
+                // Remove action buttons
+                card.querySelector('.action-buttons').innerHTML = '';
+                
+                // Move to history after delay
+                setTimeout(() => {
+                    card.style.opacity = '0.6';
+                }, 1000);
+                
+                alert(`Successfully completed donation for ${medicineName}! Thank you for your contribution.`);
+            }
+            
+            function failDonation() {
+                const card = this.closest('.request-card');
+                const medicineName = card.querySelector('.medicine-name').textContent;
+                const statusBadge = card.querySelector('.status-badge');
+                
+                // Change status to failed
+                statusBadge.textContent = 'Failed';
+                statusBadge.className = 'status-badge status-failed';
+                
+                alert(`Marked donation for ${medicineName} as failed. Please contact support if you need assistance.`);
+            }
+            
+            // Attach event listeners to existing buttons
+            document.querySelectorAll('.btn-complete').forEach(button => {
+                button.addEventListener('click', completeDonation);
+            });
+            
+            document.querySelectorAll('.btn-failed').forEach(button => {
+                button.addEventListener('click', failDonation);
+            });
+        });
+    </script>
