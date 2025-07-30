@@ -58,6 +58,10 @@
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
+            <a href="/dashboard/logout" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'logout') ? ' active' : '' %>">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
         </aside>
         <%- body %>
     </div>

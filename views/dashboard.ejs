@@ -6,7 +6,7 @@
         <!-- Welcome Banner -->
         <div class="welcome-card">
             <div class="welcome-content">
-                <h2>Welcome back, John!</h2>
+                <h2>Welcome back, <%= user.firstName || user.email.split('@')[0] %>!</h2>
                 <p>You're making a difference by helping reduce medical waste and providing essential medicines to those in need. Keep up the great work!</p>
             </div>
         </div>
@@ -18,7 +18,7 @@
                     <i class="fas fa-pills"></i>
                 </div>
                 <div class="stat-details">
-                    <div class="stat-number">24</div>
+                    <div class="stat-number"><%= stats.medicinesDonated %></div>
                     <div class="stat-title">Medicines Donated</div>
                 </div>
             </div>
@@ -27,7 +27,7 @@
                     <i class="fas fa-hand-holding-medical"></i>
                 </div>
                 <div class="stat-details">
-                    <div class="stat-number">8</div>
+                    <div class="stat-number"><%= stats.medicinesReceived %></div>
                     <div class="stat-title">Medicines Received</div>
                 </div>
             </div>
@@ -36,8 +36,17 @@
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="stat-details">
-                    <div class="stat-number">3</div>
+                    <div class="stat-number"><%= stats.pendingRequests %></div>
                     <div class="stat-title">Pending Requests</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-card icon-people">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-number"><%= stats.peopleHelped %></div>
+                    <div class="stat-title">People Helped</div>
                 </div>
             </div>
         </div>
@@ -46,77 +55,49 @@
         <div class="content-section">
             <div class="section-header">
                 <h3 class="section-title">Medicines You've Donated</h3>
-                <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                <a href="/dashboard/donor" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="medicines-grid">
-                <!-- Medicine Card 1 -->
-                <div class="medicine-card">
-                    <div class="medicine-image">
-                        <i class="fas fa-capsules"></i>
-                        <div class="medicine-status status-accepted">Accepted</div>
-                    </div>
-                    <div class="medicine-details">
-                        <h4 class="medicine-name">Paracetamol 500mg</h4>
-                        <div class="medicine-info">
-                            <div class="medicine-quantity">
-                                <i class="fas fa-capsules"></i> 20 tablets
+                <% if (recentDonations && recentDonations.length > 0) { %>
+                    <% recentDonations.forEach(donation => { %>
+                        <div class="medicine-card">
+                            <div class="medicine-image">
+                                <% if (donation.imageUrl) { %>
+                                    <img src="<%= donation.imageUrl %>" alt="<%= donation.name %>">
+                                <% } else { %>
+                                    <i class="fas fa-capsules"></i>
+                                <% } %>
+                                <div class="medicine-status status-<%= donation.status.toLowerCase() %>"><%= donation.status %></div>
                             </div>
-                            <div class="medicine-expiry">
-                                <i class="fas fa-calendar"></i> Dec 2024
+                            <div class="medicine-details">
+                                <h4 class="medicine-name"><%= donation.name %></h4>
+                                <div class="medicine-info">
+                                    <div class="medicine-quantity">
+                                        <i class="fas fa-capsules"></i> <%= donation.quantity %> <%= donation.unit || 'tablets' %>
+                                    </div>
+                                    <div class="medicine-expiry">
+                                        <i class="fas fa-calendar"></i> <%= new Date(donation.expiry).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                                    </div>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="action-button btn-details" onclick="viewMedicineDetails('<%= donation._id %>')">Details</button>
+                                    <% if (donation.status === 'Available') { %>
+                                        <button class="action-button btn-edit" onclick="editMedicine('<%= donation._id %>')">Edit</button>
+                                    <% } else if (donation.status === 'Requested') { %>
+                                        <button class="action-button btn-track" onclick="trackRequests('<%= donation._id %>')">Track</button>
+                                    <% } %>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-actions">
-                            <button class="action-button btn-details">Details</button>
-                            <button class="action-button btn-request">Track</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Medicine Card 2 -->
-                <div class="medicine-card">
-                    <div class="medicine-image">
+                    <% }); %>
+                <% } else { %>
+                    <div class="empty-state" style="grid-column: 1 / -1; grid-row: 1 / -1;">
                         <i class="fas fa-pills"></i>
-                        <div class="medicine-status status-pending">Pending</div>
+                        <h4>No donations yet</h4>
+                        <p>Start helping others by donating your unused medicines.</p>
+                        <a href="/donate" class="btn btn-primary">Donate Medicine</a>
                     </div>
-                    <div class="medicine-details">
-                        <h4 class="medicine-name">Vitamin C</h4>
-                        <div class="medicine-info">
-                            <div class="medicine-quantity">
-                                <i class="fas fa-capsules"></i> 30 capsules
-                            </div>
-                            <div class="medicine-expiry">
-                                <i class="fas fa-calendar"></i> Mar 2025
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="action-button btn-details">Details</button>
-                            <button class="action-button btn-request">Edit</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Medicine Card 3 -->
-                <div class="medicine-card">
-                    <div class="medicine-image">
-                        <i class="fas fa-tablets"></i>
-                        <div class="medicine-status status-completed">Completed</div>
-                    </div>
-                    <div class="medicine-details">
-                        <h4 class="medicine-name">Amoxicillin</h4>
-                        <div class="medicine-info">
-                            <div class="medicine-quantity">
-                                <i class="fas fa-capsules"></i> 15 capsules
-                            </div>
-                            <div class="medicine-expiry">
-                                <i class="fas fa-calendar"></i> Oct 2023
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="action-button btn-details">Details</button>
-                            <button class="action-button btn-request">Review</button>
-                        </div>
-                    </div>
-                </div>
+                <% } %>
             </div>
         </div>
 
@@ -124,73 +105,92 @@
         <div class="content-section">
             <div class="section-header">
                 <h3 class="section-title">Your Medicine Requests</h3>
-                <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                <a href="/dashboard/requests" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
             </div>
-            <table class="requests-table">
-                <thead>
-                    <tr>
-                        <th>Medicine</th>
-                        <th>Quantity</th>
-                        <th>Date Requested</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-pills"></i>
-                                </div>
-                                <div>
-                                    <div class="medicine-name">Metformin 500mg</div>
-                                    <div class="medicine-expiry">Exp: Aug 2024</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>30 tablets</td>
-                        <td>Jul 25, 2023</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td><button class="action-button btn-details">Details</button></td>
-                    </tr>
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-capsules"></i>
-                                </div>
-                                <div>
-                                    <div class="medicine-name">Lisinopril 10mg</div>
-                                    <div class="medicine-expiry">Exp: Nov 2024</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>20 tablets</td>
-                        <td>Jul 18, 2023</td>
-                        <td><span class="status-badge status-accepted">Accepted</span></td>
-                        <td><button class="action-button btn-details">Track</button></td>
-                    </tr>
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-tablets"></i>
-                                </div>
-                                <div>
-                                    <div class="medicine-name">Atorvastatin 20mg</div>
-                                    <div class="medicine-expiry">Exp: Feb 2025</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>45 tablets</td>
-                        <td>Jul 10, 2023</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
-                        <td><button class="action-button btn-details">Review</button></td>
-                    </tr>
-                </tbody>
-            </table>
+            <% if (recentRequests && recentRequests.length > 0) { %>
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Quantity</th>
+                            <th>Date Requested</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% recentRequests.forEach(request => { %>
+                            <tr class="table-row">
+                                <td>
+                                    <div class="medicine-cell">
+                                        <div class="table-med-image">
+                                            <% if (request.medicine && request.medicine.imageUrl) { %>
+                                                <img src="<%= request.medicine.imageUrl %>" alt="<%= request.medicine.name %>">
+                                            <% } else { %>
+                                                <i class="fas fa-pills"></i>
+                                            <% } %>
+                                        </div>
+                                        <div>
+                                            <div class="medicine-name"><%= request.medicine ? request.medicine.name : 'Medicine' %></div>
+                                            <div class="medicine-expiry">
+                                                Exp: <%= request.medicine ? new Date(request.medicine.expiry).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A' %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><%= request.quantity %> <%= request.medicine ? (request.medicine.unit || 'tablets') : 'units' %></td>
+                                <td><%= new Date(request.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                                <td><span class="status-badge status-<%= request.status.toLowerCase() %>"><%= request.status %></span></td>
+                                <td>
+                                    <button class="action-button btn-details" onclick="viewRequestDetails('<%= request._id %>')">
+                                        <% if (request.status === 'Pending') { %>
+                                            Details
+                                        <% } else if (request.status === 'Accepted') { %>
+                                            Track
+                                        <% } else if (request.status === 'Completed') { %>
+                                            Review
+                                        <% } else { %>
+                                            Details
+                                        <% } %>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-hand-holding-medical"></i>
+                    <h4>No requests yet</h4>
+                    <p>Browse available medicines and make your first request.</p>
+                    <a href="/dashboard/browse" class="btn btn-primary">Browse Medicines</a>
+                </div>
+            <% } %>
         </div>
+
+        <!-- Expiring Medicines Alert -->
+        <% if (expiringMedicines && expiringMedicines.length > 0) { %>
+            <div class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">⚠️ Expiring Soon</h3>
+                </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="alert-content">
+                        <h4>Medicines Expiring Soon</h4>
+                        <p>You have <%= expiringMedicines.length %> medicine(s) expiring within 30 days. Consider donating them before they expire.</p>
+                        <div class="expiring-list">
+                            <% expiringMedicines.forEach(medicine => { %>
+                                <div class="expiring-item">
+                                    <strong><%= medicine.name %></strong> - 
+                                    Expires: <%= new Date(medicine.expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
     </main>
 </div>
 
@@ -220,22 +220,43 @@
         // Button interactions
         const buttons = document.querySelectorAll('.action-button, .donate-button');
         buttons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
                 const text = this.textContent.toLowerCase();
                 if(text.includes('donate')) {
-                    alert('Opening medicine donation form...');
-                } else if(text.includes('details') || text.includes('track') || text.includes('review')) {
-                    alert(`Viewing details for this ${text.includes('details') ? 'donated' : 'requested'} medicine`);
-                } else if(text.includes('edit')) {
-                    alert('Edit donation details');
+                    window.location.href = '/donate';
                 }
             });
         });
         
         // Notification bell
         const notification = document.querySelector('.notifications');
-        notification.addEventListener('click', function() {
-            alert('You have 3 new notifications');
-        });
+        if (notification) {
+            notification.addEventListener('click', function() {
+                // TODO: Implement notification modal
+                alert('You have <%= unreadNotifications %> new notifications');
+            });
+        }
     });
+
+    // Medicine and Request functions
+    function viewMedicineDetails(medicineId) {
+        // TODO: Implement medicine details modal
+        alert('Viewing details for medicine: ' + medicineId);
+    }
+
+    function editMedicine(medicineId) {
+        // TODO: Implement edit medicine functionality
+        alert('Editing medicine: ' + medicineId);
+    }
+
+    function trackRequests(medicineId) {
+        // TODO: Implement track requests functionality
+        alert('Tracking requests for medicine: ' + medicineId);
+    }
+
+    function viewRequestDetails(requestId) {
+        // TODO: Implement request details modal
+        alert('Viewing details for request: ' + requestId);
+    }
 </script>

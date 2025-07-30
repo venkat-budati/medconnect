@@ -13,102 +13,109 @@
             </div>
         </div>
         
+        <!-- Flash Messages -->
+        <% if (messages.error) { %>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span><%= messages.error %></span>
+            </div>
+        <% } %>
+        
+        <% if (messages.success) { %>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span><%= messages.success %></span>
+            </div>
+        <% } %>
+        
         <!-- Donate Form Container -->
         <div class="donate-form-container">
             <div class="form-content">
-                <form id="donate-form">
+                <form id="donate-form" action="/donate" method="POST" enctype="multipart/form-data">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="medicine-name">
+                            <label class="form-label" for="name">
                                 <i class="fas fa-capsules"></i> Medicine Name<span class="required-star">*</span>
                             </label>
-                            <input type="text" id="medicine-name" class="form-input" placeholder="e.g., Paracetamol 500mg" required>
+                            <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Paracetamol 500mg" required>
+                            <div class="validation-message" id="name-validation"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="quantity">
                                 <i class="fas fa-calculator"></i> Quantity<span class="required-star">*</span>
                             </label>
-                            <input type="number" id="quantity" class="form-input" placeholder="Number of tablets/capsules" min="1" required>
+                            <input type="number" id="quantity" name="quantity" class="form-input" placeholder="Number of tablets/capsules" min="1" required>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="expiry-date">
+                            <label class="form-label" for="unit">
+                                <i class="fas fa-box"></i> Unit
+                            </label>
+                            <select id="unit" name="unit" class="form-select">
+                                <option value="Tablets">Tablets</option>
+                                <option value="Capsules">Capsules</option>
+                                <option value="Bottles">Bottles</option>
+                                <option value="Strips">Strips</option>
+                                <option value="Pieces">Pieces</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="expiry">
                                 <i class="fas fa-calendar"></i> Expiry Date<span class="required-star">*</span>
                             </label>
-                            <input type="date" id="expiry-date" class="form-input" required>
+                            <input type="date" id="expiry" name="expiry" class="form-input" required>
+                            <div class="validation-message" id="expiry-validation"></div>
                         </div>
+                    </div>
+                    
+                    <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="dosage">
                                 <i class="fas fa-prescription-bottle"></i> Dosage
                             </label>
-                            <input type="text" id="dosage" class="form-input" placeholder="e.g., 500mg per tablet">
+                            <input type="text" id="dosage" name="dosage" class="form-input" placeholder="e.g., 500mg per tablet">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="manufacturer">
+                                <i class="fas fa-industry"></i> Manufacturer
+                            </label>
+                            <input type="text" id="manufacturer" name="manufacturer" class="form-input" placeholder="Pharmaceutical company">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="manufacturer">
-                                <i class="fas fa-industry"></i> Manufacturer
-                            </label>
-                            <input type="text" id="manufacturer" class="form-input" placeholder="Pharmaceutical company">
-                        </div>
-                        <div class="form-group">
                             <label class="form-label" for="category">
                                 <i class="fas fa-tag"></i> Category
                             </label>
-                            <select id="category" class="form-select">
+                            <select id="category" name="category" class="form-select">
                                 <option value="">Select category</option>
-                                <option value="pain-relief">Pain Relief</option>
-                                <option value="antibiotics">Antibiotics</option>
-                                <option value="vitamins">Vitamins & Supplements</option>
-                                <option value="chronic">Chronic Conditions</option>
-                                <option value="other">Other</option>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category.value %>"><%= category.label %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="condition">
+                                <i class="fas fa-box-open"></i> Condition<span class="required-star">*</span>
+                            </label>
+                            <select id="condition" name="condition" class="form-select" required>
+                                <option value="">Select condition</option>
+                                <option value="new">Unopened (Sealed and intact packaging)</option>
+                                <option value="opened">Opened but Unused (Packaging opened but pills untouched)</option>
+                                <option value="partial">Partially Used (Some pills used from the package)</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group full-width">
-                            <label class="form-label">
-                                <i class="fas fa-box-open"></i> Condition<span class="required-star">*</span>
-                            </label>
-                            <div class="condition-options">
-                                <div class="condition-option">
-                                    <input type="radio" id="condition-new" name="condition" value="new" required>
-                                    <label for="condition-new">
-                                        <i class="fas fa-box"></i>
-                                        <div class="condition-name">Unopened</div>
-                                        <div class="condition-desc">Sealed and intact packaging</div>
-                                    </label>
-                                </div>
-                                <div class="condition-option">
-                                    <input type="radio" id="condition-opened" name="condition" value="opened">
-                                    <label for="condition-opened">
-                                        <i class="fas fa-box-open"></i>
-                                        <div class="condition-name">Opened but Unused</div>
-                                        <div class="condition-desc">Packaging opened but pills untouched</div>
-                                    </label>
-                                </div>
-                                <div class="condition-option">
-                                    <input type="radio" id="condition-partial" name="condition" value="partial">
-                                    <label for="condition-partial">
-                                        <i class="fas fa-pills"></i>
-                                        <div class="condition-name">Partially Used</div>
-                                        <div class="condition-desc">Some pills used from the package</div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <label class="form-label" for="notes">
+                            <label class="form-label" for="description">
                                 <i class="fas fa-notes-medical"></i> Additional Notes
                             </label>
-                            <textarea id="notes" class="form-textarea" placeholder="Any special instructions or details about the medicine"></textarea>
+                            <textarea id="description" name="description" class="form-textarea" placeholder="Any special instructions or details about the medicine"></textarea>
                         </div>
                     </div>
                     
@@ -125,7 +132,7 @@
                                     <div class="upload-text">Drag & drop or click to upload photos</div>
                                     <div class="upload-hint">Max 3 photos (JPG, PNG, max 5MB each)</div>
                                     <div class="upload-button">Select Images</div>
-                                    <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+                                    <input type="file" id="images" name="images" accept="image/*" multiple style="display: none;">
                                 </div>
                                 <div class="preview-container" id="preview-container">
                                     <!-- Image previews will be added here -->
@@ -135,25 +142,28 @@
                     </div>
                     
                     <div class="submit-container">
-                        <button type="submit" class="submit-button">
+                        <button type="submit" class="submit-button" id="submit-btn">
                             <i class="fas fa-paper-plane"></i> Submit Donation
                         </button>
+                        <div class="loading-spinner" id="loading-spinner" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Processing...
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
         
         <!-- Success Message (Initially Hidden) -->
-        <div class="success-message" id="success-message">
+        <div class="success-message" id="success-message" style="display: none;">
             <div class="success-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <h3 class="success-title">Thank You for Your Donation!</h3>
             <p class="success-text">
-                Your medicine donation has been submitted successfully. Our team will review your donation 
-                and contact you within 24 hours to arrange pickup. Your contribution will help those in need.
+                Your medicine donation has been submitted successfully. It is now available for requests 
+                and will help those in need. You can track your donation in your dashboard.
             </p>
-            <a href="#" class="back-to-dashboard">
+            <a href="/dashboard" class="back-to-dashboard">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
         </div>
@@ -163,9 +173,131 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('donate-form');
             const uploadArea = document.getElementById('upload-area');
-            const fileInput = document.getElementById('file-input');
+            const fileInput = document.getElementById('images');
             const previewContainer = document.getElementById('preview-container');
             const successMessage = document.getElementById('success-message');
+            const submitBtn = document.getElementById('submit-btn');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            // Validation elements
+            const nameInput = document.getElementById('name');
+            const expiryInput = document.getElementById('expiry');
+            const nameValidation = document.getElementById('name-validation');
+            const expiryValidation = document.getElementById('expiry-validation');
+            
+            // Check profile completeness on page load
+            checkProfileCompleteness();
+            
+            async function checkProfileCompleteness() {
+                try {
+                    const response = await fetch('/donate/check-profile');
+                    const data = await response.json();
+                    
+                    if (!data.hasAddress) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-warning';
+                        alertDiv.innerHTML = `
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <strong>Profile Incomplete</strong><br>
+                                Please complete your address information in your profile before donating medicines. 
+                                This is required for pickup arrangements.
+                                <a href="/dashboard/profile" class="btn btn-primary" style="margin-top: 10px; display: inline-block;">
+                                    <i class="fas fa-user-edit"></i> Complete Profile
+                                </a>
+                            </div>
+                        `;
+                        
+                        // Insert alert at the top of the form
+                        const formHeader = document.querySelector('.form-header');
+                        formHeader.parentNode.insertBefore(alertDiv, formHeader.nextSibling);
+                        
+                        // Disable form submission
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Complete Profile First';
+                        submitBtn.className = 'submit-button disabled';
+                    }
+                } catch (error) {
+                    console.error('Profile check error:', error);
+                }
+            }
+            
+            // Set minimum date for expiry (today)
+            const today = new Date().toISOString().split('T')[0];
+            expiryInput.setAttribute('min', today);
+            
+            // Real-time name validation
+            let nameValidationTimeout;
+            nameInput.addEventListener('input', function() {
+                clearTimeout(nameValidationTimeout);
+                nameValidationTimeout = setTimeout(async function() {
+                    const name = nameInput.value.trim();
+                    if (name.length >= 3) {
+                        try {
+                            const response = await fetch('/donate/validate-name', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ name })
+                            });
+                            const data = await response.json();
+                            
+                            if (data.valid) {
+                                nameValidation.textContent = '';
+                                nameValidation.className = 'validation-message valid';
+                            } else {
+                                nameValidation.textContent = data.message;
+                                nameValidation.className = 'validation-message error';
+                            }
+                        } catch (error) {
+                            console.error('Name validation error:', error);
+                        }
+                    } else {
+                        nameValidation.textContent = '';
+                        nameValidation.className = 'validation-message';
+                    }
+                }, 500);
+            });
+            
+            // Real-time expiry validation
+            let expiryValidationTimeout;
+            expiryInput.addEventListener('change', function() {
+                clearTimeout(expiryValidationTimeout);
+                expiryValidationTimeout = setTimeout(async function() {
+                    const expiry = expiryInput.value;
+                    if (expiry) {
+                        try {
+                            const response = await fetch('/donate/validate-expiry', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ expiry })
+                            });
+                            const data = await response.json();
+                            
+                            if (data.valid) {
+                                if (data.warning) {
+                                    expiryValidation.textContent = data.warning;
+                                    expiryValidation.className = 'validation-message warning';
+                                } else {
+                                    expiryValidation.textContent = '';
+                                    expiryValidation.className = 'validation-message valid';
+                                }
+                            } else {
+                                expiryValidation.textContent = data.message;
+                                expiryValidation.className = 'validation-message error';
+                            }
+                        } catch (error) {
+                            console.error('Expiry validation error:', error);
+                        }
+                    } else {
+                        expiryValidation.textContent = '';
+                        expiryValidation.className = 'validation-message';
+                    }
+                }, 300);
+            });
             
             // File upload handling
             uploadArea.addEventListener('click', () => {
@@ -195,13 +327,24 @@
             
             fileInput.addEventListener('change', () => {
                 if (fileInput.files.length) {
+                    // Check if more than 3 files are selected
+                    if (fileInput.files.length > 3) {
+                        alert('Maximum 3 images allowed. Please select fewer files.');
+                        fileInput.value = ''; // Clear the input
+                        return;
+                    }
                     handleFiles(fileInput.files);
                 }
             });
             
             function handleFiles(files) {
-                // Clear previous previews if any
+                // Clear previous previews
                 previewContainer.innerHTML = '';
+                
+                // Check file count
+                if (files.length > 3) {
+                    alert('Maximum 3 images allowed. Only the first 3 will be processed.');
+                }
                 
                 // Limit to 3 images
                 const filesToProcess = Array.from(files).slice(0, 3);
@@ -220,10 +363,23 @@
                     const reader = new FileReader();
                     
                     reader.onload = function(e) {
+                        const previewDiv = document.createElement('div');
+                        previewDiv.className = 'image-preview-container';
+                        
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         img.classList.add('image-preview');
-                        previewContainer.appendChild(img);
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'remove-image';
+                        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        removeBtn.onclick = function() {
+                            previewDiv.remove();
+                        };
+                        
+                        previewDiv.appendChild(img);
+                        previewDiv.appendChild(removeBtn);
+                        previewContainer.appendChild(previewDiv);
                     };
                     
                     reader.readAsDataURL(file);
@@ -231,37 +387,80 @@
             }
             
             // Form submission
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 // Basic validation
-                const medicineName = document.getElementById('medicine-name').value;
+                const name = nameInput.value.trim();
                 const quantity = document.getElementById('quantity').value;
-                const expiryDate = document.getElementById('expiry-date').value;
-                const condition = document.querySelector('input[name="condition"]:checked');
+                const expiry = expiryInput.value;
+                const condition = document.getElementById('condition').value;
                 
-                if (!medicineName || !quantity || !expiryDate || !condition) {
+
+                
+                if (!name || !quantity || !expiry || !condition) {
                     alert('Please fill in all required fields');
                     return;
                 }
                 
-                // Simulate form processing
-                form.reset();
-                previewContainer.innerHTML = '';
+                if (name.length < 3) {
+                    alert('Medicine name must be at least 3 characters long');
+                    return;
+                }
                 
-                // Show success message
-                successMessage.style.display = 'block';
-                document.querySelector('.donate-form-container').style.display = 'none';
+                // Show loading state
+                submitBtn.style.display = 'none';
+                loadingSpinner.style.display = 'block';
                 
-                // Scroll to success message
-                successMessage.scrollIntoView({ behavior: 'smooth' });
+                try {
+                    const formData = new FormData(form);
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                    
+                    const response = await fetch('/donate', {
+                        method: 'POST',
+                        body: formData,
+                        redirect: 'follow',
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        const result = await response.text();
+                        // Handle response
+                        if (response.ok) {
+                            // Show success message
+                            document.querySelector('.donate-form-container').style.display = 'none';
+                            successMessage.style.display = 'block';
+                            successMessage.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                            alert('Failed to submit donation. Please try again.');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Form submission error:', error);
+                    if (error.name === 'AbortError') {
+                        alert('Request timed out. Please try again.');
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
+                } finally {
+                    // Hide loading state
+                    submitBtn.style.display = 'block';
+                    loadingSpinner.style.display = 'none';
+                }
             });
             
             // Back to dashboard button
             document.querySelector('.back-to-dashboard').addEventListener('click', function(e) {
                 e.preventDefault();
-                alert('Returning to dashboard...');
-                // In a real app, you would navigate back to the dashboard view
+                window.location.href = '/dashboard';
             });
+            
+
         });
     </script>

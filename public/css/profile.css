@@ -299,6 +299,7 @@ body::before {
 .edit-button:hover {
     background: rgba(42, 124, 199, 0.2);
     transform: translateY(-3px);
+    cursor: pointer;
 }
 
 .save-button {
