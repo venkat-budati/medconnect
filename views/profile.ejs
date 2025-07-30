@@ -1008,7 +1008,7 @@
             
             // Use event delegation for click handling
             console.log('Setting up event delegation for suggestions');
-            suggestionsContainer.addEventListener('click', (e) => {
+            suggestionsContainer.addEventListener('mousedown', (e) => {
                 console.log('Click event on suggestions container:', e.target);
                 const suggestionItem = e.target.closest('.address-suggestion-item');
                 if (suggestionItem) {
