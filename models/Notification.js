@@ -18,10 +18,14 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: [
+      'request_sent',           // Requester sent a request
       'request_received',      // Donor receives a request
       'request_accepted',      // Requester's request was accepted
       'request_rejected',      // Requester's request was rejected
       'request_completed',     // Request was completed
+      'donation_completed',    // Donation was completed (newly added)
+      'donation_failed',       // Donation was marked as failed (newly added)
+      'request_cancelled',     // Request was cancelled (newly added)
       'medicine_donated',      // Medicine was successfully donated
       'medicine_expiring',     // Medicine is expiring soon
       'profile_updated',       // Profile was updated

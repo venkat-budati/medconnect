@@ -27,7 +27,6 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
-    padding: 20px;
 }
 
 body::before {
@@ -43,63 +42,16 @@ body::before {
     z-index: -1;
 }
 
-/* Header Styles */
-.header {
-    background: var(--glass);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    padding: 15px 40px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--glass-border);
-    border-radius: 18px;
-    max-width: 1400px;
-    margin: 0 auto 30px;
-}
-
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Main Content */
+.main-content {
+    padding: 30px 20px;
     max-width: 1400px;
     margin: 0 auto;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-icon {
-    font-size: 28px;
-    color: var(--primary);
-    background: rgba(42, 124, 199, 0.1);
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.logo h1 {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    background: linear-gradient(to right, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.5px;
 }
 
 /* History Container */
 .history-container {
     width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
 }
 
 /* Tabs */
@@ -160,6 +112,15 @@ body::before {
     color: var(--gray);
     font-size: 16px;
     margin-top: 8px;
+}
+
+.results-count {
+    font-weight: 600;
+    color: var(--gray);
+    font-size: 14px;
+    background: rgba(42, 124, 199, 0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
 }
 
 /* Requests Grid */
@@ -484,6 +445,115 @@ body::before {
     margin-top: 10px;
 }
 
+/* Loading Spinner */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--gray);
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--glass-border);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+.loading-spinner p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* No Data and Error States */
+.no-data, .error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--gray);
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--glass-border);
+}
+
+.no-data i, .error i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.no-data p, .error p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.error {
+    color: var(--accent);
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    animation: slideInRight 0.3s ease-out;
+    max-width: 350px;
+}
+
+.notification-success {
+    border-left: 4px solid var(--secondary);
+}
+
+.notification-error {
+    border-left: 4px solid var(--accent);
+}
+
+.notification i {
+    font-size: 1.2rem;
+}
+
+.notification-success i {
+    color: var(--secondary);
+}
+
+.notification-error i {
+    color: var(--accent);
+}
+
+.notification span {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 /* Responsive */
 @media (max-width: 1100px) {
     .requests-grid, .history-grid {
@@ -502,12 +572,12 @@ body::before {
 }
 
 @media (max-width: 768px) {
-    .requests-grid, .history-grid {
-        grid-template-columns: 1fr;
+    .main-content {
+        padding: 20px 15px;
     }
     
-    .header {
-        padding: 15px 20px;
+    .requests-grid, .history-grid {
+        grid-template-columns: 1fr;
     }
     
     .card-footer {

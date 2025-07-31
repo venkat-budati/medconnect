@@ -205,8 +205,7 @@
             const modal = document.getElementById('medicineModal');
             const closeModal = document.getElementById('closeModal');
             const closeModalBtn = document.getElementById('closeModalBtn');
-            const viewButtons = document.querySelectorAll('.view-details');
-            
+            const viewButtons = document.querySelectorAll('.btn-view');            
             // Medicine data from backend
             const medicines = <%- JSON.stringify(medicines || []) %>;
             
@@ -306,8 +305,16 @@
                     
                     if (result.success) {
                         alert('Request submitted successfully! The donor will contact you to arrange pickup.');
-                        // Optionally refresh the page or update the UI
-                        window.location.reload();
+                        // Close modal if open
+                        const modal = document.getElementById('medicineModal');
+                        if (modal.classList.contains('active')) {
+                            modal.classList.remove('active');
+                            document.body.style.overflow = 'auto';
+                        }
+                        // Refresh the page after a short delay to show updated status
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
                         alert('Error: ' + result.error);
                     }

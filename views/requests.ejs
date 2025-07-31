@@ -1,27 +1,33 @@
 <link rel="stylesheet" href="/css/requests.css">
-    <!-- My Requests Section -->
-    <div class="main-content">
-    <div class="requests-container" style="padding-top: 0px; margin-top: 0px;">
+<!-- My Requests Section -->
+<div class="main-content">
+    <div class="requests-container">
         <!-- Section Header -->
         <div class="section-header">
             <div>
                 <h2 class="section-title">My Medicine Requests</h2>
                 <p class="section-subtitle">Track the status of medicines you've requested from others</p>
             </div>
-            <div class="results-count">5 requests</div>
+            <div class="results-count" id="resultsCount">Loading...</div>
         </div>
         
         <!-- Tabs -->
         <div class="tabs-container">
-            <div class="tab active">All Requests</div>
-            <div class="tab">Pending</div>
-            <div class="tab">Accepted</div>
-            <div class="tab">Rejected</div>
-            <div class="tab">Completed</div>
+            <div class="tab active" data-status="all">All Requests</div>
+            <div class="tab" data-status="Pending">Pending</div>
+            <div class="tab" data-status="Accepted">Accepted</div>
+            <div class="tab" data-status="Rejected">Rejected</div>
+            <div class="tab" data-status="Completed">Completed</div>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+            <p>Loading your requests...</p>
         </div>
         
         <!-- Requests Table -->
-        <div class="requests-table-container">
+        <div class="requests-table-container" id="requestsTableContainer" style="display: none;">
             <table class="requests-table">
                 <thead>
                     <tr>
@@ -31,416 +37,342 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Request 1 -->
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-capsules"></i>
-                                </div>
-                                <div class="medicine-info">
-                                    <div class="medicine-name">Paracetamol 500mg</div>
-                                    <div class="medicine-donor">
-                                        <i class="fas fa-user"></i>
-                                        <span>Donated by: Sarah M.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Jul 28, 2023</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-button btn-details view-details" data-id="1">
-                                    View Details
-                                </button>
-                                <button class="action-button btn-cancel">
-                                    Cancel
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    
-                    <!-- Request 2 -->
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-pills"></i>
-                                </div>
-                                <div class="medicine-info">
-                                    <div class="medicine-name">Vitamin D3 1000 IU</div>
-                                    <div class="medicine-donor">
-                                        <i class="fas fa-user"></i>
-                                        <span>Donated by: Robert T.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Jul 25, 2023</td>
-                        <td><span class="status-badge status-accepted">Accepted</span></td>
-                        <td>
-                            <button class="action-button btn-details view-details" data-id="2">
-                                View Details
-                            </button>
-                        </td>
-                    </tr>
-                    
-                    <!-- Request 3 -->
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-tablets"></i>
-                                </div>
-                                <div class="medicine-info">
-                                    <div class="medicine-name">Amoxicillin 500mg</div>
-                                    <div class="medicine-donor">
-                                        <i class="fas fa-user"></i>
-                                        <span>Donated by: Michael K.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Jul 20, 2023</td>
-                        <td><span class="status-badge status-rejected">Rejected</span></td>
-                        <td>
-                            <button class="action-button btn-details view-details" data-id="3">
-                                View Details
-                            </button>
-                        </td>
-                    </tr>
-                    
-                    <!-- Request 4 -->
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-prescription-bottle"></i>
-                                </div>
-                                <div class="medicine-info">
-                                    <div class="medicine-name">Lisinopril 10mg</div>
-                                    <div class="medicine-donor">
-                                        <i class="fas fa-user"></i>
-                                        <span>Donated by: Jennifer L.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Jul 18, 2023</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
-                        <td>
-                            <button class="action-button btn-details view-details" data-id="4">
-                                View Details
-                            </button>
-                        </td>
-                    </tr>
-                    
-                    <!-- Request 5 -->
-                    <tr class="table-row">
-                        <td>
-                            <div class="medicine-cell">
-                                <div class="table-med-image">
-                                    <i class="fas fa-capsules"></i>
-                                </div>
-                                <div class="medicine-info">
-                                    <div class="medicine-name">Metformin 500mg</div>
-                                    <div class="medicine-donor">
-                                        <i class="fas fa-user"></i>
-                                        <span>Donated by: David W.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Jul 15, 2023</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-button btn-details view-details" data-id="5">
-                                    View Details
-                                </button>
-                                <button class="action-button btn-cancel">
-                                    Cancel
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                <tbody id="requestsTableBody">
+                    <!-- Dynamic content will be loaded here -->
                 </tbody>
             </table>
         </div>
-    </div>
-    
-    <!-- Empty State (Hidden by default) -->
-    <div class="requests-container" id="emptyState" style="display: none;">
-        <div class="empty-state">
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
             <div class="empty-icon">
                 <i class="fas fa-inbox"></i>
             </div>
-            <h3 class="empty-title">No Requests Yet</h3>
-            <p class="empty-text">
-                You haven't made any medicine requests yet. Browse available medicines and request what you need.
-                Your requests will appear here once you've made them.
-            </p>
-            <button class="browse-button">
-                <i class="fas fa-search"></i> Browse Medicines
+            <h3>No requests found</h3>
+            <p>You haven't made any medicine requests yet.</p>
+            <button class="browse-button" onclick="window.location.href='/dashboard/browse'">
+                <i class="fas fa-search"></i>
+                Browse Medicines
+            </button>
+        </div>
+        
+        <!-- Error State -->
+        <div class="error-state" id="errorState" style="display: none;">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Error loading requests</h3>
+            <p id="errorMessage">Something went wrong while loading your requests.</p>
+            <button class="retry-button" onclick="loadRequests()">
+                <i class="fas fa-redo"></i>
+                Try Again
             </button>
         </div>
     </div>
     
-    <!-- Medicine Details Modal -->
-    <div class="modal-overlay" id="medicineModal">
-        <div class="modal">
+    <!-- Request Details Modal -->
+    <div class="modal" id="requestModal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Request Details</h3>
-                <button class="close-modal" id="closeModal">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h3>Request Details</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
             </div>
-            <div class="modal-content">
-                <div class="modal-image">
-                    <i class="fas fa-capsules"></i>
+            <div class="modal-body">
+                <div class="medicine-details">
+                    <div class="medicine-image">
+                        <i class="fas fa-capsules" id="medIcon"></i>
+                    </div>
+                    <div class="medicine-info">
+                        <h4 id="medName">Medicine Name</h4>
+                        <p id="medDescription">Description</p>
+                        <p><strong>Manufacturer:</strong> <span id="medManufacturer">-</span></p>
+                        <p><strong>Quantity:</strong> <span id="medQuantity">-</span></p>
+                        <p><strong>Expiry:</strong> <span id="medExpiry">-</span></p>
+                    </div>
                 </div>
-                <div class="modal-details">
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-capsules"></i> Medicine Name</span>
-                        <span class="detail-value" id="medName">Paracetamol 500mg</span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-info-circle"></i> Description</span>
-                        <span class="detail-value" id="medDesc">Pain reliever and fever reducer. Unopened package, stored properly.</span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-calculator"></i> Quantity</span>
-                        <span class="detail-value" id="medQty">24 tablets</span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-calendar"></i> Expiry Date</span>
-                        <span class="detail-value" id="medExpiry">December 15, 2024</span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-tag"></i> Category</span>
-                        <span class="detail-value" id="medCategory">Pain Relief</span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-user"></i> Donated By</span>
-                        <span class="detail-value" id="medDonor">Sarah M.</span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Pickup Location</span>
-                        <div class="address-card">
-                            <div class="detail-value" id="medAddress">123 Wellness Street, Apt 4B</div>
-                            <div class="detail-value">Seattle, WA 98101</div>
-                            <div class="detail-value">United States</div>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-clock"></i> Request Status</span>
-                        <span class="detail-value" id="medStatus"><span class="status-badge status-pending">Pending</span></span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <span class="detail-label"><i class="fas fa-calendar-check"></i> Request Date</span>
-                        <span class="detail-value">July 28, 2023</span>
+                <div class="donor-details">
+                    <h4>Donor Information</h4>
+                    <p><strong>Name:</strong> <span id="donorName">-</span></p>
+                    <p><strong>Location:</strong> <span id="donorLocation">-</span></p>
+                </div>
+                <div class="request-details">
+                    <h4>Request Information</h4>
+                    <p><strong>Status:</strong> <span id="requestStatus">-</span></p>
+                    <p><strong>Requested Date:</strong> <span id="requestDate">-</span></p>
+                    <p><strong>Your Message:</strong> <span id="requestMessage">-</span></p>
+                    <div id="donorResponse" style="display: none;">
+                        <p><strong>Donor's Response:</strong> <span id="donorResponseMessage">-</span></p>
+                        <p><strong>Response Date:</strong> <span id="donorResponseDate">-</span></p>
                     </div>
                 </div>
             </div>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="closeModalBtn">
-                    Close
-                </button>
-                <button class="action-button btn-cancel" id="cancelRequestBtn">
-                    Cancel Request
-                </button>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="closeModalBtn">Close</button>
+                <button class="btn-danger" id="cancelRequestBtn" style="display: none;">Cancel Request</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('medicineModal');
-            const closeModal = document.getElementById('closeModal');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const viewButtons = document.querySelectorAll('.view-details');
-            const cancelButtons = document.querySelectorAll('.btn-cancel');
-            const tabs = document.querySelectorAll('.tab');
-            const browseButton = document.querySelector('.browse-button');
-            const emptyState = document.getElementById('emptyState');
-            
-            // Open modal function
-            function openModal(medicineId) {
-                // In a real app, you would fetch medicine details based on ID
-                const medicines = {
-                    1: {
-                        name: "Paracetamol 500mg",
-                        desc: "Pain reliever and fever reducer. Unopened package, stored properly.",
-                        qty: "24 tablets",
-                        expiry: "December 15, 2024",
-                        category: "Pain Relief",
-                        donor: "Sarah M.",
-                        address: "123 Wellness Street, Apt 4B\nSeattle, WA 98101\nUnited States",
-                        status: "Pending"
-                    },
-                    2: {
-                        name: "Vitamin D3 1000 IU",
-                        desc: "Vitamin supplement for bone health. Unopened bottle.",
-                        qty: "60 capsules",
-                        expiry: "March 22, 2025",
-                        category: "Vitamins & Supplements",
-                        donor: "Robert T.",
-                        address: "456 Health Avenue\nBellevue, WA 98004\nUnited States",
-                        status: "Accepted"
-                    },
-                    3: {
-                        name: "Amoxicillin 500mg",
-                        desc: "Antibiotic for bacterial infections. Unopened package.",
-                        qty: "20 capsules",
-                        expiry: "October 10, 2024",
-                        category: "Antibiotics",
-                        donor: "Michael K.",
-                        address: "789 Recovery Road\nRedmond, WA 98052\nUnited States",
-                        status: "Rejected"
-                    },
-                    4: {
-                        name: "Lisinopril 10mg",
-                        desc: "For high blood pressure treatment. Sealed package.",
-                        qty: "30 tablets",
-                        expiry: "November 15, 2024",
-                        category: "Chronic Conditions",
-                        donor: "Jennifer L.",
-                        address: "101 Heart Lane\nKirkland, WA 98033\nUnited States",
-                        status: "Completed"
-                    },
-                    5: {
-                        name: "Metformin 500mg",
-                        desc: "For type 2 diabetes management. Unopened package.",
-                        qty: "90 tablets",
-                        expiry: "January 20, 2025",
-                        category: "Chronic Conditions",
-                        donor: "David W.",
-                        address: "55 Sugar Street\nSeattle, WA 98105\nUnited States",
-                        status: "Pending"
-                    }
-                };
+<script>
+    let currentRequests = [];
+    let currentStatus = 'all';
+    
+    // Load requests on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadRequests();
+        setupEventListeners();
+    });
+    
+    function loadRequests() {
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const requestsTableContainer = document.getElementById('requestsTableContainer');
+        const emptyState = document.getElementById('emptyState');
+        const errorState = document.getElementById('errorState');
+        
+        // Show loading
+        loadingSpinner.style.display = 'flex';
+        requestsTableContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+        errorState.style.display = 'none';
+        
+        // Fetch requests from API
+        fetch('/dashboard/requests/api')
+            .then(response => response.json())
+            .then(data => {
+                loadingSpinner.style.display = 'none';
                 
-                const med = medicines[medicineId] || medicines[1];
-                
-                document.getElementById('medName').textContent = med.name;
-                document.getElementById('medDesc').textContent = med.desc;
-                document.getElementById('medQty').textContent = med.qty;
-                document.getElementById('medExpiry').textContent = med.expiry;
-                document.getElementById('medCategory').textContent = med.category;
-                document.getElementById('medDonor').textContent = med.donor;
-                document.getElementById('medAddress').innerHTML = med.address.replace(/\n/g, '<br>');
-                
-                // Update status badge
-                const statusElement = document.getElementById('medStatus');
-                statusElement.innerHTML = '';
-                const statusBadge = document.createElement('span');
-                statusBadge.className = `status-badge status-${med.status.toLowerCase()}`;
-                statusBadge.textContent = med.status;
-                statusElement.appendChild(statusBadge);
-                
-                // Show/hide cancel button based on status
-                const cancelRequestBtn = document.getElementById('cancelRequestBtn');
-                if(med.status === 'Pending') {
-                    cancelRequestBtn.style.display = 'inline-block';
+                if (data.success) {
+                    currentRequests = data.requests;
+                    renderRequests();
                 } else {
-                    cancelRequestBtn.style.display = 'none';
+                    showError(data.error || 'Failed to load requests');
                 }
-                
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-            
-            // Close modal function
-            function closeModalFunc() {
-                modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-            
-            // Event listeners
-            viewButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const medicineId = parseInt(this.getAttribute('data-id'));
-                    openModal(medicineId);
-                });
+            })
+            .catch(error => {
+                loadingSpinner.style.display = 'none';
+                showError('Network error: ' + error.message);
             });
-            
-            closeModal.addEventListener('click', closeModalFunc);
-            closeModalBtn.addEventListener('click', closeModalFunc);
-            
-            // Close modal when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeModalFunc();
-                }
-            });
-            
-            // Cancel request buttons
-            cancelButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const medicineCard = this.closest('.table-row');
-                    const medicineName = medicineCard.querySelector('.medicine-name').textContent;
-                    
-                    if(confirm(`Are you sure you want to cancel your request for ${medicineName}?`)) {
-                        medicineCard.style.opacity = '0.5';
-                        button.disabled = true;
-                        button.textContent = 'Cancelling...';
-                        
-                        // Simulate API call
-                        setTimeout(() => {
-                            medicineCard.remove();
-                            alert(`Your request for ${medicineName} has been cancelled.`);
-                            
-                            // Show empty state if no requests left
-                            if(document.querySelectorAll('.table-row').length === 0) {
-                                document.querySelector('.requests-table-container').style.display = 'none';
-                                emptyState.style.display = 'block';
-                            }
-                        }, 1000);
-                    }
-                });
-            });
-            
-            // Tab switching
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // In a real app, this would filter the requests
-                    alert(`Showing ${this.textContent} requests`);
-                });
-            });
-            
-            // Browse button
-            browseButton.addEventListener('click', function() {
-                alert('Redirecting to Browse Medicines page...');
-            });
-            
-            // Cancel request in modal
-            document.getElementById('cancelRequestBtn').addEventListener('click', function() {
-                const medicineName = document.getElementById('medName').textContent;
-                
-                if(confirm(`Are you sure you want to cancel your request for ${medicineName}?`)) {
-                    // Simulate cancellation
-                    this.disabled = true;
-                    this.textContent = 'Cancelling...';
-                    
-                    setTimeout(() => {
-                        closeModalFunc();
-                        alert(`Your request for ${medicineName} has been cancelled.`);
-                    }, 1000);
-                }
+    }
+    
+    function renderRequests() {
+        const requestsTableBody = document.getElementById('requestsTableBody');
+        const resultsCount = document.getElementById('resultsCount');
+        const requestsTableContainer = document.getElementById('requestsTableContainer');
+        const emptyState = document.getElementById('emptyState');
+        
+        // Filter requests by status
+        let filteredRequests = currentRequests;
+        if (currentStatus !== 'all') {
+            filteredRequests = currentRequests.filter(req => req.status === currentStatus);
+        }
+        
+        // Update results count
+        resultsCount.textContent = `${filteredRequests.length} request${filteredRequests.length !== 1 ? 's' : ''}`;
+        
+        if (filteredRequests.length === 0) {
+            requestsTableContainer.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+        
+        // Render requests
+        requestsTableBody.innerHTML = filteredRequests.map(request => `
+            <tr class="table-row" data-request-id="${request._id}">
+                <td>
+                    <div class="medicine-cell">
+                        <div class="table-med-image">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                        <div class="medicine-info">
+                            <div class="medicine-name">${request.medicine.name}</div>
+                            <div class="medicine-donor">
+                                <i class="fas fa-user"></i>
+                                <span>Donated by: ${request.donor.firstName} ${request.donor.lastName}</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>${formatDate(request.createdAt)}</td>
+                <td><span class="status-badge status-${request.status.toLowerCase()}">${request.status}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-button btn-details view-details" data-request-id="${request._id}">
+                            View Details
+                        </button>
+                        ${request.status === 'Pending' ? `
+                            <button class="action-button btn-cancel" data-request-id="${request._id}">
+                                Cancel
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        
+        requestsTableContainer.style.display = 'block';
+        emptyState.style.display = 'none';
+        
+        // Re-attach event listeners
+        attachRowEventListeners();
+    }
+    
+    function showError(message) {
+        const errorState = document.getElementById('errorState');
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = message;
+        errorState.style.display = 'block';
+    }
+    
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+    
+    function setupEventListeners() {
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentStatus = this.getAttribute('data-status');
+                renderRequests();
             });
         });
-    </script>
-</div>
+        
+        // Modal event listeners
+        const modal = document.getElementById('requestModal');
+        const closeModal = document.getElementById('closeModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        
+        closeModal.addEventListener('click', closeModalFunc);
+        closeModalBtn.addEventListener('click', closeModalFunc);
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModalFunc();
+            }
+        });
+    }
+    
+    function attachRowEventListeners() {
+        // View details buttons
+        const viewButtons = document.querySelectorAll('.view-details');
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.getAttribute('data-request-id');
+                openRequestModal(requestId);
+            });
+        });
+        
+        // Cancel buttons
+        const cancelButtons = document.querySelectorAll('.btn-cancel');
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.getAttribute('data-request-id');
+                cancelRequest(requestId);
+            });
+        });
+    }
+    
+    function openRequestModal(requestId) {
+        const request = currentRequests.find(req => req._id === requestId);
+        if (!request) return;
+        
+        // Populate modal with request data
+        document.getElementById('medName').textContent = request.medicine.name;
+        document.getElementById('medDescription').textContent = request.medicine.description || 'No description available';
+        document.getElementById('medManufacturer').textContent = request.medicine.manufacturer || 'Unknown';
+        document.getElementById('medQuantity').textContent = request.quantity;
+        document.getElementById('medExpiry').textContent = formatDate(request.medicine.expiry);
+        document.getElementById('donorName').textContent = `${request.donor.firstName} ${request.donor.lastName}`;
+        document.getElementById('donorLocation').textContent = `${request.donor.city}, ${request.donor.state}`;
+        document.getElementById('requestStatus').textContent = request.status;
+        document.getElementById('requestDate').textContent = formatDate(request.createdAt);
+        document.getElementById('requestMessage').textContent = request.message || 'No message provided';
+        
+        // Show/hide donor response
+        const donorResponseDiv = document.getElementById('donorResponse');
+        if (request.donorResponse && request.donorResponse.message) {
+            document.getElementById('donorResponseMessage').textContent = request.donorResponse.message;
+            document.getElementById('donorResponseDate').textContent = formatDate(request.donorResponse.respondedAt);
+            donorResponseDiv.style.display = 'block';
+        } else {
+            donorResponseDiv.style.display = 'none';
+        }
+        
+        // Show/hide cancel button
+        const cancelRequestBtn = document.getElementById('cancelRequestBtn');
+        if (request.status === 'Pending') {
+            cancelRequestBtn.style.display = 'inline-block';
+            cancelRequestBtn.setAttribute('data-request-id', requestId);
+        } else {
+            cancelRequestBtn.style.display = 'none';
+        }
+        
+        // Show modal
+        document.getElementById('requestModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModalFunc() {
+        document.getElementById('requestModal').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function cancelRequest(requestId) {
+        const request = currentRequests.find(req => req._id === requestId);
+        if (!request) return;
+        
+        if (confirm(`Are you sure you want to cancel your request for ${request.medicine.name}?`)) {
+            // Send cancel request to API
+            fetch(`/dashboard/requests/${requestId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove from current requests
+                    currentRequests = currentRequests.filter(req => req._id !== requestId);
+                    renderRequests();
+                    showNotification('Request cancelled successfully', 'success');
+                } else {
+                    showNotification(data.error || 'Failed to cancel request', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Network error: ' + error.message, 'error');
+            });
+        }
+    }
+    
+    // Cancel request from modal
+    document.getElementById('cancelRequestBtn').addEventListener('click', function() {
+        const requestId = this.getAttribute('data-request-id');
+        closeModalFunc();
+        cancelRequest(requestId);
+    });
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>

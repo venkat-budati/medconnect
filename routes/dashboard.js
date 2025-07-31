@@ -119,6 +119,9 @@ router.get('/browse', isLoggedIn, async (req, res) => {
     
     let query = { status: 'Available' };
     
+    // Exclude medicines donated by the current user
+    query.donor = { $ne: userId };
+    
     // Filter by category
     if (category && category !== 'all') {
       query.category = category;
@@ -391,6 +394,112 @@ router.get('/requests', isLoggedIn, async (req, res) => {
     console.error('Requests error:', error);
     req.flash('error', 'Error loading requests.');
     res.redirect('/dashboard');
+  }
+});
+
+// API endpoint for requests data
+router.get('/requests/api', isLoggedIn, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { status, page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+    
+    let query = { requester: userId };
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    
+    const [requests, totalRequests] = await Promise.all([
+      Request.find(query)
+        .populate('medicine')
+        .populate('donor', 'firstName lastName city state')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Request.countDocuments(query)
+    ]);
+    
+    const totalPages = Math.ceil(totalRequests / limit);
+    
+    res.json({
+      success: true,
+      requests: requests,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalRequests,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1
+      }
+    });
+  } catch (error) {
+    console.error('Requests API error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error fetching requests' 
+    });
+  }
+});
+
+// Cancel request API endpoint
+router.post('/requests/:requestId/cancel', isLoggedIn, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.session.user.id;
+    
+    const request = await Request.findOne({ _id: requestId, requester: userId });
+    if (!request) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Request not found or unauthorized' 
+      });
+    }
+    
+    if (request.status !== 'Pending') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Only pending requests can be cancelled' 
+      });
+    }
+    
+    // Update request status
+    request.status = 'Cancelled';
+    await request.save();
+    
+    // Update medicine status back to available if it was requested
+    if (request.medicine) {
+      const medicine = await Medicine.findById(request.medicine);
+      if (medicine && medicine.status === 'Requested') {
+        medicine.status = 'Available';
+        await medicine.save();
+      }
+    }
+    
+    // Create notification for donor
+    await Notification.create({
+      recipient: request.donor,
+      sender: userId,
+      type: 'request_cancelled',
+      title: 'Request Cancelled',
+      message: 'A request for your medicine has been cancelled.',
+      relatedRequest: requestId,
+      priority: 'medium'
+    });
+    
+    res.json({ 
+      success: true, 
+      message: 'Request cancelled successfully',
+      request: {
+        id: request._id,
+        status: request.status
+      }
+    });
+  } catch (error) {
+    console.error('Cancel request error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error cancelling request' 
+    });
   }
 });
 
@@ -718,6 +827,297 @@ router.get('/api/reverse-geocode', isLoggedIn, async (req, res) => {
   } catch (error) {
     console.error('Reverse geocoding error:', error);
     res.status(500).json({ error: 'Failed to fetch address details' });
+  }
+});
+
+// Request Status Update Endpoints
+// Accept a request
+router.post('/api/requests/:requestId/accept', isLoggedIn, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.session.user.id;
+    const { message } = req.body;
+
+    const request = await Request.findById(requestId)
+      .populate('medicine')
+      .populate('requester', 'firstName lastName email');
+
+    if (!request) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // Verify the user is the donor of this medicine
+    if (request.donor.toString() !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to accept this request' });
+    }
+
+    // Update request status
+    request.status = 'Accepted';
+    request.donorResponse = {
+      message: message || 'Request accepted',
+      respondedAt: new Date()
+    };
+    await request.save();
+
+    // Create notification for requester
+    await Notification.create({
+      recipient: request.requester._id,
+      sender: userId,
+      type: 'request_accepted',
+      title: 'Request Accepted',
+      message: `Your request for ${request.medicine.name} has been accepted by the donor`,
+      relatedRequest: request._id
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Request accepted successfully',
+      request: {
+        id: request._id,
+        status: request.status,
+        donorResponse: request.donorResponse
+      }
+    });
+  } catch (error) {
+    console.error('Accept request error:', error);
+    res.status(500).json({ error: 'Error accepting request' });
+  }
+});
+
+// Reject a request
+router.post('/api/requests/:requestId/reject', isLoggedIn, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.session.user.id;
+    const { message } = req.body;
+
+    const request = await Request.findById(requestId)
+      .populate('medicine')
+      .populate('requester', 'firstName lastName email');
+
+    if (!request) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // Verify the user is the donor of this medicine
+    if (request.donor.toString() !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to reject this request' });
+    }
+
+    // Update request status
+    request.status = 'Rejected';
+    request.donorResponse = {
+      message: message || 'Request rejected',
+      respondedAt: new Date()
+    };
+    await request.save();
+
+    // Create notification for requester
+    await Notification.create({
+      recipient: request.requester._id,
+      sender: userId,
+      type: 'request_rejected',
+      title: 'Request Rejected',
+      message: `Your request for ${request.medicine.name} has been rejected by the donor`,
+      relatedRequest: request._id
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Request rejected successfully',
+      request: {
+        id: request._id,
+        status: request.status,
+        donorResponse: request.donorResponse
+      }
+    });
+  } catch (error) {
+    console.error('Reject request error:', error);
+    res.status(500).json({ error: 'Error rejecting request' });
+  }
+});
+
+// Complete a donation
+router.post('/api/requests/:requestId/complete', isLoggedIn, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.session.user.id;
+
+    const request = await Request.findById(requestId)
+      .populate('medicine')
+      .populate('requester', 'firstName lastName email');
+
+    if (!request) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // Verify the user is the donor of this medicine
+    if (request.donor.toString() !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to complete this donation' });
+    }
+
+    // Update request status
+    request.status = 'Completed';
+    request.completedAt = new Date();
+    await request.save();
+
+    // Create notification for requester
+    await Notification.create({
+      recipient: request.requester._id,
+      sender: userId,
+      type: 'donation_completed',
+      title: 'Donation Completed',
+      message: `Your donation of ${request.medicine.name} has been completed successfully`,
+      relatedRequest: request._id
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Donation completed successfully',
+      request: {
+        id: request._id,
+        status: request.status,
+        completedAt: request.completedAt
+      }
+    });
+  } catch (error) {
+    console.error('Complete donation error:', error);
+    res.status(500).json({ error: 'Error completing donation' });
+  }
+});
+
+// Mark donation as failed
+router.post('/api/requests/:requestId/failed', isLoggedIn, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.session.user.id;
+    const { reason } = req.body;
+
+    const request = await Request.findById(requestId)
+      .populate('medicine')
+      .populate('requester', 'firstName lastName email');
+
+    if (!request) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // Verify the user is the donor of this medicine
+    if (request.donor.toString() !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to mark this donation as failed' });
+    }
+
+    // Update request status
+    request.status = 'Failed';
+    request.donorResponse = {
+      message: reason || 'Donation failed',
+      respondedAt: new Date()
+    };
+    await request.save();
+
+    // Create notification for requester
+    await Notification.create({
+      recipient: request.requester._id,
+      sender: userId,
+      type: 'donation_failed',
+      title: 'Donation Failed',
+      message: `The donation of ${request.medicine.name} has been marked as failed`,
+      relatedRequest: request._id
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Donation marked as failed',
+      request: {
+        id: request._id,
+        status: request.status,
+        donorResponse: request.donorResponse
+      }
+    });
+  } catch (error) {
+    console.error('Mark donation failed error:', error);
+    res.status(500).json({ error: 'Error marking donation as failed' });
+  }
+});
+
+// Get donation history data
+router.get('/api/donations/history', isLoggedIn, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { status, page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    let query = { donor: userId };
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    const [donations, totalDonations] = await Promise.all([
+      Medicine.find(query)
+        .populate('donor', 'firstName lastName')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Medicine.countDocuments(query)
+    ]);
+
+    // Get request counts for each donation
+    const donationsWithRequests = await Promise.all(
+      donations.map(async (donation) => {
+        const requestCount = await Request.countDocuments({ medicine: donation._id });
+        const completedCount = await Request.countDocuments({ 
+          medicine: donation._id, 
+          status: 'Completed' 
+        });
+        return {
+          ...donation.toObject(),
+          requestCount,
+          completedCount
+        };
+      })
+    );
+
+    const totalPages = Math.ceil(totalDonations / limit);
+
+    res.json({
+      success: true,
+      donations: donationsWithRequests,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalDonations,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1
+      }
+    });
+  } catch (error) {
+    console.error('Get donation history error:', error);
+    res.status(500).json({ error: 'Error fetching donation history' });
+  }
+});
+
+// Get requests for a specific donation
+router.get('/api/donations/:donationId/requests', isLoggedIn, async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const userId = req.session.user.id;
+
+    // Verify the user owns this donation
+    const donation = await Medicine.findById(donationId);
+    if (!donation || donation.donor.toString() !== userId) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+
+    const requests = await Request.find({ medicine: donationId })
+      .populate('requester', 'firstName lastName city state')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      requests: requests
+    });
+  } catch (error) {
+    console.error('Get donation requests error:', error);
+    res.status(500).json({ error: 'Error fetching donation requests' });
   }
 });
 
