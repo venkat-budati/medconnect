@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="/css/donor.css">
 <!-- Donor Dashboard -->
-<div class="main-content">
+     <div class="main-content">
     <div class="history-container">
         <!-- Tabs -->
         <div class="tabs-container">
@@ -456,28 +456,28 @@
             
             const donationsHTML = donations.map(donation => {
                 return `
-                    <div class="donation-card">
-                        <div class="donation-header">
-                            <div class="donation-icon">
-                                <i class="fas fa-pills"></i>
-                            </div>
-                            <div class="donation-info">
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="donation-info">
                                 <div class="donation-title">${donation.name}</div>
-                                <div class="donation-date">
+                            <div class="donation-date">
                                     <i class="fas fa-calendar"></i> Donated: ${formatDate(donation.createdAt)}
                                 </div>
-                            </div>
                         </div>
-                        <div class="donation-body">
-                            <div class="donation-item">
-                                <span class="donation-label">Quantity</span>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
                                 <span class="donation-value">${donation.quantity} ${donation.unit}</span>
-                            </div>
-                            <div class="donation-item">
+                        </div>
+                        <div class="donation-item">
                                 <span class="donation-label">Requests</span>
                                 <span class="donation-value">${donation.requestCount || 0} requests</span>
-                            </div>
-                            <div class="donation-item">
+                        </div>
+                        <div class="donation-item">
                                 <span class="donation-label">Completed</span>
                                 <span class="donation-value">${donation.completedCount || 0} completed</span>
                             </div>
