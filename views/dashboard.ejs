@@ -1,8 +1,6 @@
 
-<!-- Dashboard Container -->
-<div class="dashboard-container" style="padding-top: 0px; margin-top: 0px;">
-    <!-- Sidebar will be injected by the layout -->
-    <main class="main-content">
+<!-- Dashboard Content -->
+<main class="main-content">
         <!-- Welcome Banner -->
         <div class="welcome-card">
             <div class="welcome-content">
@@ -81,11 +79,6 @@
                                 </div>
                                 <div class="card-actions">
                                     <button class="action-button btn-details" onclick="viewMedicineDetails('<%= donation._id %>')">Details</button>
-                                    <% if (donation.status === 'Available') { %>
-                                        <button class="action-button btn-edit" onclick="editMedicine('<%= donation._id %>')">Edit</button>
-                                    <% } else if (donation.status === 'Requested') { %>
-                                        <button class="action-button btn-track" onclick="trackRequests('<%= donation._id %>')">Track</button>
-                                    <% } %>
                                 </div>
                             </div>
                         </div>
@@ -192,7 +185,271 @@
             </div>
         <% } %>
     </main>
+
+<!-- Medicine Details Modal -->
+<div id="medicineDetailsModal" class="medicine-details-modal-overlay" style="display: none;">
+    <div class="medicine-details-modal-content">
+        <div class="medicine-details-modal-header">
+            <h3><i class="fas fa-pills"></i> Medicine Details</h3>
+            <button class="medicine-details-modal-close" id="medicineModalClose">&times;</button>
+        </div>
+        <div class="medicine-details-modal-body" id="medicineDetailsContent">
+            <!-- Content will be loaded dynamically -->
+        </div>
+    </div>
 </div>
+
+<!-- Request Details Modal -->
+<div id="requestDetailsModal" class="request-details-modal-overlay" style="display: none;">
+    <div class="request-details-modal-content">
+        <div class="request-details-modal-header">
+            <h3><i class="fas fa-hand-holding-medical"></i> Request Details</h3>
+            <button class="request-details-modal-close" id="requestModalClose">&times;</button>
+        </div>
+        <div class="request-details-modal-body" id="requestDetailsContent">
+            <!-- Content will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Medicine Details Modal Styles */
+    .medicine-details-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+    }
+
+    .medicine-details-modal-content {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: medicineDetailsModalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes medicineDetailsModalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .medicine-details-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e1e5e9;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .medicine-details-modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .medicine-details-modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .medicine-details-modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .medicine-details-modal-body {
+        padding: 30px 24px;
+    }
+
+    /* Request Details Modal Styles */
+    .request-details-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+    }
+
+    .request-details-modal-content {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: requestDetailsModalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes requestDetailsModalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .request-details-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e1e5e9;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .request-details-modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .request-details-modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .request-details-modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .request-details-modal-body {
+        padding: 30px 24px;
+    }
+
+    /* Modal Content Styles */
+    .medicine-details-display,
+    .request-details-display {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .medicine-details-image {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .medicine-details-image img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .medicine-details-image i {
+        font-size: 80px;
+        color: #667eea;
+        opacity: 0.7;
+    }
+
+    .medicine-details-info h4,
+    .request-details-info h4 {
+        margin: 0 0 15px 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .detail-item i {
+        color: #667eea;
+        width: 20px;
+        text-align: center;
+    }
+
+    .detail-item span {
+        color: #555;
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+        .medicine-details-modal-content,
+        .request-details-modal-content {
+            width: 95%;
+            margin: 20px;
+        }
+
+        .medicine-details-modal-header,
+        .request-details-modal-header {
+            padding: 16px 20px;
+        }
+
+        .medicine-details-modal-body,
+        .request-details-modal-body {
+            padding: 24px 20px;
+        }
+    }
+</style>
 
 <script>
     // Dashboard interactions
@@ -229,34 +486,184 @@
             });
         });
         
-        // Notification bell
-        const notification = document.querySelector('.notifications');
-        if (notification) {
-            notification.addEventListener('click', function() {
-                // TODO: Implement notification modal
-                alert('You have <%= unreadNotifications %> new notifications');
-            });
-        }
+        // Notification bell - handled by dashboard layout
+        // The notification functionality is already implemented in dashboard_layout.ejs
     });
 
     // Medicine and Request functions
     function viewMedicineDetails(medicineId) {
-        // TODO: Implement medicine details modal
-        alert('Viewing details for medicine: ' + medicineId);
-    }
-
-    function editMedicine(medicineId) {
-        // TODO: Implement edit medicine functionality
-        alert('Editing medicine: ' + medicineId);
-    }
-
-    function trackRequests(medicineId) {
-        // TODO: Implement track requests functionality
-        alert('Tracking requests for medicine: ' + medicineId);
+        // Show medicine details modal
+        const modal = document.getElementById('medicineDetailsModal');
+        const content = document.getElementById('medicineDetailsContent');
+        
+        // Find the donation data from the current page
+        const donationCards = document.querySelectorAll('.medicine-card');
+        let donationData = null;
+        
+        donationCards.forEach(card => {
+            const detailsBtn = card.querySelector('.btn-details');
+            if (detailsBtn && detailsBtn.getAttribute('onclick').includes(medicineId)) {
+                const name = card.querySelector('.medicine-name').textContent;
+                const quantity = card.querySelector('.medicine-quantity').textContent;
+                const expiry = card.querySelector('.medicine-expiry').textContent;
+                const status = card.querySelector('.medicine-status').textContent;
+                const image = card.querySelector('.medicine-image img');
+                const imageUrl = image ? image.src : null;
+                
+                donationData = {
+                    name: name,
+                    quantity: quantity,
+                    expiry: expiry,
+                    status: status,
+                    imageUrl: imageUrl
+                };
+            }
+        });
+        
+        if (donationData) {
+            content.innerHTML = `
+                <div class="medicine-details-display">
+                    <div class="medicine-details-image">
+                        ${donationData.imageUrl ? 
+                            `<img src="${donationData.imageUrl}" alt="${donationData.name}">` : 
+                            '<i class="fas fa-capsules"></i>'
+                        }
+                    </div>
+                    <div class="medicine-details-info">
+                        <h4>${donationData.name}</h4>
+                        <div class="detail-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>${donationData.quantity}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${donationData.expiry}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Status: ${donationData.status}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            content.innerHTML = '<p>Medicine details not found.</p>';
+        }
+        
+        openModal(modal);
     }
 
     function viewRequestDetails(requestId) {
-        // TODO: Implement request details modal
-        alert('Viewing details for request: ' + requestId);
+        // Show request details modal
+        const modal = document.getElementById('requestDetailsModal');
+        const content = document.getElementById('requestDetailsContent');
+        
+        // Find the request data from the current page
+        const requestRows = document.querySelectorAll('.table-row');
+        let requestData = null;
+        
+        requestRows.forEach(row => {
+            const detailsBtn = row.querySelector('.btn-details');
+            if (detailsBtn && detailsBtn.getAttribute('onclick').includes(requestId)) {
+                const medicineName = row.querySelector('.medicine-name').textContent;
+                const quantity = row.querySelector('td:nth-child(2)').textContent;
+                const dateRequested = row.querySelector('td:nth-child(3)').textContent;
+                const status = row.querySelector('.status-badge').textContent;
+                
+                requestData = {
+                    medicineName: medicineName,
+                    quantity: quantity,
+                    dateRequested: dateRequested,
+                    status: status
+                };
+            }
+        });
+        
+        if (requestData) {
+            content.innerHTML = `
+                <div class="request-details-display">
+                    <div class="request-details-info">
+                        <h4>${requestData.medicineName}</h4>
+                        <div class="detail-item">
+                            <i class="fas fa-capsules"></i>
+                            <span>Quantity: ${requestData.quantity}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Requested: ${requestData.dateRequested}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Status: ${requestData.status}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            content.innerHTML = '<p>Request details not found.</p>';
+        }
+        
+        openModal(modal);
     }
+
+    // Modal close functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        let bodyScrollTop = 0;
+        
+        // Function to open modal
+        function openModal(modal) {
+            bodyScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${bodyScrollTop}px`;
+            document.body.style.width = '100%';
+        }
+        
+        // Function to close modal
+        function closeModal(modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, bodyScrollTop);
+        }
+        
+        // Medicine modal close
+        const medicineModalClose = document.getElementById('medicineModalClose');
+        const medicineModal = document.getElementById('medicineDetailsModal');
+        
+        if (medicineModalClose) {
+            medicineModalClose.addEventListener('click', function() {
+                closeModal(medicineModal);
+            });
+        }
+        
+        if (medicineModal) {
+            medicineModal.addEventListener('click', function(e) {
+                if (e.target === medicineModal) {
+                    closeModal(medicineModal);
+                }
+            });
+        }
+        
+        // Request modal close
+        const requestModalClose = document.getElementById('requestModalClose');
+        const requestModal = document.getElementById('requestDetailsModal');
+        
+        if (requestModalClose) {
+            requestModalClose.addEventListener('click', function() {
+                closeModal(requestModal);
+            });
+        }
+        
+        if (requestModal) {
+            requestModal.addEventListener('click', function(e) {
+                if (e.target === requestModal) {
+                    closeModal(requestModal);
+                }
+            });
+        }
+    });
 </script>
