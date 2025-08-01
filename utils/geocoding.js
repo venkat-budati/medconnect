@@ -138,13 +138,13 @@ async function distanceMatrixWithGoogle(origin, destinations) {
         origins: origin,
         destinations: destinations.join('|'),
         key: GOOGLE_MAPS_API_KEY,
-        units: 'imperial'
+        units: 'metric'
       }
     });
     
     if (response.data.rows && response.data.rows[0].elements) {
       return response.data.rows[0].elements.map(element => ({
-        distance: element.distance ? element.distance.value / 1609.34 : null, // Convert meters to miles
+        distance: element.distance ? element.distance.value / 1000 : null, // Convert meters to kilometers
         duration: element.duration ? element.duration.value : null,
         status: element.status
       }));
@@ -169,7 +169,7 @@ async function distanceMatrixWithMapbox(origin, destinations) {
     
     if (response.data.distances && response.data.durations) {
       return response.data.distances[0].slice(1).map((distance, index) => ({
-        distance: distance / 1609.34, // Convert meters to miles
+        distance: distance / 1000, // Convert meters to kilometers
         duration: response.data.durations[0][index + 1],
         status: distance > 0 ? 'OK' : 'NOT_FOUND'
       }));
@@ -204,7 +204,7 @@ async function distanceMatrixWithHere(origin, destinations) {
 
 // Calculate distance using Haversine formula (fallback)
 function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 3959; // Earth's radius in miles
+  const R = 6371; // Earth's radius in kilometers
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
@@ -220,11 +220,11 @@ function formatDistance(distance) {
   if (!distance) return 'Distance unknown';
   
   if (distance < 1) {
-    return `${Math.round(distance * 5280)} feet`;
+    return `${Math.round(distance * 1000)} meters`;
   } else if (distance < 10) {
-    return `${distance.toFixed(1)} miles`;
+    return `${distance.toFixed(1)} km`;
   } else {
-    return `${Math.round(distance)} miles`;
+    return `${Math.round(distance)} km`;
   }
 }
 
