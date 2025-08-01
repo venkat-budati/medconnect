@@ -135,9 +135,21 @@ router.get('/browse', isLoggedIn, async (req, res) => {
       search, 
       sort = 'distance', 
       distance = '50',
-      lat,
-      lng 
+      customDistance
     } = req.query;
+    
+    console.log('📥 Received query parameters:', { category, search, sort, distance, customDistance });
+    
+    // Use custom distance if provided, but handle "Any Distance" case
+    let finalDistance = customDistance || distance;
+    
+    // If distance is "all" (Any Distance), set finalDistance to null to skip filtering
+    if (distance === 'all') {
+      finalDistance = null;
+      console.log('🌍 "Any Distance" selected - no distance filtering will be applied');
+    } else if (customDistance) {
+      console.log(`🎯 Custom distance selected: ${customDistance} km`);
+    }
     
     const userId = req.session.user.id;
     const user = await User.findById(userId);
@@ -166,16 +178,54 @@ router.get('/browse', isLoggedIn, async (req, res) => {
       .populate('donor', 'firstName lastName city state pincode addressLine1')
       .sort({ createdAt: -1 });
     
-    // Calculate distances if user location is provided
-    if (lat && lng && user.addressLine1 && user.city && user.state) {
-      console.log('📍 Calculating distances for', medicines.length, 'medicines...');
-      medicines = await calculateDistances(medicines, lat, lng);
+    console.log(`🔍 Found ${medicines.length} medicines matching query criteria`);
+    console.log(`🔍 Query:`, JSON.stringify(query, null, 2));
+    
+    // Debug: Check for specific medicine
+    const specificMedicine = medicines.find(m => m.name.toLowerCase().includes('paracetmol'));
+    if (specificMedicine) {
+      console.log(`🎯 Found Paracetmol medicine:`, {
+        id: specificMedicine._id,
+        name: specificMedicine.name,
+        status: specificMedicine.status,
+        donor: specificMedicine.donor?._id,
+        currentUser: userId
+      });
+    } else {
+      console.log(`❌ Paracetmol medicine not found in results`);
       
-      // Filter by distance
-      const maxDistance = parseInt(distance);
-      const beforeFilter = medicines.length;
-      medicines = medicines.filter(medicine => medicine.distance && medicine.distance <= maxDistance);
-      console.log(`📏 Filtered ${beforeFilter} → ${medicines.length} medicines within ${maxDistance} miles`);
+      // Check all medicines in database
+      const allMedicines = await Medicine.find({}).populate('donor');
+      const paracetmolInDB = allMedicines.find(m => m.name.toLowerCase().includes('paracetmol'));
+      if (paracetmolInDB) {
+        console.log(`🔍 Paracetmol found in database but not in results:`, {
+          id: paracetmolInDB._id,
+          name: paracetmolInDB.name,
+          status: paracetmolInDB.status,
+          donor: paracetmolInDB.donor?._id,
+          currentUser: userId,
+          isOwnMedicine: paracetmolInDB.donor?._id?.toString() === userId.toString()
+        });
+      }
+    }
+    
+    // Calculate distances if user has address information
+    if (user.addressLine1 && user.city && user.state) {
+      console.log('📍 Calculating distances for', medicines.length, 'medicines...');
+      
+      // Use user's address for distance calculation
+      const userAddress = `${user.addressLine1}, ${user.city}, ${user.state} ${user.pincode || ''}`;
+      medicines = await calculateDistances(medicines, userAddress);
+      
+      // Filter by distance only if distance parameter is provided and not "all"
+      if (finalDistance && finalDistance !== 'all' && finalDistance !== null) {
+        const maxDistance = parseInt(finalDistance);
+        const beforeFilter = medicines.length;
+        medicines = medicines.filter(medicine => medicine.distance && medicine.distance <= maxDistance);
+        console.log(`📏 Filtered ${beforeFilter} → ${medicines.length} medicines within ${maxDistance} km`);
+      } else {
+        console.log('📏 Showing all medicines with distance information (no distance filter applied)');
+      }
       
       // Sort by distance
       if (sort === 'distance') {
@@ -202,7 +252,29 @@ router.get('/browse', isLoggedIn, async (req, res) => {
     }
     
     // Limit results
+    const beforeLimit = medicines.length;
     medicines = medicines.slice(0, 20);
+    console.log(`📊 Limited results from ${beforeLimit} to ${medicines.length} medicines`);
+    
+    // Debug: Log all medicine names and distances
+    medicines.forEach(medicine => {
+      console.log(`🏥 ${medicine.name}:`, {
+        distance: medicine.distance,
+        distanceFormatted: medicine.distanceFormatted,
+        hasDistance: !!medicine.distance,
+        hasDistanceFormatted: !!medicine.distanceFormatted
+      });
+    });
+    
+    // Convert Mongoose documents to plain objects to preserve custom properties
+    const medicinesForResponse = medicines.map(medicine => {
+      const medicineObj = medicine.toObject ? medicine.toObject() : medicine;
+      return {
+        ...medicineObj,
+        distance: medicine.distance,
+        distanceFormatted: medicine.distanceFormatted
+      };
+    });
     
     // Get categories for filter
     const categories = await Medicine.distinct('category');
@@ -214,15 +286,29 @@ router.get('/browse', isLoggedIn, async (req, res) => {
       state: user.state
     } : null;
     
-    res.render('browse', {
-      medicines,
-      categories,
-      userLocation,
-      currentFilters: { category, search, sort, distance },
-      getMedicineIcon: getMedicineIcon,
-      layout: 'layouts/dashboard_layout',
-      activePage: 'browse'
-    });
+    // Check if it's an AJAX request
+    const isAjaxRequest = req.headers['x-requested-with'] === 'XMLHttpRequest';
+    
+    if (isAjaxRequest) {
+      // Return JSON for AJAX requests
+      res.json({
+        medicines: medicinesForResponse,
+        categories,
+        userLocation,
+        currentFilters: { category, search, sort, distance: distance === 'all' ? 'all' : distance, customDistance }
+      });
+    } else {
+      // Return rendered page for regular requests
+      res.render('browse', {
+        medicines: medicinesForResponse,
+        categories,
+        userLocation,
+        currentFilters: { category, search, sort, distance: distance === 'all' ? 'all' : distance, customDistance },
+        getMedicineIcon: getMedicineIcon,
+        layout: 'layouts/dashboard_layout',
+        activePage: 'browse'
+      });
+    }
   } catch (error) {
     console.error('Browse error:', error);
     req.flash('error', 'Error loading medicines.');
@@ -231,26 +317,40 @@ router.get('/browse', isLoggedIn, async (req, res) => {
 });
 
 // Calculate distances between user and medicine locations
-async function calculateDistances(medicines, userLat, userLng) {
-  const userLocation = `${userLat},${userLng}`;
+async function calculateDistances(medicines, userAddress) {
   let processedCount = 0;
+  
+  // Get user coordinates first
+  console.log(`📍 Geocoding user address: ${userAddress}`);
+  const userCoordinates = await geocodeAddress(userAddress);
+  
+  if (!userCoordinates) {
+    console.log('❌ Failed to geocode user address - cannot calculate distances');
+    return medicines.map(medicine => {
+      medicine.distance = null;
+      medicine.distanceFormatted = 'Distance unknown';
+      return medicine;
+    });
+  }
+  
+  console.log(`✅ User location: ${userCoordinates.lat}, ${userCoordinates.lng}`);
   
   for (let medicine of medicines) {
     if (medicine.donor && medicine.donor.addressLine1 && medicine.donor.city) {
       try {
         // Get coordinates for medicine location
         const medicineAddress = `${medicine.donor.addressLine1}, ${medicine.donor.city}, ${medicine.donor.state}`;
-        console.log(`📍 Geocoding: ${medicineAddress}`);
+        console.log(`📍 Geocoding medicine: ${medicineAddress}`);
         
-        const coordinates = await geocodeAddress(medicineAddress);
+        const medicineCoordinates = await geocodeAddress(medicineAddress);
         
-        if (coordinates) {
+        if (medicineCoordinates) {
           // Calculate distance using Haversine formula
           medicine.distance = calculateHaversineDistance(
-            parseFloat(userLat), 
-            parseFloat(userLng), 
-            coordinates.lat, 
-            coordinates.lng
+            userCoordinates.lat, 
+            userCoordinates.lng, 
+            medicineCoordinates.lat, 
+            medicineCoordinates.lng
           );
           medicine.distanceFormatted = formatDistance(medicine.distance);
           console.log(`✅ ${medicine.name}: ${medicine.distanceFormatted}`);

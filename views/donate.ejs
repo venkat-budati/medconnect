@@ -248,7 +248,7 @@
                             
                             if (data.valid) {
                                 nameValidation.textContent = '';
-                                nameValidation.className = 'validation-message valid';
+                                nameValidation.className = 'validation-message';
                             } else {
                                 nameValidation.textContent = data.message;
                                 nameValidation.className = 'validation-message error';
@@ -286,7 +286,7 @@
                                     expiryValidation.className = 'validation-message warning';
                                 } else {
                                     expiryValidation.textContent = '';
-                                    expiryValidation.className = 'validation-message valid';
+                                    expiryValidation.className = 'validation-message';
                                 }
                             } else {
                                 expiryValidation.textContent = data.message;
@@ -310,7 +310,7 @@
                     categoryValidation.className = 'validation-message error';
                 } else {
                     categoryValidation.textContent = '';
-                    categoryValidation.className = 'validation-message valid';
+                    categoryValidation.className = 'validation-message';
                 }
             });
             

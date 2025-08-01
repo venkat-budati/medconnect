@@ -15,15 +15,15 @@
         </div>
         
         <!-- Filters -->
-        <form class="filters-container" method="GET" action="/dashboard/browse">
+        <div class="filters-container">
             <div class="filter-group">
                 <label class="filter-label">Medicine Name</label>
-                <input type="text" class="filter-input" name="search" placeholder="Search by name" value="<%= currentFilters.search || '' %>">
+                <input type="text" class="filter-input" id="searchFilter" placeholder="Search by name" value="<%= currentFilters.search || '' %>">
             </div>
             
             <div class="filter-group">
                 <label class="filter-label">Category</label>
-                <select class="filter-select" name="category">
+                <select class="filter-select" id="categoryFilter">
                     <option value="">All Categories</option>
                     <% if (categories) { %>
                         <% categories.forEach(category => { %>
@@ -35,18 +35,26 @@
             
             <div class="filter-group">
                 <label class="filter-label">Distance</label>
-                <select class="filter-select" name="distance">
-                    <option value="5" <%= currentFilters.distance === '5' ? 'selected' : '' %>>Within 5 miles</option>
-                    <option value="10" <%= currentFilters.distance === '10' ? 'selected' : '' %>>Within 10 miles</option>
-                    <option value="25" <%= currentFilters.distance === '25' ? 'selected' : '' %>>Within 25 miles</option>
-                    <option value="50" <%= currentFilters.distance === '50' ? 'selected' : '' %>>Within 50 miles</option>
-                    <option value="100" <%= currentFilters.distance === '100' ? 'selected' : '' %>>Any Distance</option>
-                </select>
+                <div class="distance-filter-container">
+                    <select class="filter-select" id="distanceFilter">
+                        <option value="5" <%= currentFilters.distance === '5' ? 'selected' : '' %>>Within 5 km</option>
+                        <option value="10" <%= currentFilters.distance === '10' ? 'selected' : '' %>>Within 10 km</option>
+                        <option value="15" <%= currentFilters.distance === '15' ? 'selected' : '' %>>Within 15 km</option>
+                        <option value="25" <%= currentFilters.distance === '25' ? 'selected' : '' %>>Within 25 km</option>
+                        <option value="50" <%= currentFilters.distance === '50' ? 'selected' : '' %>>Within 50 km</option>
+                        <option value="custom" <%= currentFilters.distance === 'custom' ? 'selected' : '' %>>Custom Distance</option>
+                        <option value="all" <%= currentFilters.distance === 'all' ? 'selected' : '' %>>Any Distance</option>
+                    </select>
+                    <input type="number" class="filter-input custom-distance-input" id="customDistanceInput" 
+                           placeholder="Enter km" min="1" max="1000" 
+                           value="<%= currentFilters.customDistance || '' %>"
+                           style="display: none;">
+                </div>
             </div>
             
             <div class="filter-group">
                 <label class="filter-label">Sort By</label>
-                <select class="filter-select" name="sort">
+                <select class="filter-select" id="sortFilter">
                     <option value="distance" <%= currentFilters.sort === 'distance' ? 'selected' : '' %>>Distance</option>
                     <option value="newest" <%= currentFilters.sort === 'newest' ? 'selected' : '' %>>Newest First</option>
                     <option value="oldest" <%= currentFilters.sort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
@@ -54,11 +62,7 @@
                     <option value="name" <%= currentFilters.sort === 'name' ? 'selected' : '' %>>Name A-Z</option>
                 </select>
             </div>
-            
-            <button type="submit" class="filter-button">
-                <i class="fas fa-filter"></i> Apply Filters
-            </button>
-        </form>
+        </div>
         
         <!-- Location Notice -->
         <% if (!userLocation) { %>
@@ -73,7 +77,7 @@
         <% } %>
         
         <!-- Medicines Grid -->
-        <div class="medicines-grid">
+        <div class="medicines-grid" id="medicinesGrid">
             <% if (medicines && medicines.length > 0) { %>
                 <% medicines.forEach(medicine => { %>
                     <div class="medicine-card">
@@ -147,12 +151,20 @@
                 </button>
             </div>
             <div class="modal-content">
-                <div class="modal-image">
-                    <div class="modal-image-container" id="modalImageContainer">
-                        <i class="fas fa-capsules" id="modalImage"></i>
-                        <div class="modal-image-overlay" id="modalImageOverlay">
-                            <span class="modal-category-label" id="modalCategoryLabel">Medicine</span>
-                        </div>
+                <div class="modal-image-section">
+                    <div class="modal-image-gallery" id="modalImageGallery">
+                        <!-- Images will be dynamically inserted here -->
+                    </div>
+                    <div class="modal-image-nav">
+                        <button class="image-nav-btn prev-btn" id="prevImageBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="image-nav-btn next-btn" id="nextImageBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="image-indicators" id="imageIndicators">
+                        <!-- Indicators will be dynamically inserted here -->
                     </div>
                 </div>
                 <div class="modal-details">
@@ -211,137 +223,191 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('medicineModal');
-            const closeModal = document.getElementById('closeModal');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const viewButtons = document.querySelectorAll('.btn-view');            
-            // Medicine data from backend
-            const medicines = <%- JSON.stringify(medicines || []) %>;
+        // Global variables and functions
+        let medicines = [];
+        let modal, closeModal, closeModalBtn;
+        
+        // Helper function to get medicine icon based on category
+        function getMedicineIcon(category) {
+            const iconMap = {
+                'Pain Relief': 'fas fa-head-side-cough',
+                'Fever': 'fas fa-thermometer-half',
+                'Antibiotics': 'fas fa-shield-virus',
+                'Vitamins': 'fas fa-apple-alt',
+                'Diabetes': 'fas fa-tint',
+                'Blood Pressure': 'fas fa-heartbeat',
+                'Allergy': 'fas fa-wind',
+                'Cough & Cold': 'fas fa-lungs',
+                'Digestive': 'fas fa-stomach',
+                'Skin Care': 'fas fa-spa',
+                'Eye Care': 'fas fa-eye',
+                'Dental': 'fas fa-tooth',
+                'Women Health': 'fas fa-female',
+                'Children': 'fas fa-baby',
+                'Elderly': 'fas fa-user-plus',
+                'First Aid': 'fas fa-first-aid',
+                'General': 'fas fa-capsules'
+            };
             
-            // Helper function to get medicine icon based on category
-            function getMedicineIcon(category) {
-                const iconMap = {
-                    'Pain Relief': 'fas fa-head-side-cough',
-                    'Fever': 'fas fa-thermometer-half',
-                    'Antibiotics': 'fas fa-shield-virus',
-                    'Vitamins': 'fas fa-apple-alt',
-                    'Diabetes': 'fas fa-tint',
-                    'Blood Pressure': 'fas fa-heartbeat',
-                    'Allergy': 'fas fa-wind',
-                    'Cough & Cold': 'fas fa-lungs',
-                    'Digestive': 'fas fa-stomach',
-                    'Skin Care': 'fas fa-spa',
-                    'Eye Care': 'fas fa-eye',
-                    'Dental': 'fas fa-tooth',
-                    'Women Health': 'fas fa-female',
-                    'Children': 'fas fa-baby',
-                    'Elderly': 'fas fa-user-plus',
-                    'First Aid': 'fas fa-first-aid',
-                    'General': 'fas fa-capsules'
-                };
-                
-                return iconMap[category] || 'fas fa-capsules';
+            return iconMap[category] || 'fas fa-capsules';
+        }
+        
+        // Open modal function
+        function openModal(medicineId) {
+            const medicine = medicines.find(m => m._id === medicineId);
+            if (!medicine) return;
+            
+            // Update modal content
+            document.getElementById('medName').textContent = medicine.name;
+            document.getElementById('medDesc').textContent = medicine.description || 'No description available';
+            document.getElementById('medQty').textContent = `${medicine.quantity} ${medicine.unit || 'tablets'}`;
+            document.getElementById('medExpiry').textContent = new Date(medicine.expiry).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('medCategory').textContent = medicine.category || 'Uncategorized';
+            document.getElementById('medDonor').textContent = medicine.donor ? 
+                (medicine.donor.firstName || medicine.donor.email.split('@')[0]) : 'Anonymous';
+            document.getElementById('medDonatedOn').textContent = new Date(medicine.createdAt).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Update modal image gallery
+            updateModalImageGallery(medicine);
+            
+            // Address
+            let address = 'Location not available';
+            if (medicine.donor && medicine.donor.addressLine1) {
+                address = `${medicine.donor.addressLine1}`;
+                if (medicine.donor.city) address += `, ${medicine.donor.city}`;
+                if (medicine.donor.state) address += `, ${medicine.donor.state}`;
+                if (medicine.donor.pincode) address += ` ${medicine.donor.pincode}`;
+            }
+            document.getElementById('medAddress').textContent = address;
+            
+            // Set request button data
+            document.getElementById('modalRequestBtn').setAttribute('data-id', medicineId);
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Update modal image gallery
+        function updateModalImageGallery(medicine) {
+            const gallery = document.getElementById('modalImageGallery');
+            const indicators = document.getElementById('imageIndicators');
+            const prevBtn = document.getElementById('prevImageBtn');
+            const nextBtn = document.getElementById('nextImageBtn');
+            
+            // Clear existing content
+            gallery.innerHTML = '';
+            indicators.innerHTML = '';
+            
+            // Get images (support for multiple images)
+            const images = [];
+            if (medicine.imageUrl) {
+                // Split by comma if multiple images
+                const imageUrls = medicine.imageUrl.split(',').map(url => url.trim());
+                images.push(...imageUrls);
             }
             
-            // Open modal function
-            function openModal(medicineId) {
-                const medicine = medicines.find(m => m._id === medicineId);
-                if (!medicine) return;
-                
-                // Update modal content
-                document.getElementById('medName').textContent = medicine.name;
-                document.getElementById('medDesc').textContent = medicine.description || 'No description available';
-                document.getElementById('medQty').textContent = `${medicine.quantity} ${medicine.unit || 'tablets'}`;
-                document.getElementById('medExpiry').textContent = new Date(medicine.expiry).toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-                document.getElementById('medCategory').textContent = medicine.category || 'Uncategorized';
-                document.getElementById('medDonor').textContent = medicine.donor ? 
-                    (medicine.donor.firstName || medicine.donor.email.split('@')[0]) : 'Anonymous';
-                document.getElementById('medDonatedOn').textContent = new Date(medicine.createdAt).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-                
-                // Update modal image
-                const modalImage = document.getElementById('modalImage');
-                const modalCategoryLabel = document.getElementById('modalCategoryLabel');
-                const modalImageContainer = document.getElementById('modalImageContainer');
-                
-                if (medicine.imageUrl) {
-                    // If medicine has an image, show it
-                    modalImageContainer.innerHTML = `<img src="${medicine.imageUrl}" alt="${medicine.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">`;
-                } else {
-                    // Show default image with category-specific icon
-                    const icon = getMedicineIcon(medicine.category);
-                    modalImageContainer.innerHTML = `
+            if (images.length === 0) {
+                // Show default image with category-specific icon
+                const icon = getMedicineIcon(medicine.category);
+                gallery.innerHTML = `
+                    <div class="modal-default-image">
                         <i class="${icon}"></i>
                         <div class="modal-image-overlay">
                             <span class="modal-category-label">${medicine.category || 'Medicine'}</span>
                         </div>
-                    `;
+                    </div>
+                `;
+                
+                // Hide navigation and indicators
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                indicators.style.display = 'none';
+            } else {
+                // Show images with navigation
+                images.forEach((imageUrl, index) => {
+                    const slide = document.createElement('div');
+                    slide.className = `modal-image-slide ${index === 0 ? 'active' : ''}`;
+                    slide.innerHTML = `<img src="${imageUrl}" alt="${medicine.name} - Image ${index + 1}">`;
+                    gallery.appendChild(slide);
                     
-                    // Apply category-specific styling
-                    modalImageContainer.className = 'modal-image-container';
-                    modalImageContainer.setAttribute('data-category', medicine.category || 'general');
-                }
-                
-                // Address
-                let address = 'Location not available';
-                if (medicine.donor && medicine.donor.addressLine1) {
-                    address = `${medicine.donor.addressLine1}`;
-                    if (medicine.donor.city) address += `, ${medicine.donor.city}`;
-                    if (medicine.donor.state) address += `, ${medicine.donor.state}`;
-                    if (medicine.donor.pincode) address += ` ${medicine.donor.pincode}`;
-                }
-                document.getElementById('medAddress').textContent = address;
-                
-                // Set request button data
-                document.getElementById('modalRequestBtn').setAttribute('data-id', medicineId);
-                
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-            
-            // Close modal function
-            function closeModalFunc() {
-                modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-            
-            // Event listeners
-            viewButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const medicineId = this.getAttribute('data-id');
-                    openModal(medicineId);
+                    // Create indicator
+                    const indicator = document.createElement('div');
+                    indicator.className = `image-indicator ${index === 0 ? 'active' : ''}`;
+                    indicator.onclick = () => showImage(index);
+                    indicators.appendChild(indicator);
                 });
-            });
-            
-            closeModal.addEventListener('click', closeModalFunc);
-            closeModalBtn.addEventListener('click', closeModalFunc);
-            
-            // Close modal when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeModalFunc();
-                }
-            });
-            
-            // Request button functionality
-            const requestButtons = document.querySelectorAll('.btn-request');
-            requestButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const medicineId = this.getAttribute('data-id') || this.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
-                    if (medicineId) {
-                        requestMedicine(medicineId);
+                
+                // Show/hide navigation based on image count
+                if (images.length > 1) {
+                    prevBtn.style.display = 'flex';
+                    nextBtn.style.display = 'flex';
+                    indicators.style.display = 'flex';
+                    
+                    // Set up navigation
+                    let currentImage = 0;
+                    
+                    prevBtn.onclick = () => {
+                        currentImage = (currentImage - 1 + images.length) % images.length;
+                        showImage(currentImage);
+                    };
+                    
+                    nextBtn.onclick = () => {
+                        currentImage = (currentImage + 1) % images.length;
+                        showImage(currentImage);
+                    };
+                    
+                    function showImage(index) {
+                        // Hide all slides
+                        document.querySelectorAll('.modal-image-slide').forEach(slide => {
+                            slide.classList.remove('active');
+                        });
+                        
+                        // Remove active from all indicators
+                        document.querySelectorAll('.image-indicator').forEach(ind => {
+                            ind.classList.remove('active');
+                        });
+                        
+                        // Show selected slide and indicator
+                        document.querySelectorAll('.modal-image-slide')[index].classList.add('active');
+                        document.querySelectorAll('.image-indicator')[index].classList.add('active');
+                        
+                        currentImage = index;
                     }
-                });
-            });
+                } else {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                    indicators.style.display = 'none';
+                }
+            }
+        }
+        
+        // Close modal function
+        function closeModalFunc() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            modal = document.getElementById('medicineModal');
+            closeModal = document.getElementById('closeModal');
+            closeModalBtn = document.getElementById('closeModalBtn');
+            const viewButtons = document.querySelectorAll('.btn-view');            
+            // Medicine data from backend
+            medicines = <%- JSON.stringify(medicines || []) %>;
+            
+
+            
+            // Initial event listeners setup
+            attachEventListeners();
             
             // Update default medicine images with category-specific icons
             function updateDefaultImages() {
@@ -358,6 +424,244 @@
             
             // Initialize default images
             updateDefaultImages();
+            
+            // AJAX Filtering
+            let filterTimeout;
+            const searchFilter = document.getElementById('searchFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const distanceFilter = document.getElementById('distanceFilter');
+            const customDistanceInput = document.getElementById('customDistanceInput');
+            const sortFilter = document.getElementById('sortFilter');
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            const medicinesGrid = document.getElementById('medicinesGrid');
+            const resultsCount = document.querySelector('.results-count');
+            
+            // Debounced search function
+            function debounceSearch() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(applyFilters, 500);
+            }
+            
+            // Apply filters function
+            async function applyFilters() {
+                const distanceFilterValue = distanceFilter.value;
+                
+                // Handle "Any Distance" - don't send distance filter
+                const filters = {
+                    search: searchFilter.value,
+                    category: categoryFilter.value,
+                    sort: sortFilter.value
+                };
+                
+                // Handle distance filter
+                if (distanceFilterValue === 'all') {
+                    // Explicitly send "all" to indicate no distance filtering
+                    filters.distance = 'all';
+                } else if (distanceFilterValue === 'custom') {
+                    filters.customDistance = customDistanceInput.value || '50';
+                } else {
+                    filters.distance = distanceFilterValue;
+                }
+                
+                // Show loading state
+                medicinesGrid.innerHTML = '<div class="loading-state" style="grid-column: 1 / -1; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; color: var(--primary);"></i><p style="margin-top: 10px; color: var(--gray);">Loading medicines...</p></div>';
+                
+                try {
+                    const queryString = new URLSearchParams(filters).toString();
+                    console.log('📤 Sending filters:', filters);
+                    console.log('📤 Query string:', queryString);
+                    const response = await fetch(`/dashboard/browse?${queryString}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('📊 Received medicines data:', data.medicines.length, 'medicines');
+                        console.log('📊 Sample medicine:', data.medicines[0]);
+                        updateMedicinesGrid(data.medicines);
+                        updateResultsCount(data.medicines.length);
+                    } else {
+                        throw new Error('Failed to fetch medicines');
+                    }
+                } catch (error) {
+                    console.error('Filter error:', error);
+                    medicinesGrid.innerHTML = '<div class="error-state" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--accent);"><i class="fas fa-exclamation-triangle"></i><p style="margin-top: 10px;">Error loading medicines. Please try again.</p></div>';
+                }
+            }
+            
+            // Update medicines grid
+            function updateMedicinesGrid(newMedicines) {
+                // Update global medicines array
+                medicines = newMedicines;
+                
+                if (!medicines || medicines.length === 0) {
+                    medicinesGrid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1; grid-row: 1 / -1;">
+                            <i class="fas fa-search"></i>
+                            <h4>No medicines found</h4>
+                            <p>Try adjusting your filters or check back later for new donations.</p>
+                            <button class="btn btn-primary" onclick="clearFilters()">Clear Filters</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                console.log('🔍 Rendering medicines:', medicines.length);
+                medicines.forEach((medicine, index) => {
+                    console.log(`🔍 Medicine ${index}:`, {
+                        name: medicine.name,
+                        distance: medicine.distance,
+                        distanceFormatted: medicine.distanceFormatted,
+                        hasDistance: !!medicine.distance,
+                        hasDistanceFormatted: !!medicine.distanceFormatted
+                    });
+                });
+                
+                const medicinesHTML = medicines.map(medicine => `
+                    <div class="medicine-card">
+                        <div class="medicine-image">
+                            ${medicine.imageUrl ? 
+                                `<img src="${medicine.imageUrl}" alt="${medicine.name}">` : 
+                                `<div class="default-medicine-image" data-category="${medicine.category || 'general'}">
+                                    <i class="fas fa-capsules"></i>
+                                    <div class="image-overlay">
+                                        <span class="category-label">${medicine.category || 'Medicine'}</span>
+                                    </div>
+                                </div>`
+                            }
+                            <div class="medicine-status status-${medicine.status.toLowerCase()}">${medicine.status}</div>
+                        </div>
+                        <div class="medicine-details">
+                            <h4 class="medicine-name">${medicine.name}</h4>
+                            <div class="medicine-info">
+                                <div class="info-item">
+                                    <i class="fas fa-capsules"></i>
+                                    <span>${medicine.quantity} ${medicine.unit || 'tablets'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>Expires: ${new Date(medicine.expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>Donated by: ${medicine.donor ? (medicine.donor.firstName || medicine.donor.email.split('@')[0]) : 'Anonymous'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${medicine.donor ? `${medicine.donor.city || ''}, ${medicine.donor.state || ''}` : 'Location not available'}</span>
+                                </div>
+                                ${medicine.distanceFormatted ? 
+                                    `<div class="distance-badge">
+                                        <i class="fas fa-location-arrow"></i> ${medicine.distanceFormatted}
+                                    </div>` : 
+                                    medicine.distance ? 
+                                    `<div class="distance-badge">
+                                        <i class="fas fa-location-arrow"></i> ${medicine.distance.toFixed(1)} km
+                                    </div>` : 
+                                    `<div class="distance-badge">
+                                        <i class="fas fa-location-arrow"></i> Distance unknown
+                                    </div>`
+                                }
+                            </div>
+                            <div class="card-actions">
+                                <button class="action-button btn-details view-details" data-id="${medicine._id}">
+                                    View Details
+                                </button>
+                                <button class="action-button btn-request" onclick="requestMedicine('${medicine._id}')">
+                                    Request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                medicinesGrid.innerHTML = medicinesHTML;
+                
+                // Re-attach event listeners
+                attachEventListeners();
+                updateDefaultImages();
+            }
+            
+            // Update results count
+            function updateResultsCount(count) {
+                resultsCount.textContent = `${count} available medicines`;
+            }
+            
+
+            
+            // Clear filters function
+            function clearFilters() {
+                searchFilter.value = '';
+                categoryFilter.value = '';
+                distanceFilter.value = '50';
+                customDistanceInput.value = '';
+                customDistanceInput.style.display = 'none';
+                sortFilter.value = 'distance';
+                applyFilters();
+            }
+            
+            // Attach event listeners to new elements
+            function attachEventListeners() {
+                // Re-attach view details buttons
+                const viewButtons = document.querySelectorAll('.view-details');
+                viewButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const medicineId = this.getAttribute('data-id');
+                        openModal(medicineId);
+                    });
+                });
+                
+                // Re-attach modal close event listeners
+                closeModal.addEventListener('click', closeModalFunc);
+                closeModalBtn.addEventListener('click', closeModalFunc);
+                
+                // Close modal when clicking outside
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModalFunc();
+                    }
+                });
+                
+                // Request button functionality
+                const requestButtons = document.querySelectorAll('.btn-request');
+                requestButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const medicineId = this.getAttribute('data-id') || this.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+                        if (medicineId) {
+                            requestMedicine(medicineId);
+                        }
+                    });
+                });
+            }
+            
+            // Handle custom distance input visibility
+            function handleDistanceFilterChange() {
+                if (distanceFilter.value === 'custom') {
+                    customDistanceInput.style.display = 'block';
+                    customDistanceInput.focus();
+                } else {
+                    customDistanceInput.style.display = 'none';
+                }
+            }
+            
+            // Event listeners for filters
+            searchFilter.addEventListener('input', debounceSearch);
+            categoryFilter.addEventListener('change', applyFilters);
+            distanceFilter.addEventListener('change', () => {
+                handleDistanceFilterChange();
+                applyFilters();
+            });
+            customDistanceInput.addEventListener('input', debounceSearch);
+            sortFilter.addEventListener('change', applyFilters);
+            clearFiltersBtn.addEventListener('click', clearFilters);
+            
+            // Make clearFilters globally available
+            window.clearFilters = clearFilters;
+            
+            // Initialize custom distance input visibility
+            handleDistanceFilterChange();
         });
         
         // Request medicine function

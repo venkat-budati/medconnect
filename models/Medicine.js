@@ -14,8 +14,26 @@ const medicineSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['Pain Relief', 'Antibiotics', 'Vitamins', 'Diabetes', 'Heart', 'Respiratory', 'Other'],
-    default: 'Other'
+    enum: [
+      'Pain Relief', 
+      'Fever', 
+      'Antibiotics', 
+      'Vitamins', 
+      'Diabetes', 
+      'Blood Pressure', 
+      'Allergy', 
+      'Cough & Cold', 
+      'Digestive', 
+      'Skin Care', 
+      'Eye Care', 
+      'Dental', 
+      'Women Health', 
+      'Children', 
+      'Elderly', 
+      'First Aid', 
+      'General'
+    ],
+    required: true
   },
   dosage: {
     type: String,
