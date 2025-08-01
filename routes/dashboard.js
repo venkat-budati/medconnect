@@ -100,6 +100,14 @@ async function getUserStats(userId) {
   };
 }
 
+// Get unread notifications count
+async function getUnreadNotificationsCount(userId) {
+  return await Notification.countDocuments({
+    recipient: userId,
+    read: false
+  });
+}
+
 
 
 // Helper function to get medicine icon based on category
@@ -214,12 +222,17 @@ router.get('/browse', isLoggedIn, async (req, res) => {
       state: user.state
     } : null;
     
+    // Get unread notifications count
+    const unreadNotifications = await getUnreadNotificationsCount(userId);
+    
     res.render('browse', {
+      user,
       medicines,
       categories,
       userLocation,
       currentFilters: { category, search, sort, distance },
       getMedicineIcon: getMedicineIcon,
+      unreadNotifications,
       layout: 'layouts/dashboard_layout',
       activePage: 'browse'
     });
@@ -387,6 +400,7 @@ router.get('/medicine/:medicineId', isLoggedIn, async (req, res) => {
 router.get('/requests', isLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user.id;
+    const user = await User.findById(userId);
     const { status, page = 1 } = req.query;
     const limit = 10;
     const skip = (page - 1) * limit;
@@ -408,11 +422,16 @@ router.get('/requests', isLoggedIn, async (req, res) => {
     
     const totalPages = Math.ceil(totalRequests / limit);
     
+    // Get unread notifications count
+    const unreadNotifications = await getUnreadNotificationsCount(userId);
+    
     res.render('requests', {
+      user,
       requests,
       currentPage: parseInt(page),
       totalPages,
       currentFilters: { status },
+      unreadNotifications,
       layout: 'layouts/dashboard_layout',
       activePage: 'requests'
     });
@@ -533,6 +552,7 @@ router.post('/requests/:requestId/cancel', isLoggedIn, async (req, res) => {
 router.get('/donor', isLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user.id;
+    const user = await User.findById(userId);
     const { status, page = 1 } = req.query;
     const limit = 10;
     const skip = (page - 1) * limit;
@@ -569,11 +589,16 @@ router.get('/donor', isLoggedIn, async (req, res) => {
     
     const totalPages = Math.ceil(totalDonations / limit);
     
+    // Get unread notifications count
+    const unreadNotifications = await getUnreadNotificationsCount(userId);
+    
     res.render('donor', {
+      user,
       donations: donationsWithRequests,
       currentPage: parseInt(page),
       totalPages,
       currentFilters: { status },
+      unreadNotifications,
       layout: 'layouts/dashboard_layout',
       activePage: 'donor'
     });
@@ -598,9 +623,13 @@ router.get('/profile', isLoggedIn, async (req, res) => {
     // Get user stats
     const stats = await getUserStats(userId);
     
+    // Get unread notifications count
+    const unreadNotifications = await getUnreadNotificationsCount(userId);
+    
     res.render('profile', {
       user,
       stats,
+      unreadNotifications,
       layout: 'layouts/dashboard_layout',
       activePage: 'profile'
     });
@@ -667,8 +696,12 @@ router.get('/settings', isLoggedIn, async (req, res) => {
     const userId = req.session.user.id;
     const user = await User.findById(userId);
     
+    // Get unread notifications count
+    const unreadNotifications = await getUnreadNotificationsCount(userId);
+    
     res.render('settings', {
       user,
+      unreadNotifications,
       layout: 'layouts/dashboard_layout',
       activePage: 'settings'
     });
@@ -919,23 +952,49 @@ router.post('/cancel/:id', isLoggedIn, async (req, res) => {
   }
 });
 
-// Get notifications
+// Render notifications page
+router.get('/notifications-page', isLoggedIn, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const user = await User.findById(userId);
+    const unreadNotifications = await getUnreadNotificationsCount(userId);
+    
+    res.render('notifications', {
+      user,
+      unreadNotifications,
+      layout: 'layouts/dashboard_layout',
+      activePage: 'notifications'
+    });
+  } catch (error) {
+    console.error('Notifications page error:', error);
+    req.flash('error', 'Error loading notifications page.');
+    res.redirect('/dashboard');
+  }
+});
+
+// Get notifications (API endpoint for dropdown and notifications page)
 router.get('/notifications', isLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { page = 1 } = req.query;
+    const { page = 1, type } = req.query;
     const limit = 20;
     const skip = (page - 1) * limit;
     
+    // Build query
+    const query = { recipient: userId };
+    if (type) {
+      query.type = type;
+    }
+    
     const [notifications, totalNotifications] = await Promise.all([
-      Notification.find({ recipient: userId })
+      Notification.find(query)
         .populate('sender', 'firstName lastName')
         .populate('relatedMedicine', 'name')
         .populate('relatedRequest', 'status')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      Notification.countDocuments({ recipient: userId })
+      Notification.countDocuments(query)
     ]);
     
     const totalPages = Math.ceil(totalNotifications / limit);
@@ -984,6 +1043,45 @@ router.post('/notifications/read-all', isLoggedIn, async (req, res) => {
   } catch (error) {
     console.error('Mark all notifications read error:', error);
     res.status(500).json({ error: 'Error marking all notifications as read' });
+  }
+});
+
+// Create test notifications (for development only)
+router.post('/notifications/test', isLoggedIn, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    
+    // Create some test notifications
+    const testNotifications = [
+      {
+        recipient: userId,
+        type: 'request_received',
+        title: 'New Medicine Request',
+        message: 'Someone has requested your donated medicine.',
+        priority: 'high'
+      },
+      {
+        recipient: userId,
+        type: 'request_accepted',
+        title: 'Request Accepted',
+        message: 'Your medicine request has been accepted by the donor.',
+        priority: 'medium'
+      },
+      {
+        recipient: userId,
+        type: 'medicine_expiring',
+        title: 'Medicine Expiring Soon',
+        message: 'Your donated medicine will expire in 5 days.',
+        priority: 'urgent'
+      }
+    ];
+    
+    await Notification.insertMany(testNotifications);
+    
+    res.json({ success: true, message: 'Test notifications created' });
+  } catch (error) {
+    console.error('Create test notifications error:', error);
+    res.status(500).json({ error: 'Error creating test notifications' });
   }
 });
 

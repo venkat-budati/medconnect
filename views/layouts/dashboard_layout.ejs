@@ -19,11 +19,30 @@
                 <h1>MedConnect</h1>
             </div>
             <div class="user-info">
-                <div class="notifications">
+                <div class="notifications" id="notificationIcon">
                     <i class="fas fa-bell"></i>
-                    <div class="notification-badge">3</div>
+                    <% if (typeof unreadNotifications !== 'undefined' && unreadNotifications > 0) { %>
+                        <div class="notification-badge"><%= unreadNotifications %></div>
+                    <% } %>
                 </div>
-                <div class="user-avatar">JD</div>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        <h3>Notifications</h3>
+                        <button class="mark-all-read" id="markAllRead">Mark all read</button>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div class="loading-notifications">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Loading notifications...</span>
+                        </div>
+                    </div>
+                    <div class="notification-footer">
+                        <a href="/dashboard/notifications-page" class="view-all-notifications">View all notifications</a>
+                    </div>
+                </div>
+                <a href="/dashboard/profile" class="user-avatar-link">
+                    <div class="user-avatar"><%= user ? user.initials : 'U' %></div>
+                </a>
             </div>
         </div>
     </header>
@@ -112,6 +131,200 @@
             
             // Make logout function globally available
             window.logoutViaAjax = logoutViaAjax;
+            
+            // Notification dropdown functionality
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            const notificationList = document.getElementById('notificationList');
+            const markAllReadBtn = document.getElementById('markAllRead');
+            
+            if (notificationIcon && notificationDropdown) {
+                // Toggle dropdown
+                notificationIcon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notificationDropdown.classList.toggle('active');
+                    
+                    // Load notifications when dropdown is opened
+                    if (notificationDropdown.classList.contains('active')) {
+                        loadNotifications();
+                    }
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!notificationIcon.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                        notificationDropdown.classList.remove('active');
+                    }
+                });
+                
+                // Mark all notifications as read
+                if (markAllReadBtn) {
+                    markAllReadBtn.addEventListener('click', function() {
+                        markAllNotificationsAsRead();
+                    });
+                }
+            }
+            
+            // Load notifications
+            async function loadNotifications() {
+                try {
+                    const response = await fetch('/dashboard/notifications?page=1');
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        notificationList.innerHTML = '<div class="notification-error">Error loading notifications</div>';
+                        return;
+                    }
+                    
+                    displayNotifications(data.notifications);
+                } catch (error) {
+                    console.error('Error loading notifications:', error);
+                    notificationList.innerHTML = '<div class="notification-error">Error loading notifications</div>';
+                }
+            }
+            
+            // Display notifications
+            function displayNotifications(notifications) {
+                if (!notifications || notifications.length === 0) {
+                    notificationList.innerHTML = '<div class="no-notifications">No notifications</div>';
+                    return;
+                }
+                
+                const notificationsHTML = notifications.map(notification => `
+                    <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification._id}">
+                        <div class="notification-icon">
+                            <i class="fas ${getNotificationIcon(notification.type)}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notification.title}</div>
+                            <div class="notification-message">${notification.message}</div>
+                            <div class="notification-time">${notification.formattedTime}</div>
+                        </div>
+                        ${!notification.read ? '<div class="notification-unread-dot"></div>' : ''}
+                    </div>
+                `).join('');
+                
+                notificationList.innerHTML = notificationsHTML;
+                
+                // Add click handlers for individual notifications
+                notificationList.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const notificationId = this.dataset.id;
+                        markNotificationAsRead(notificationId);
+                    });
+                });
+            }
+            
+            // Get notification icon based on type
+            function getNotificationIcon(type) {
+                const icons = {
+                    'request_sent': 'fa-paper-plane',
+                    'request_received': 'fa-inbox',
+                    'request_accepted': 'fa-check-circle',
+                    'request_rejected': 'fa-times-circle',
+                    'request_completed': 'fa-check-double',
+                    'donation_completed': 'fa-gift',
+                    'donation_failed': 'fa-exclamation-triangle',
+                    'request_cancelled': 'fa-ban',
+                    'medicine_donated': 'fa-pills',
+                    'medicine_expiring': 'fa-clock',
+                    'profile_updated': 'fa-user-edit',
+                    'welcome': 'fa-heart',
+                    'system': 'fa-cog'
+                };
+                return icons[type] || 'fa-bell';
+            }
+            
+            // Mark notification as read
+            async function markNotificationAsRead(notificationId) {
+                try {
+                    const response = await fetch(`/dashboard/notifications/${notificationId}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        // Update UI
+                        const notificationItem = document.querySelector(`[data-id="${notificationId}"]`);
+                        if (notificationItem) {
+                            notificationItem.classList.remove('unread');
+                            notificationItem.classList.add('read');
+                            const unreadDot = notificationItem.querySelector('.notification-unread-dot');
+                            if (unreadDot) {
+                                unreadDot.remove();
+                            }
+                        }
+                        
+                        // Update badge count
+                        updateNotificationBadge();
+                    }
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                }
+            }
+            
+            // Mark all notifications as read
+            async function markAllNotificationsAsRead() {
+                try {
+                    const response = await fetch('/dashboard/notifications/read-all', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        // Update UI
+                        notificationList.querySelectorAll('.notification-item').forEach(item => {
+                            item.classList.remove('unread');
+                            item.classList.add('read');
+                            const unreadDot = item.querySelector('.notification-unread-dot');
+                            if (unreadDot) {
+                                unreadDot.remove();
+                            }
+                        });
+                        
+                        // Update badge count
+                        updateNotificationBadge();
+                        
+                        // Update button text
+                        markAllReadBtn.textContent = 'All read';
+                        markAllReadBtn.disabled = true;
+                    }
+                } catch (error) {
+                    console.error('Error marking all notifications as read:', error);
+                }
+            }
+            
+            // Update notification badge
+            async function updateNotificationBadge() {
+                try {
+                    const response = await fetch('/dashboard/notifications?page=1');
+                    const data = await response.json();
+                    
+                    const unreadCount = data.notifications.filter(n => !n.read).length;
+                    const badge = notificationIcon.querySelector('.notification-badge');
+                    
+                    if (unreadCount > 0) {
+                        if (badge) {
+                            badge.textContent = unreadCount;
+                        } else {
+                            const newBadge = document.createElement('div');
+                            newBadge.className = 'notification-badge';
+                            newBadge.textContent = unreadCount;
+                            notificationIcon.appendChild(newBadge);
+                        }
+                    } else {
+                        if (badge) {
+                            badge.remove();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error updating notification badge:', error);
+                }
+            }
         });
     </script>
 </body>

@@ -58,10 +58,17 @@ router.get('/', isLoggedIn, async (req, res) => {
       { value: 'General', label: 'General', icon: 'fas fa-capsules' }
     ];
 
+    // Get unread notifications count
+    const unreadNotifications = await Notification.countDocuments({
+      recipient: req.session.user.id,
+      read: false
+    });
+
     res.render('donate', { 
       user,
       categories,
       messages: req.flash(),
+      unreadNotifications,
       layout: 'layouts/dashboard_layout', 
       activePage: 'donate' 
     });

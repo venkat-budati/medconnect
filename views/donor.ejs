@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="/css/donor.css">
 <!-- Donor Dashboard -->
-<div class="main-content">
+     <div class="main-content">
     <div class="history-container">
         <!-- Tabs -->
         <div class="tabs-container">
@@ -46,11 +46,11 @@
                 <div class="loading-spinner">
                     <i class="fas fa-spinner fa-spin"></i>
                     <p>Loading donation history...</p>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -150,8 +150,8 @@
                     <div class="request-card" data-request-id="${request._id}">
                         <div class="card-header">
                             <div class="medicine-icon">
-                                <i class="fas fa-capsules"></i>
-                            </div>
+                            <i class="fas fa-capsules"></i>
+                        </div>
                             <div class="medicine-info">
                                 <div class="medicine-name">${request.medicine.name}</div>
                                 <div class="request-date">
@@ -163,11 +163,11 @@
                             <div class="info-item">
                                 <span class="info-label">Quantity</span>
                                 <span class="info-value">${request.quantity} ${request.medicine.unit}</span>
-                            </div>
+                    </div>
                             <div class="info-item">
                                 <span class="info-label">Expiry Date</span>
                                 <span class="info-value">${formatDate(request.medicine.expiry)}</span>
-                            </div>
+                        </div>
                             <div class="info-item">
                                 <span class="info-label">Status</span>
                                 <span class="status-badge ${statusClass}">${request.status}</span>
@@ -183,8 +183,8 @@
                                 <div>
                                     <div class="requester-name">${request.requester.firstName} ${request.requester.lastName}</div>
                                     <div class="requester-location">${request.requester.city}, ${request.requester.state}</div>
-                                </div>
-                            </div>
+                    </div>
+                </div>
                             <div class="action-buttons">
                                 ${actionButtons}
                             </div>
@@ -206,32 +206,32 @@
             
             const donationsHTML = donations.map(donation => {
                 return `
-                    <div class="donation-card">
-                        <div class="donation-header">
-                            <div class="donation-icon">
-                                <i class="fas fa-pills"></i>
-                            </div>
-                            <div class="donation-info">
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="donation-info">
                                 <div class="donation-title">${donation.name}</div>
-                                <div class="donation-date">
+                            <div class="donation-date">
                                     <i class="fas fa-calendar"></i> Donated: ${formatDate(donation.createdAt)}
                                 </div>
-                            </div>
                         </div>
-                        <div class="donation-body">
-                            <div class="donation-item">
-                                <span class="donation-label">Quantity</span>
+                    </div>
+                    <div class="donation-body">
+                        <div class="donation-item">
+                            <span class="donation-label">Quantity</span>
                                 <span class="donation-value">${donation.quantity} ${donation.unit}</span>
-                            </div>
-                            <div class="donation-item">
+                        </div>
+                        <div class="donation-item">
                                 <span class="donation-label">Requests</span>
                                 <span class="donation-value">${donation.requestCount || 0} requests</span>
-                            </div>
-                            <div class="donation-item">
+                        </div>
+                        <div class="donation-item">
                                 <span class="donation-label">Completed</span>
                                 <span class="donation-value">${donation.completedCount || 0} completed</span>
-                            </div>
-                            <div class="donation-item">
+                        </div>
+                        <div class="donation-item">
                                 <span class="donation-label">Status</span>
                                 <span class="donation-value">${donation.status}</span>
                             </div>
@@ -363,5 +363,5 @@
                 notification.remove();
             }, 3000);
         }
-    });
-</script>
+        });
+    </script>

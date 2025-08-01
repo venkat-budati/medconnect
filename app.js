@@ -28,7 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 const expressLayouts = require('express-ejs-layouts');
 app.use(expressLayouts);
-app.set('layout', false);
+app.set('layout', 'layouts/dashboard_layout');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -64,7 +64,7 @@ app.use('/dashboard', require('./routes/dashboard'));
 
 // 404
 app.use((req, res) => {
-  res.status(404).render('404');
+  res.status(404).render('404', { layout: false });
 });
 
 const PORT = process.env.PORT || 3000;
