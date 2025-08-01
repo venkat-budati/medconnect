@@ -628,8 +628,8 @@ body::before {
     animation: fadeIn 0.6s ease-out;
 }
 
-/* Modal Styles */
-.modal-overlay {
+/* Donor Modal Styles */
+.donor-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -643,7 +643,7 @@ body::before {
     backdrop-filter: blur(5px);
 }
 
-.modal {
+.donor-modal {
     background: var(--card-bg);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -655,7 +655,7 @@ body::before {
     animation: modalSlideIn 0.3s ease-out;
 }
 
-.modal-header {
+.donor-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -666,13 +666,13 @@ body::before {
     border-radius: 20px 20px 0 0;
 }
 
-.modal-title {
+.donor-modal-title {
     font-size: 24px;
     font-weight: 700;
     margin: 0;
 }
 
-.close-modal {
+.donor-close-modal {
     background: none;
     border: none;
     color: white;
@@ -688,11 +688,11 @@ body::before {
     transition: var(--transition);
 }
 
-.close-modal:hover {
+.donor-close-modal:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.modal-content {
+.donor-modal-content {
     padding: 30px;
 }
 
@@ -767,7 +767,7 @@ body::before {
     font-style: italic;
 }
 
-.modal-actions {
+.donor-modal-actions {
     padding: 20px 30px;
     border-top: 1px solid var(--light-gray);
     display: flex;
@@ -828,16 +828,16 @@ body::before {
 
 /* Responsive Modal */
 @media (max-width: 768px) {
-    .modal {
+    .donor-modal {
         width: 95%;
         margin: 20px;
     }
     
-    .modal-header {
+    .donor-modal-header {
         padding: 20px;
     }
     
-    .modal-content {
+    .donor-modal-content {
         padding: 20px;
     }
     
@@ -846,19 +846,19 @@ body::before {
         gap: 15px;
     }
     
-    .modal-actions {
+    .donor-modal-actions {
         padding: 15px 20px;
     }
 }
 
 /* Donation Modal Styles */
-.donation-modal {
+.donor-donation-modal {
     max-width: 800px;
     max-height: 90vh;
     overflow-y: auto;
 }
 
-.donation-modal .modal-content {
+.donor-donation-modal .donor-modal-content {
     padding: 30px;
 }
 
@@ -1037,12 +1037,12 @@ body::before {
 
 /* Responsive Design for Donation Modal */
 @media (max-width: 768px) {
-    .donation-modal {
+    .donor-donation-modal {
         max-width: 95%;
         max-height: 95vh;
     }
     
-    .donation-modal .modal-content {
+    .donor-donation-modal .donor-modal-content {
         padding: 20px;
     }
     
