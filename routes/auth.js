@@ -17,47 +17,65 @@ const transporter = nodemailer.createTransport({
 
 // Registration - Step 1: Send OTP
 router.post('/send-otp', async (req, res) => {
-  const { email } = req.body;
+  const { email, phone } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required' });
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  req.session.otp = otp;
-  req.session.otpEmail = email;
-  req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+  if (!phone) return res.status(400).json({ error: 'Phone number is required' });
+  
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: email,
-      subject: 'Your MedConnect Registration OTP',
-      text: `Your OTP for MedConnect registration is: ${otp}`,
-      html: `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; background: #f7f9fa; padding: 32px;">
-          <div style="max-width: 480px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 32px 24px;">
-            <div style="text-align: center; margin-bottom: 24px;">
-              <span style="display: inline-block; background: #2a7cc7; color: #fff; font-size: 2rem; font-weight: bold; border-radius: 50%; width: 56px; height: 56px; line-height: 56px;">M</span>
-              <h2 style="margin: 16px 0 0 0; color: #2a7cc7; font-size: 1.5rem;">MedConnect</h2>
+    // Check if user already exists with email
+    const existingUserByEmail = await User.findOne({ email });
+    if (existingUserByEmail) {
+      return res.status(400).json({ error: 'An account with this email already exists. Please login instead.' });
+    }
+    
+    // Check if user already exists with phone
+    const existingUserByPhone = await User.findOne({ phone });
+    if (existingUserByPhone) {
+      return res.status(400).json({ error: 'An account with this phone number already exists. Please login instead.' });
+    }
+    
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    req.session.otp = otp;
+    req.session.otpEmail = email;
+    req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+    try {
+      await transporter.sendMail({
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to: email,
+        subject: 'Your MedConnect Registration OTP',
+        text: `Your OTP for MedConnect registration is: ${otp}`,
+        html: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; background: #f7f9fa; padding: 32px;">
+            <div style="max-width: 480px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 32px 24px;">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <span style="display: inline-block; background: #2a7cc7; color: #fff; font-size: 2rem; font-weight: bold; border-radius: 50%; width: 56px; height: 56px; line-height: 56px;">M</span>
+                <h2 style="margin: 16px 0 0 0; color: #2a7cc7; font-size: 1.5rem;">MedConnect</h2>
+              </div>
+              <h3 style="color: #222; text-align: center;">Verify Your Email Address</h3>
+              <p style="color: #444; font-size: 1rem; text-align: center;">Thank you for registering with <b>MedConnect</b>.<br>Your One-Time Password (OTP) for registration is:</p>
+              <div style="text-align: center; margin: 32px 0;">
+                <span style="display: inline-block; font-size: 2.2rem; letter-spacing: 0.5rem; color: #2a7cc7; font-weight: bold; background: #e9f4fb; padding: 12px 32px; border-radius: 8px; border: 1px dashed #2a7cc7;">${otp}</span>
+              </div>
+              <p style="color: #666; font-size: 0.95rem; text-align: center;">This OTP is valid for 10 minutes. Please do not share it with anyone.<br>If you did not request this, you can safely ignore this email.</p>
+              <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;">
+              <div style="text-align: center; color: #aaa; font-size: 0.9rem;">&copy; ${new Date().getFullYear()} MedConnect</div>
             </div>
-            <h3 style="color: #222; text-align: center;">Verify Your Email Address</h3>
-            <p style="color: #444; font-size: 1rem; text-align: center;">Thank you for registering with <b>MedConnect</b>.<br>Your One-Time Password (OTP) for registration is:</p>
-            <div style="text-align: center; margin: 32px 0;">
-              <span style="display: inline-block; font-size: 2.2rem; letter-spacing: 0.5rem; color: #2a7cc7; font-weight: bold; background: #e9f4fb; padding: 12px 32px; border-radius: 8px; border: 1px dashed #2a7cc7;">${otp}</span>
-            </div>
-            <p style="color: #666; font-size: 0.95rem; text-align: center;">This OTP is valid for 10 minutes. Please do not share it with anyone.<br>If you did not request this, you can safely ignore this email.</p>
-            <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;">
-            <div style="text-align: center; color: #aaa; font-size: 0.9rem;">&copy; ${new Date().getFullYear()} MedConnect</div>
           </div>
-        </div>
-      `
-    });
-    res.json({ success: true, message: 'OTP sent to email' });
+        `
+      });
+      res.json({ success: true, message: 'OTP sent to email' });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to send OTP' });
+    }
   } catch (err) {
-    res.status(500).json({ error: 'Failed to send OTP' });
+    res.status(500).json({ error: 'Error checking email availability' });
   }
 });
 
 // Registration - Step 2: Verify OTP and Register
 router.post('/register', async (req, res) => {
-  const { email, phone, password, confirmPassword, otp } = req.body;
-  if (!email || !password || !otp) {
+  const { firstName, lastName, email, phone, password, confirmPassword, otp } = req.body;
+  if (!firstName || !lastName || !email || !phone || !password || !otp) {
     req.flash('error', 'All fields are required.');
     return res.redirect('/auth/register');
   }
@@ -78,7 +96,25 @@ router.post('/register', async (req, res) => {
     return res.redirect('/auth/register');
   }
   try {
-    const user = new User({ email, phone, password });
+    // Generate unique username
+    const baseUsername = `${firstName.toLowerCase()}${lastName.toLowerCase()}`.replace(/[^a-z0-9]/g, '');
+    let username = baseUsername;
+    let counter = 1;
+    
+    // Check if username exists and generate unique one
+    while (await User.findOne({ username })) {
+      username = `${baseUsername}${counter}`;
+      counter++;
+    }
+    
+    const user = new User({ 
+      firstName, 
+      lastName, 
+      username,
+      email, 
+      phone, 
+      password 
+    });
     await user.save();
     user.verified = true;
     await user.save();
@@ -106,17 +142,50 @@ router.get('/login', (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { email, phone, password } = req.body;
+  
+  // Validate that either email or phone is provided
+  if (!email && !phone) {
+    req.flash('error', 'Please provide either email or phone number.');
+    return res.redirect('/auth/login');
+  }
+  
   try {
-    const user = await User.findOne(email ? { email } : { phone });
+    let user;
+    
+    // If both email and phone are provided, check if they belong to the same account
+    if (email && phone) {
+      user = await User.findOne({ email, phone });
+      if (!user) {
+        req.flash('error', 'The phone number you entered is not associated with this email address. Please check your credentials.');
+        return res.redirect('/auth/login');
+      }
+    } else if (email) {
+      // Login with email only
+      user = await User.findOne({ email });
+      if (!user) {
+        req.flash('error', 'No account found with this email.');
+        return res.redirect('/auth/login');
+      }
+    } else if (phone) {
+      // Login with phone only
+      user = await User.findOne({ phone });
+      if (!user) {
+        req.flash('error', 'No account found with this phone number.');
+        return res.redirect('/auth/login');
+      }
+    }
+    
     console.log('Login attempt user:', user);
-    if (!user || !user.verified) {
+    
+    if (!user.verified) {
       req.flash('error', 'Account not verified. Please register and verify your email.');
       return res.redirect('/auth/login');
     }
+    
     const match = await user.comparePassword(password);
     console.log('Password match:', match);
     if (!match) {
-      req.flash('error', 'Invalid credentials.');
+      req.flash('error', 'Invalid password.');
       return res.redirect('/auth/login');
     }
     req.session.user = { 
@@ -131,6 +200,7 @@ router.post('/login', async (req, res) => {
     req.flash('success', 'Logged in successfully.');
     res.redirect('/dashboard');
   } catch (err) {
+    console.error('Login error:', err);
     req.flash('error', 'Login failed.');
     res.redirect('/auth/login');
   }

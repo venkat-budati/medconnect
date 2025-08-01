@@ -8,9 +8,176 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="/css/dashboard-sidebar.css">
-    <% if (typeof activePage !== 'undefined' && activePage === 'donate') { %>
-    <link rel="stylesheet" href="/css/donate.css">
-    <% } %>
+    <style>
+        /* Profile Completion Modal Styles */
+        .profile-completion-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .profile-completion-modal-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: profileCompletionModalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes profileCompletionModalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .profile-completion-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e1e5e9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .profile-completion-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-completion-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .profile-completion-modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-completion-modal-body {
+            padding: 30px 24px;
+            text-align: center;
+        }
+
+        .profile-completion-modal-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .profile-completion-modal-body h4 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .profile-completion-modal-body p {
+            margin: 0 0 25px 0;
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .profile-completion-modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .profile-completion-modal-actions .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+
+            .modal-header {
+                padding: 16px 20px;
+            }
+
+            .modal-body {
+                padding: 24px 20px;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -135,6 +302,29 @@
             </div>
         </div>
     </div>
+
+    <!-- Profile Completion Modal -->
+    <div id="profileCompletionModal" class="profile-completion-modal-overlay" style="display: none;">
+        <div class="profile-completion-modal-content">
+            <div class="profile-completion-modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Complete Your Profile</h3>
+                <button class="profile-completion-modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="profile-completion-modal-body">
+                <div class="profile-completion-modal-icon">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <h4>Profile Completion Required</h4>
+                <p>Please complete your profile information to access all features of MedConnect. This helps us provide better service and connect you with nearby medicines.</p>
+                <div class="profile-completion-modal-actions">
+                    <button class="btn btn-primary" id="completeProfileBtn">
+                        <i class="fas fa-user-edit"></i> Complete Profile
+                    </button>
+                    <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -210,14 +400,14 @@
                 }
                 
                 const notificationsHTML = notifications.map(notification => `
-                    <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification._id}">
+                    <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification._id || ''}">
                         <div class="notification-icon">
                             <i class="fas ${getNotificationIcon(notification.type)}"></i>
                         </div>
                         <div class="notification-content">
-                            <div class="notification-title">${notification.title}</div>
-                            <div class="notification-message">${notification.message}</div>
-                            <div class="notification-time">${notification.formattedTime}</div>
+                            <div class="notification-title">${notification.title || 'Notification'}</div>
+                            <div class="notification-message">${notification.message || 'No message available'}</div>
+                            <div class="notification-time">${formatTimeAgo(notification.createdAt)}</div>
                         </div>
                         ${!notification.read ? '<div class="notification-unread-dot"></div>' : ''}
                     </div>
@@ -252,6 +442,31 @@
                     'system': 'fa-cog'
                 };
                 return icons[type] || 'fa-bell';
+            }
+            
+            // Format time ago
+            function formatTimeAgo(dateString) {
+                // Handle undefined, null, or invalid date strings
+                if (!dateString) {
+                    return 'Recently';
+                }
+                
+                const date = new Date(dateString);
+                
+                // Check if the date is valid
+                if (isNaN(date.getTime())) {
+                    return 'Recently';
+                }
+                
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - date) / 1000);
+                
+                if (diffInSeconds < 60) return 'Just now';
+                if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+                if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+                if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+                
+                return date.toLocaleDateString();
             }
             
             // Mark notification as read
@@ -344,6 +559,90 @@
                     console.error('Error updating notification badge:', error);
                 }
             }
+
+            // Profile Completion Modal Functionality
+            const profileCompletionModal = document.getElementById('profileCompletionModal');
+            const modalClose = document.getElementById('modalClose');
+            const modalCancelBtn = document.getElementById('modalCancelBtn');
+            const completeProfileBtn = document.getElementById('completeProfileBtn');
+
+            // Function to show modal
+            function showProfileCompletionModal() {
+                profileCompletionModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Function to hide modal
+            function hideProfileCompletionModal() {
+                profileCompletionModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            // Close modal handlers
+            if (modalClose) {
+                modalClose.addEventListener('click', hideProfileCompletionModal);
+            }
+
+            if (modalCancelBtn) {
+                modalCancelBtn.addEventListener('click', hideProfileCompletionModal);
+            }
+
+            // Complete profile button handler
+            if (completeProfileBtn) {
+                completeProfileBtn.addEventListener('click', function() {
+                    hideProfileCompletionModal();
+                    window.location.href = '/dashboard/profile';
+                });
+            }
+
+            // Close modal when clicking outside
+            profileCompletionModal.addEventListener('click', function(e) {
+                if (e.target === profileCompletionModal) {
+                    hideProfileCompletionModal();
+                }
+            });
+
+            // Intercept sidebar navigation clicks
+            const sidebarLinks = document.querySelectorAll('.sidebar .nav-item');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', async function(e) {
+                    // Don't intercept profile page or logout
+                    if (this.getAttribute('href') === '/dashboard/profile' || 
+                        this.getAttribute('href') === '/dashboard/logout' ||
+                        this.getAttribute('href') === '/dashboard/settings') {
+                        return;
+                    }
+
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+
+                    try {
+                        // Make AJAX request to check profile completion
+                        const response = await fetch(href, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        if (response.status === 403) {
+                            const data = await response.json();
+                            if (data.requiresProfileCompletion) {
+                                showProfileCompletionModal();
+                                return;
+                            }
+                        }
+
+                        // If no profile completion required, proceed with navigation
+                        window.location.href = href;
+
+                    } catch (error) {
+                        console.error('Error checking profile completion:', error);
+                        // Fallback to regular navigation
+                        window.location.href = href;
+                    }
+                });
+            });
         });
         
         function openLogoutModal() {

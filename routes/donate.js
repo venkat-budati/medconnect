@@ -11,6 +11,44 @@ const cloudinary = require('cloudinary').v2;
 function isAjaxRequest(req) {
   return req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest' || (req.headers.accept && req.headers.accept.indexOf('json') > -1);
 }
+// Middleware to check if user's profile is complete
+const requireCompleteProfile = async (req, res, next) => {
+  try {
+    const userId = req.session.user.id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      req.flash('error', 'User not found.');
+      return res.redirect('/auth/login');
+    }
+
+    if (!user.isProfileComplete()) {
+      // Check if it's an AJAX request
+      if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
+        return res.status(403).json({
+          success: false,
+          message: 'Please complete your profile to access all features.',
+          requiresProfileCompletion: true
+        });
+      }
+      
+      req.flash('info', 'Please complete your profile to access all features.');
+      return res.redirect('/dashboard/profile');
+    }
+
+    next();
+  } catch (error) {
+    console.error('Profile completion check error:', error);
+    if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({
+        success: false,
+        message: 'Error checking profile completion.'
+      });
+    }
+    req.flash('error', 'Error checking profile completion.');
+    res.redirect('/dashboard/profile');
+  }
+};
 const upload = multer({ 
   storage: multer.memoryStorage(),
   limits: {
@@ -34,7 +72,7 @@ cloudinary.config({
 });
 
 // GET donate form
-router.get('/', isLoggedIn, async (req, res) => {
+router.get('/', isLoggedIn, requireCompleteProfile, async (req, res) => {
   try {
     const user = await User.findById(req.session.user.id);
     if (!user) {
