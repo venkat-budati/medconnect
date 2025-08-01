@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/dashboard-sidebar.css">
     <style>
         /* Profile Completion Modal Styles */
-        .modal-overlay {
+        .profile-completion-modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -24,7 +24,7 @@
             backdrop-filter: blur(5px);
         }
 
-        .modal-content {
+        .profile-completion-modal-content {
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -32,10 +32,10 @@
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            animation: modalSlideIn 0.3s ease-out;
+            animation: profileCompletionModalSlideIn 0.3s ease-out;
         }
 
-        @keyframes modalSlideIn {
+        @keyframes profileCompletionModalSlideIn {
             from {
                 opacity: 0;
                 transform: translateY(-50px) scale(0.9);
@@ -46,7 +46,7 @@
             }
         }
 
-        .modal-header {
+        .profile-completion-modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -57,7 +57,7 @@
             border-radius: 16px 16px 0 0;
         }
 
-        .modal-header h3 {
+        .profile-completion-modal-header h3 {
             margin: 0;
             font-size: 18px;
             font-weight: 600;
@@ -66,7 +66,7 @@
             gap: 10px;
         }
 
-        .modal-close {
+        .profile-completion-modal-close {
             background: none;
             border: none;
             color: white;
@@ -82,43 +82,43 @@
             transition: background-color 0.2s;
         }
 
-        .modal-close:hover {
+        .profile-completion-modal-close:hover {
             background: rgba(255, 255, 255, 0.2);
         }
 
-        .modal-body {
+        .profile-completion-modal-body {
             padding: 30px 24px;
             text-align: center;
         }
 
-        .modal-icon {
+        .profile-completion-modal-icon {
             font-size: 48px;
             color: #667eea;
             margin-bottom: 20px;
         }
 
-        .modal-body h4 {
+        .profile-completion-modal-body h4 {
             margin: 0 0 15px 0;
             font-size: 20px;
             font-weight: 600;
             color: #333;
         }
 
-        .modal-body p {
+        .profile-completion-modal-body p {
             margin: 0 0 25px 0;
             color: #666;
             line-height: 1.6;
             font-size: 14px;
         }
 
-        .modal-actions {
+        .profile-completion-modal-actions {
             display: flex;
             gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
-        .modal-actions .btn {
+        .profile-completion-modal-actions .btn {
             padding: 12px 24px;
             border-radius: 8px;
             font-weight: 500;
@@ -256,19 +256,19 @@
     </div>
     
     <!-- Profile Completion Modal -->
-    <div id="profileCompletionModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div id="profileCompletionModal" class="profile-completion-modal-overlay" style="display: none;">
+        <div class="profile-completion-modal-content">
+            <div class="profile-completion-modal-header">
                 <h3><i class="fas fa-exclamation-triangle"></i> Complete Your Profile</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
+                <button class="profile-completion-modal-close" id="modalClose">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="modal-icon">
+            <div class="profile-completion-modal-body">
+                <div class="profile-completion-modal-icon">
                     <i class="fas fa-user-edit"></i>
                 </div>
                 <h4>Profile Completion Required</h4>
                 <p>Please complete your profile information to access all features of MedConnect. This helps us provide better service and connect you with nearby medicines.</p>
-                <div class="modal-actions">
+                <div class="profile-completion-modal-actions">
                     <button class="btn btn-primary" id="completeProfileBtn">
                         <i class="fas fa-user-edit"></i> Complete Profile
                     </button>
