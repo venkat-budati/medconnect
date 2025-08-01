@@ -119,7 +119,15 @@ router.post('/login', async (req, res) => {
       req.flash('error', 'Invalid credentials.');
       return res.redirect('/auth/login');
     }
-    req.session.user = { id: user._id, email: user.email, phone: user.phone };
+    req.session.user = { 
+      id: user._id, 
+      email: user.email, 
+      phone: user.phone,
+      addressLine1: user.addressLine1,
+      city: user.city,
+      state: user.state,
+      pincode: user.pincode
+    };
     req.flash('success', 'Logged in successfully.');
     res.redirect('/dashboard');
   } catch (err) {

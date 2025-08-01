@@ -154,7 +154,14 @@ router.get('/browse', isLoggedIn, async (req, res) => {
     const userId = req.session.user.id;
     const user = await User.findById(userId);
     
-    let query = { status: 'Available' };
+    // Build query to show medicines that are available for requests
+    // This includes medicines with status 'Available' or 'Requested' that have remaining quantity
+    let query = {
+      $or: [
+        { status: 'Available' },
+        { status: 'Requested' }
+      ]
+    };
     
     // Exclude medicines donated by the current user
     query.donor = { $ne: userId };
@@ -266,15 +273,50 @@ router.get('/browse', isLoggedIn, async (req, res) => {
       });
     });
     
-    // Convert Mongoose documents to plain objects to preserve custom properties
-    const medicinesForResponse = medicines.map(medicine => {
-      const medicineObj = medicine.toObject ? medicine.toObject() : medicine;
-      return {
-        ...medicineObj,
-        distance: medicine.distance,
-        distanceFormatted: medicine.distanceFormatted
-      };
-    });
+    // Calculate availability and status for each medicine
+    const medicinesWithAvailability = await Promise.all(
+      medicines.map(async (medicine) => {
+        // Calculate total quantity already requested (pending + accepted)
+        const pendingRequests = await Request.find({ 
+          medicine: medicine._id, 
+          status: { $in: ['Pending', 'Accepted'] }
+        });
+        const totalRequestedQuantity = pendingRequests.reduce((sum, req) => sum + req.quantity, 0);
+        const availableQuantity = Math.max(0, medicine.quantity - totalRequestedQuantity);
+        
+        // Determine display status based on availability and expiry
+        let displayStatus = 'Available';
+        
+        // Check if expired
+        if (medicine.expiry && new Date(medicine.expiry) <= new Date()) {
+          displayStatus = 'Expired';
+        }
+        // Check if stock is finished
+        else if (availableQuantity === 0) {
+          displayStatus = 'Stock Finished';
+        }
+        // Check if there are pending requests
+        else if (pendingRequests.length > 0) {
+          displayStatus = 'Requested';
+        }
+        // Otherwise it's available
+        else {
+          displayStatus = 'Available';
+        }
+        
+        return {
+          ...medicine.toObject(),
+          distance: medicine.distance,
+          distanceFormatted: medicine.distanceFormatted,
+          availableQuantity,
+          totalRequestedQuantity,
+          displayStatus
+        };
+      })
+    );
+    
+    // Filter out medicines with no available quantity
+    const medicinesForResponse = medicinesWithAvailability.filter(medicine => medicine.availableQuantity > 0);
     
     // Get categories for filter
     const categories = await Medicine.distinct('category');
@@ -375,6 +417,33 @@ async function calculateDistances(medicines, userAddress) {
   return medicines;
 }
 
+// Calculate distance between two addresses
+async function calculateDistance(originAddress, destinationAddress) {
+  try {
+    console.log(`📍 Calculating distance from ${originAddress} to ${destinationAddress}`);
+    
+    const originCoords = await geocodeAddress(originAddress);
+    const destinationCoords = await geocodeAddress(destinationAddress);
+    
+    if (originCoords && destinationCoords) {
+      const distance = calculateHaversineDistance(
+        originCoords.lat, 
+        originCoords.lng, 
+        destinationCoords.lat, 
+        destinationCoords.lng
+      );
+      console.log(`✅ Distance calculated: ${distance.toFixed(1)} km`);
+      return distance;
+    }
+    
+    console.log('❌ Could not geocode one or both addresses');
+    return null;
+  } catch (error) {
+    console.error('Error calculating distance:', error);
+    return null;
+  }
+}
+
 // Note: Geocoding functions are now imported from utils/geocoding.js
 
 // Request Medicine
@@ -390,8 +459,22 @@ router.post('/request-medicine/:medicineId', isLoggedIn, async (req, res) => {
       return res.status(404).json({ error: 'Medicine not found' });
     }
     
-    if (medicine.status !== 'Available') {
-      return res.status(400).json({ error: 'Medicine is not available for request' });
+    // Check if medicine is available for request
+    // Medicine can be requested if status is 'Available' or if there's remaining quantity
+    const pendingRequests = await Request.find({ 
+      medicine: medicineId, 
+      status: { $in: ['Pending', 'Accepted'] }
+    });
+    const totalRequestedQuantity = pendingRequests.reduce((sum, req) => sum + req.quantity, 0);
+    const remainingQuantity = Math.max(0, medicine.quantity - totalRequestedQuantity);
+    
+    if (remainingQuantity === 0) {
+      return res.status(400).json({ error: 'No quantity available for this medicine' });
+    }
+    
+    // Check if expired
+    if (medicine.expiry && new Date(medicine.expiry) <= new Date()) {
+      return res.status(400).json({ error: 'This medicine has expired' });
     }
     
     if (medicine.donor._id.toString() === requesterId) {
@@ -409,20 +492,37 @@ router.post('/request-medicine/:medicineId', isLoggedIn, async (req, res) => {
       return res.status(400).json({ error: 'You already have a pending request for this medicine' });
     }
     
+    // Validate requested quantity
+    const requestedQuantity = quantity || 1;
+    if (requestedQuantity > remainingQuantity) {
+      return res.status(400).json({ 
+        error: `Only ${remainingQuantity} ${medicine.unit || 'units'} available. You requested ${requestedQuantity}.` 
+      });
+    }
+    
+    if (requestedQuantity <= 0) {
+      return res.status(400).json({ error: 'Requested quantity must be greater than 0' });
+    }
+    
     // Create request
     const request = new Request({
       requester: requesterId,
       donor: medicine.donor._id,
       medicine: medicineId,
-      quantity: quantity || medicine.quantity,
+      quantity: requestedQuantity,
       message: message || '',
       status: 'Pending'
     });
     
     await request.save();
     
-    // Update medicine status to requested
-    medicine.status = 'Requested';
+    // Update medicine status based on remaining quantity
+    const newTotalRequested = totalRequestedQuantity + requestedQuantity;
+    if (newTotalRequested >= medicine.quantity) {
+      medicine.status = 'Stock Finished';
+    } else if (newTotalRequested > 0) {
+      medicine.status = 'Requested';
+    }
     await medicine.save();
     
     // Create notifications
@@ -459,6 +559,11 @@ router.post('/request-medicine/:medicineId', isLoggedIn, async (req, res) => {
     
   } catch (error) {
     console.error('Request medicine error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     res.status(500).json({ error: 'Error processing request' });
   }
 });
@@ -744,6 +849,15 @@ router.post('/profile/update', isLoggedIn, async (req, res) => {
     user.pincode = pincode || user.pincode;
     
     await user.save();
+    
+    // Update session with new address information
+    req.session.user = {
+      ...req.session.user,
+      addressLine1: user.addressLine1,
+      city: user.city,
+      state: user.state,
+      pincode: user.pincode
+    };
     
     // Create notification
     await Notification.create({
@@ -1185,6 +1299,34 @@ router.post('/api/requests/:requestId/accept', isLoggedIn, async (req, res) => {
     };
     await request.save();
 
+    // Reduce medicine quantity when request is accepted
+    const medicine = request.medicine;
+    const requestedQuantity = request.quantity;
+    
+    // Calculate new quantity
+    const newQuantity = Math.max(0, medicine.quantity - requestedQuantity);
+    medicine.quantity = newQuantity;
+    
+    // Update medicine status based on remaining quantity
+    if (newQuantity === 0) {
+      medicine.status = 'Stock Finished';
+    } else {
+      // Check if there are other pending requests
+      const otherPendingRequests = await Request.find({
+        medicine: medicine._id,
+        status: { $in: ['Pending', 'Accepted'] },
+        _id: { $ne: request._id } // Exclude current request
+      });
+      
+      if (otherPendingRequests.length > 0) {
+        medicine.status = 'Requested';
+      } else {
+        medicine.status = 'Available';
+      }
+    }
+    
+    await medicine.save();
+
     // Create notification for requester
     await Notification.create({
       recipient: request.requester._id,
@@ -1230,6 +1372,9 @@ router.post('/api/requests/:requestId/reject', isLoggedIn, async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized to reject this request' });
     }
 
+    // Check if request was previously accepted (to restore quantity)
+    const wasAccepted = request.status === 'Accepted';
+    
     // Update request status
     request.status = 'Rejected';
     request.donorResponse = {
@@ -1237,6 +1382,30 @@ router.post('/api/requests/:requestId/reject', isLoggedIn, async (req, res) => {
       respondedAt: new Date()
     };
     await request.save();
+
+    // If request was previously accepted, restore the quantity
+    if (wasAccepted) {
+      const medicine = request.medicine;
+      const requestedQuantity = request.quantity;
+      
+      // Restore quantity
+      medicine.quantity += requestedQuantity;
+      
+      // Update medicine status
+      const otherPendingRequests = await Request.find({
+        medicine: medicine._id,
+        status: { $in: ['Pending', 'Accepted'] },
+        _id: { $ne: request._id } // Exclude current request
+      });
+      
+      if (otherPendingRequests.length > 0) {
+        medicine.status = 'Requested';
+      } else {
+        medicine.status = 'Available';
+      }
+      
+      await medicine.save();
+    }
 
     // Create notification for requester
     await Notification.create({
@@ -1286,6 +1455,32 @@ router.post('/api/requests/:requestId/complete', isLoggedIn, async (req, res) =>
     request.status = 'Completed';
     request.completedAt = new Date();
     await request.save();
+
+    // Update medicine status if this was the last accepted request
+    const medicine = request.medicine;
+    const otherAcceptedRequests = await Request.find({
+      medicine: medicine._id,
+      status: 'Accepted',
+      _id: { $ne: request._id } // Exclude current request
+    });
+    
+    // If no other accepted requests, update medicine status
+    if (otherAcceptedRequests.length === 0) {
+      const pendingRequests = await Request.find({
+        medicine: medicine._id,
+        status: 'Pending'
+      });
+      
+      if (pendingRequests.length > 0) {
+        medicine.status = 'Requested';
+      } else if (medicine.quantity > 0) {
+        medicine.status = 'Available';
+      } else {
+        medicine.status = 'Stock Finished';
+      }
+      
+      await medicine.save();
+    }
 
     // Create notification for requester
     await Notification.create({
@@ -1386,7 +1581,7 @@ router.get('/api/donations/history', isLoggedIn, async (req, res) => {
       Medicine.countDocuments(query)
     ]);
 
-    // Get request counts for each donation
+    // Get request counts and calculate availability for each donation
     const donationsWithRequests = await Promise.all(
       donations.map(async (donation) => {
         const requestCount = await Request.countDocuments({ medicine: donation._id });
@@ -1394,10 +1589,43 @@ router.get('/api/donations/history', isLoggedIn, async (req, res) => {
           medicine: donation._id, 
           status: 'Completed' 
         });
+        
+        // Calculate total quantity requested (pending + accepted requests)
+        const pendingRequests = await Request.find({ 
+          medicine: donation._id, 
+          status: { $in: ['Pending', 'Accepted'] }
+        });
+        const totalRequestedQuantity = pendingRequests.reduce((sum, req) => sum + req.quantity, 0);
+        
+        // Calculate remaining available quantity
+        const remainingQuantity = Math.max(0, donation.quantity - totalRequestedQuantity);
+        
+        // Determine display status based on availability and expiry
+        let displayStatus = 'Available';
+        
+        // Check if expired
+        if (donation.expiry && new Date(donation.expiry) <= new Date()) {
+          displayStatus = 'Expired';
+        }
+        // Check if stock is finished
+        else if (remainingQuantity === 0) {
+          displayStatus = 'Stock Finished';
+        }
+        // Check if there are pending requests
+        else if (pendingRequests.length > 0) {
+          displayStatus = 'Requested';
+        }
+        // Otherwise it's available
+        else {
+          displayStatus = 'Available';
+        }
+        
         return {
           ...donation.toObject(),
           requestCount,
-          completedCount
+          completedCount,
+          remainingQuantity,
+          displayStatus
         };
       })
     );
@@ -1434,16 +1662,148 @@ router.get('/api/donations/:donationId/requests', isLoggedIn, async (req, res) =
     }
 
     const requests = await Request.find({ medicine: donationId })
-      .populate('requester', 'firstName lastName city state')
+      .populate('requester', 'firstName lastName city state addressLine1 pincode')
+      .populate('medicine', 'name unit expiry category')
       .sort({ createdAt: -1 });
+
+    // Calculate distances for each request
+    console.log('🔍 User session data:', {
+      addressLine1: req.session.user.addressLine1,
+      city: req.session.user.city,
+      state: req.session.user.state
+    });
+    
+    const userAddress = req.session.user.addressLine1 && req.session.user.city ? 
+      `${req.session.user.addressLine1}, ${req.session.user.city}, ${req.session.user.state}` : null;
+    
+    console.log('📍 Constructed user address:', userAddress);
+    
+    if (userAddress) {
+      for (let request of requests) {
+        if (request.requester && request.requester.addressLine1 && request.requester.city) {
+          try {
+            const requesterAddress = `${request.requester.addressLine1}, ${request.requester.city}, ${request.requester.state}`;
+            console.log(`📍 Calculating distance from ${userAddress} to ${requesterAddress}`);
+            console.log('🔍 Requester data:', {
+              addressLine1: request.requester.addressLine1,
+              city: request.requester.city,
+              state: request.requester.state
+            });
+            
+            const distance = await calculateDistance(userAddress, requesterAddress);
+            request.distance = distance;
+            request.distanceFormatted = distance ? `${distance.toFixed(1)} km` : 'Distance unknown';
+            console.log(`✅ Distance calculated: ${request.distanceFormatted}`);
+          } catch (error) {
+            console.error('Error calculating distance for request:', error);
+            request.distance = null;
+            request.distanceFormatted = 'Distance unknown';
+          }
+        } else {
+          console.log('⚠️ Requester address incomplete:', request.requester);
+          request.distance = null;
+          request.distanceFormatted = 'Distance unknown';
+        }
+      }
+    } else {
+      console.log('⚠️ User address incomplete:', req.session.user);
+      for (let request of requests) {
+        request.distance = null;
+        request.distanceFormatted = 'Distance unknown';
+      }
+    }
+
+    // Convert to plain objects to ensure all properties are included in JSON
+    const requestsForResponse = requests.map(request => {
+      const requestObj = request.toObject ? request.toObject() : request;
+      return {
+        ...requestObj,
+        distance: request.distance,
+        distanceFormatted: request.distanceFormatted
+      };
+    });
+
+    console.log('📤 Sending requests response:', requestsForResponse.map(r => ({
+      id: r._id,
+      distance: r.distance,
+      distanceFormatted: r.distanceFormatted
+    })));
 
     res.json({
       success: true,
-      requests: requests
+      requests: requestsForResponse
     });
   } catch (error) {
     console.error('Get donation requests error:', error);
     res.status(500).json({ error: 'Error fetching donation requests' });
+  }
+});
+
+// Get individual donation details
+router.get('/api/donations/:donationId', isLoggedIn, async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const userId = req.session.user.id;
+
+    // Verify the user owns this donation
+    const donation = await Medicine.findById(donationId);
+    if (!donation || donation.donor.toString() !== userId) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+
+    // Get request counts for this donation
+    const requestCount = await Request.countDocuments({ medicine: donationId });
+    const completedCount = await Request.countDocuments({ 
+      medicine: donationId, 
+      status: 'Completed' 
+    });
+    
+    // Calculate total quantity requested (pending + accepted requests)
+    const pendingRequests = await Request.find({ 
+      medicine: donationId, 
+      status: { $in: ['Pending', 'Accepted'] }
+    });
+    const totalRequestedQuantity = pendingRequests.reduce((sum, req) => sum + req.quantity, 0);
+    
+    // Calculate remaining available quantity
+    const remainingQuantity = Math.max(0, donation.quantity - totalRequestedQuantity);
+    
+    // Determine display status based on availability and expiry
+    let displayStatus = 'Available';
+    
+    // Check if expired
+    if (donation.expiry && new Date(donation.expiry) <= new Date()) {
+      displayStatus = 'Expired';
+    }
+    // Check if stock is finished
+    else if (remainingQuantity === 0) {
+      displayStatus = 'Stock Finished';
+    }
+    // Check if there are pending requests
+    else if (pendingRequests.length > 0) {
+      displayStatus = 'Requested';
+    }
+    // Otherwise it's available
+    else {
+      displayStatus = 'Available';
+    }
+
+    // Add request counts and status to donation object
+    const donationWithCounts = {
+      ...donation.toObject(),
+      requestCount,
+      completedCount,
+      remainingQuantity,
+      displayStatus
+    };
+
+    res.json({
+      success: true,
+      donation: donationWithCounts
+    });
+  } catch (error) {
+    console.error('Get donation details error:', error);
+    res.status(500).json({ error: 'Error fetching donation details' });
   }
 });
 

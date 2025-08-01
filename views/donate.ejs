@@ -1,7 +1,6 @@
-<link rel="stylesheet" href="/css/donate.css">
     <!-- Donate Medicines Section -->
      <div class="main-content">
-    <div class="donate-container " style="padding-top: 0px; margin-top: 0px;">
+    <div class="donate-container" style="padding-top: 0px; margin-top: 0px;">
         <!-- Form Header -->
         <div class="form-header">
             <div class="form-icon">
@@ -12,6 +11,9 @@
                 <p class="form-subtitle">Help others by donating unused medicines. Your contribution can save lives.</p>
             </div>
         </div>
+        
+        <!-- Toast Notification Container -->
+        <div id="toast-container"></div>
         
         <!-- Flash Messages -->
         <% if (messages.error) { %>
@@ -154,19 +156,27 @@
             </div>
         </div>
         
-        <!-- Success Message (Initially Hidden) -->
-        <div class="success-message" id="success-message" style="display: none;">
-            <div class="success-icon">
-                <i class="fas fa-check-circle"></i>
+        <!-- Success Modal (Initially Hidden) -->
+        <div class="success-modal" id="success-modal" style="display: none;">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="success-title">Thank You for Your Donation!</h3>
+                <p class="success-text">
+                    Your medicine donation has been submitted successfully. It is now available for requests 
+                    and will help those in need. You can track your donation in your dashboard.
+                </p>
+                <div class="modal-actions">
+                    <a href="/dashboard" class="back-to-dashboard">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <button class="close-modal" onclick="closeSuccessModal()" style="margin: 10px 0px 0px; ">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
             </div>
-            <h3 class="success-title">Thank You for Your Donation!</h3>
-            <p class="success-text">
-                Your medicine donation has been submitted successfully. It is now available for requests 
-                and will help those in need. You can track your donation in your dashboard.
-            </p>
-            <a href="/dashboard" class="back-to-dashboard">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
         </div>
     </div>
 </div>
@@ -176,7 +186,7 @@
             const uploadArea = document.getElementById('upload-area');
             const fileInput = document.getElementById('images');
             const previewContainer = document.getElementById('preview-container');
-            const successMessage = document.getElementById('success-message');
+            const successModal = document.getElementById('success-modal');
             const submitBtn = document.getElementById('submit-btn');
             const loadingSpinner = document.getElementById('loading-spinner');
             
@@ -343,11 +353,11 @@
             fileInput.addEventListener('change', () => {
                 if (fileInput.files.length) {
                     // Check if more than 3 files are selected
-                    if (fileInput.files.length > 3) {
-                        alert('Maximum 3 images allowed. Please select fewer files.');
-                        fileInput.value = ''; // Clear the input
-                        return;
-                    }
+                                    if (fileInput.files.length > 3) {
+                    showToast('error', 'File Limit Exceeded', 'Maximum 3 images allowed. Please select fewer files.');
+                    fileInput.value = ''; // Clear the input
+                    return;
+                }
                     handleFiles(fileInput.files);
                 }
             });
@@ -358,7 +368,7 @@
                 
                 // Check file count
                 if (files.length > 3) {
-                    alert('Maximum 3 images allowed. Only the first 3 will be processed.');
+                    showToast('warning', 'File Limit', 'Maximum 3 images allowed. Only the first 3 will be processed.');
                 }
                 
                 // Limit to 3 images
@@ -401,6 +411,92 @@
                 });
             }
             
+            // Form data preservation
+            function saveFormData() {
+                const formData = {
+                    name: nameInput.value,
+                    quantity: document.getElementById('quantity').value,
+                    unit: document.getElementById('unit').value,
+                    expiry: expiryInput.value,
+                    dosage: document.getElementById('dosage').value,
+                    manufacturer: document.getElementById('manufacturer').value,
+                    category: categoryInput.value,
+                    condition: (() => {
+                        const checkedInput = document.querySelector('input[name="condition"]:checked');
+                        return checkedInput ? checkedInput.value : null;
+                    })(),
+                    description: document.getElementById('description').value
+                };
+                sessionStorage.setItem('donateFormData', JSON.stringify(formData));
+            }
+
+            function restoreFormData() {
+                const savedData = sessionStorage.getItem('donateFormData');
+                if (savedData) {
+                    const formData = JSON.parse(savedData);
+                    
+                    nameInput.value = formData.name || '';
+                    document.getElementById('quantity').value = formData.quantity || '';
+                    document.getElementById('unit').value = formData.unit || 'Tablets';
+                    expiryInput.value = formData.expiry || '';
+                    document.getElementById('dosage').value = formData.dosage || '';
+                    document.getElementById('manufacturer').value = formData.manufacturer || '';
+                    categoryInput.value = formData.category || '';
+                    if (formData.condition) {
+                        const conditionInput = document.querySelector(`input[name="condition"][value="${formData.condition}"]`);
+                        if (conditionInput) {
+                            conditionInput.checked = true;
+                        }
+                    }
+                    document.getElementById('description').value = formData.description || '';
+                    
+                    // Clear saved data after restoring
+                    sessionStorage.removeItem('donateFormData');
+                }
+            }
+
+            // Restore form data on page load
+            restoreFormData();
+
+            // Toast notification function
+            function showToast(type, title, message, duration = 5000) {
+                const toastContainer = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const iconMap = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    info: 'fas fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <i class="toast-icon ${iconMap[type]}"></i>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Auto remove after duration
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.classList.add('removing');
+                        setTimeout(() => {
+                            if (toast.parentElement) {
+                                toast.remove();
+                            }
+                        }, 300);
+                    }
+                }, duration);
+            }
+
             // Form submission
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -413,14 +509,17 @@
                 const condition = document.getElementById('condition').value;
                 
                 if (!name || !quantity || !expiry || !category || !condition) {
-                    alert('Please fill in all required fields');
+                    showToast('error', 'Validation Error', 'Please fill in all required fields');
                     return;
                 }
                 
                 if (name.length < 3) {
-                    alert('Medicine name must be at least 3 characters long');
+                    showToast('error', 'Validation Error', 'Medicine name must be at least 3 characters long');
                     return;
                 }
+                
+                // Save form data before submission
+                saveFormData();
                 
                 // Show loading state
                 submitBtn.style.display = 'none';
@@ -435,33 +534,69 @@
                     const response = await fetch('/donate', {
                         method: 'POST',
                         body: formData,
-                        redirect: 'follow',
-                        signal: controller.signal
+                        signal: controller.signal,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
                     });
                     
                     clearTimeout(timeoutId);
                     
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else {
-                        const result = await response.text();
-                        // Handle response
-                        if (response.ok) {
-                            // Show success message
-                            document.querySelector('.donate-form-container').style.display = 'none';
-                            successMessage.style.display = 'block';
-                            successMessage.scrollIntoView({ behavior: 'smooth' });
+                    if (response.ok) {
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            // Show success toast
+                            showToast('success', 'Donation Successful!', 'Your medicine has been donated successfully and is now available for requests.');
+                            
+                            // Clear saved form data
+                            sessionStorage.removeItem('donateFormData');
+                            
+                            // Clear form data
+                            form.reset();
+                            
+                            // Clear image previews
+                            const previewContainer = document.querySelector('.preview-container');
+                            if (previewContainer) {
+                                previewContainer.innerHTML = '';
+                            }
+                            
+                            // Show success modal
+                            successModal.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
                         } else {
-                            alert('Failed to submit donation. Please try again.');
+                            // Show error toast with form data preserved
+                            showToast('error', 'Donation Failed', result.error || 'Failed to submit donation. Please try again.');
+                            // Form data is already preserved in sessionStorage
                         }
+                    } else {
+                        // Handle HTTP error responses
+                        const errorText = await response.text();
+                        let errorMessage = 'Failed to submit donation. Please try again.';
+                        
+                        try {
+                            const errorData = JSON.parse(errorText);
+                            errorMessage = errorData.error || errorMessage;
+                        } catch (e) {
+                            // If not JSON, use the text as is
+                            if (errorText.includes('ValidationError')) {
+                                errorMessage = 'Please check your input and try again.';
+                            }
+                        }
+                        
+                        showToast('error', 'Donation Failed', errorMessage);
+                        // Form data is already preserved in sessionStorage
                     }
                 } catch (error) {
                     console.error('Form submission error:', error);
+                    
+                    let errorMessage = 'An error occurred. Please try again.';
                     if (error.name === 'AbortError') {
-                        alert('Request timed out. Please try again.');
-                    } else {
-                        alert('An error occurred. Please try again.');
+                        errorMessage = 'Request timed out. Please try again.';
                     }
+                    
+                    showToast('error', 'Connection Error', errorMessage);
+                    // Form data is already preserved in sessionStorage
                 } finally {
                     // Hide loading state
                     submitBtn.style.display = 'block';
@@ -469,10 +604,22 @@
                 }
             });
             
-            // Back to dashboard button
-            document.querySelector('.back-to-dashboard').addEventListener('click', function(e) {
-                e.preventDefault();
-                window.location.href = '/dashboard';
+            // Close modal function
+            window.closeSuccessModal = function() {
+                successModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            };
+
+            // Close modal when clicking overlay
+            document.querySelector('.modal-overlay').addEventListener('click', function() {
+                closeSuccessModal();
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && successModal.style.display === 'block') {
+                    closeSuccessModal();
+                }
             });
             
 

@@ -49,11 +49,6 @@
                 <i class="fas fa-inbox"></i>
             </div>
             <h3>No requests found</h3>
-            <p>You haven't made any medicine requests yet.</p>
-            <button class="browse-button" onclick="window.location.href='/dashboard/browse'">
-                <i class="fas fa-search"></i>
-                Browse Medicines
-            </button>
         </div>
         
         <!-- Error State -->
@@ -70,45 +65,177 @@
         </div>
     </div>
     
-    <!-- Request Details Modal -->
+    <!-- Enhanced Request Details Modal -->
     <div class="modal" id="requestModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Request Details</h3>
-                <button class="close-modal" id="closeModal">&times;</button>
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3>Request Details</h3>
+                        <p class="header-subtitle">View complete information about your medicine request</p>
+                    </div>
+                </div>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            
             <div class="modal-body">
-                <div class="medicine-details">
-                    <div class="medicine-image">
-                        <i class="fas fa-capsules" id="medIcon"></i>
+                <!-- Medicine Information Section -->
+                <div class="detail-section medicine-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                        <h4>Medicine Information</h4>
                     </div>
-                    <div class="medicine-info">
-                        <h4 id="medName">Medicine Name</h4>
-                        <p id="medDescription">Description</p>
-                        <p><strong>Manufacturer:</strong> <span id="medManufacturer">-</span></p>
-                        <p><strong>Quantity:</strong> <span id="medQuantity">-</span></p>
-                        <p><strong>Expiry:</strong> <span id="medExpiry">-</span></p>
+                    <div class="section-content">
+                        <div class="medicine-card">
+                            <div class="medicine-image">
+                                <img id="medImage" src="" alt="Medicine" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                                <i class="fas fa-capsules" id="medIcon" style="display: none;"></i>
+                            </div>
+                            <div class="medicine-details">
+                                <h5 id="medName">Medicine Name</h5>
+                                <p class="medicine-description" id="medDescription">Description</p>
+                                <div class="medicine-specs">
+                                    <div class="spec-item">
+                                        <i class="fas fa-industry"></i>
+                                        <span><strong>Manufacturer:</strong> <span id="medManufacturer">-</span></span>
+                                    </div>
+                                    <div class="spec-item">
+                                        <i class="fas fa-calculator"></i>
+                                        <span><strong>Quantity:</strong> <span id="medQuantity">-</span></span>
+                                    </div>
+                                    <div class="spec-item">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span><strong>Expiry:</strong> <span id="medExpiry">-</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="donor-details">
-                    <h4>Donor Information</h4>
-                    <p><strong>Name:</strong> <span id="donorName">-</span></p>
-                    <p><strong>Location:</strong> <span id="donorLocation">-</span></p>
+
+                <!-- Donor Information Section -->
+                <div class="detail-section donor-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h4>Donor Information</h4>
+                    </div>
+                    <div class="section-content">
+                        <div class="donor-card">
+                            <div class="donor-avatar">
+                                <img id="donorImage" src="" alt="Donor" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                <i class="fas fa-user" style="display: none;"></i>
+                            </div>
+                            <div class="donor-info">
+                                <h5 id="donorName">Donor Name</h5>
+                                <div class="donor-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span id="donorLocation">Location</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="request-details">
-                    <h4>Request Information</h4>
-                    <p><strong>Status:</strong> <span id="requestStatus">-</span></p>
-                    <p><strong>Requested Date:</strong> <span id="requestDate">-</span></p>
-                    <p><strong>Your Message:</strong> <span id="requestMessage">-</span></p>
-                    <div id="donorResponse" style="display: none;">
-                        <p><strong>Donor's Response:</strong> <span id="donorResponseMessage">-</span></p>
-                        <p><strong>Response Date:</strong> <span id="donorResponseDate">-</span></p>
+
+                <!-- Request Information Section -->
+                <div class="detail-section request-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h4>Request Information</h4>
+                    </div>
+                    <div class="section-content">
+                        <div class="request-info-grid">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>Request Date</span>
+                                </div>
+                                <div class="info-value" id="requestDate">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Status</span>
+                                </div>
+                                <div class="info-value" id="requestStatus">-</div>
+                            </div>
+                            <div class="info-item full-width">
+                                <div class="info-label">
+                                    <i class="fas fa-comment"></i>
+                                    <span>Your Message</span>
+                                </div>
+                                <div class="message-content" id="requestMessage">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donor Response Section (if available) -->
+                <div class="detail-section donor-response-section" id="donorResponse" style="display: none;">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-reply"></i>
+                        </div>
+                        <h4>Donor Response</h4>
+                    </div>
+                    <div class="section-content">
+                        <div class="response-header">
+                            <i class="fas fa-user-circle"></i>
+                            <h5>Response from Donor</h5>
+                        </div>
+                        <div class="response-message" id="donorResponseMessage">-</div>
+                        <div class="response-date" id="donorResponseDate">-</div>
                     </div>
                 </div>
             </div>
+            
             <div class="modal-footer">
-                <button class="btn-secondary" id="closeModalBtn">Close</button>
+                <button class="btn-secondary" onclick="closeModalFunc()">Close</button>
                 <button class="btn-danger" id="cancelRequestBtn" style="display: none;">Cancel Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Request Cancellation -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3>Confirm Cancellation</h3>
+                        <p class="header-subtitle">Are you sure you want to cancel this request?</p>
+                    </div>
+                </div>
+                <button class="close-modal" onclick="closeConfirmationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <p>This action cannot be undone. The request will be permanently cancelled.</p>
+                    <div class="request-summary" id="confirmationRequestSummary">
+                        <!-- Request details will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeConfirmationModal()">Keep Request</button>
+                <button class="btn-danger" id="confirmCancelBtn">Yes, Cancel Request</button>
             </div>
         </div>
     </div>
@@ -184,7 +311,7 @@
                         <div class="table-med-image">
                             <i class="fas fa-capsules"></i>
                         </div>
-                        <div class="medicine-info">
+                        <div class="medicine-info" style="gap: 0px; display: flex; flex-direction: column; margin-bottom: 0px;height: 100%; align-items: flex-start;">
                             <div class="medicine-name">${request.medicine.name}</div>
                             <div class="medicine-donor">
                                 <i class="fas fa-user"></i>
@@ -248,14 +375,32 @@
         // Modal event listeners
         const modal = document.getElementById('requestModal');
         const closeModal = document.getElementById('closeModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn'); // This line is removed as per new_code
         
         closeModal.addEventListener('click', closeModalFunc);
-        closeModalBtn.addEventListener('click', closeModalFunc);
+        // closeModalBtn.addEventListener('click', closeModalFunc); // This line is removed as per new_code
         
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
                 closeModalFunc();
+            }
+        });
+
+        // Confirmation modal event listeners
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+        confirmCancelBtn.addEventListener('click', function() {
+            const requestId = this.getAttribute('data-request-id');
+            if (requestId) {
+                cancelRequest(requestId);
+            }
+            closeConfirmationModal();
+        });
+
+        confirmationModal.addEventListener('click', function(e) {
+            if (e.target === confirmationModal) {
+                closeConfirmationModal();
             }
         });
     }
@@ -275,7 +420,7 @@
         cancelButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const requestId = this.getAttribute('data-request-id');
-                cancelRequest(requestId);
+                openConfirmationModal(requestId);
             });
         });
     }
@@ -295,6 +440,30 @@
         document.getElementById('requestStatus').textContent = request.status;
         document.getElementById('requestDate').textContent = formatDate(request.createdAt);
         document.getElementById('requestMessage').textContent = request.message || 'No message provided';
+        
+        // Handle medicine image
+        const medImage = document.getElementById('medImage');
+        const medIcon = document.getElementById('medIcon');
+        if (request.medicine.imageUrl && request.medicine.imageUrl.trim() !== '') {
+            medImage.src = request.medicine.imageUrl;
+            medImage.style.display = 'block';
+            medIcon.style.display = 'none';
+        } else {
+            medImage.style.display = 'none';
+            medIcon.style.display = 'block';
+        }
+        
+        // Handle donor image
+        const donorImage = document.getElementById('donorImage');
+        const donorIcon = document.querySelector('.donor-avatar i');
+        if (request.donor.profileImage && request.donor.profileImage.trim() !== '') {
+            donorImage.src = request.donor.profileImage;
+            donorImage.style.display = 'block';
+            donorIcon.style.display = 'none';
+        } else {
+            donorImage.style.display = 'none';
+            donorIcon.style.display = 'block';
+        }
         
         // Show/hide donor response
         const donorResponseDiv = document.getElementById('donorResponse');
@@ -319,6 +488,27 @@
         document.getElementById('requestModal').classList.add('active');
         document.body.style.overflow = 'hidden';
     }
+
+    function openConfirmationModal(requestId) {
+        const request = currentRequests.find(req => req._id === requestId);
+        if (!request) return;
+
+        const confirmationRequestSummary = document.getElementById('confirmationRequestSummary');
+        confirmationRequestSummary.innerHTML = `
+            <p><strong>Medicine:</strong> ${request.medicine.name}</p>
+            <p><strong>Requested Date:</strong> ${formatDate(request.createdAt)}</p>
+            <p><strong>Status:</strong> ${request.status}</p>
+            <p><strong>Your Message:</strong> ${request.message || 'No message provided'}</p>
+        `;
+        document.getElementById('confirmCancelBtn').setAttribute('data-request-id', requestId);
+        document.getElementById('confirmationModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeConfirmationModal() {
+        document.getElementById('confirmationModal').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
     
     function closeModalFunc() {
         document.getElementById('requestModal').classList.remove('active');
@@ -329,36 +519,35 @@
         const request = currentRequests.find(req => req._id === requestId);
         if (!request) return;
         
-        if (confirm(`Are you sure you want to cancel your request for ${request.medicine.name}?`)) {
-            // Send cancel request to API
-            fetch(`/dashboard/requests/${requestId}/cancel`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove from current requests
-                    currentRequests = currentRequests.filter(req => req._id !== requestId);
-                    renderRequests();
-                    showNotification('Request cancelled successfully', 'success');
-                } else {
-                    showNotification(data.error || 'Failed to cancel request', 'error');
-                }
-            })
-            .catch(error => {
-                showNotification('Network error: ' + error.message, 'error');
-            });
-        }
+        // Send cancel request to API
+        fetch(`/dashboard/requests/${requestId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove from current requests
+                currentRequests = currentRequests.filter(req => req._id !== requestId);
+                renderRequests();
+                closeConfirmationModal();
+                showNotification('Request cancelled successfully', 'success');
+            } else {
+                showNotification(data.error || 'Failed to cancel request', 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Network error: ' + error.message, 'error');
+        });
     }
     
     // Cancel request from modal
     document.getElementById('cancelRequestBtn').addEventListener('click', function() {
         const requestId = this.getAttribute('data-request-id');
         closeModalFunc();
-        cancelRequest(requestId);
+        openConfirmationModal(requestId);
     });
     
     function showNotification(message, type = 'info') {

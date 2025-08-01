@@ -31,7 +31,8 @@ const medicineSchema = new mongoose.Schema({
       'Children', 
       'Elderly', 
       'First Aid', 
-      'General'
+      'General',
+      'Other'
     ],
     required: true
   },
@@ -77,7 +78,7 @@ const medicineSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Available', 'Requested', 'Donated', 'Expired'],
+    enum: ['Available', 'Requested', 'Stock Finished', 'Donated', 'Expired'],
     default: 'Available'
   },
   

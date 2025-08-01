@@ -2,10 +2,8 @@
 
 <link rel="stylesheet" href="/css/browse.css">
 
-<!-- Browse Medicines Section -->
 <div class="main-content">
     <div class="browse-container">
-        <!-- Browse Header -->
         <div class="browse-header">
             <div>
                 <h2 class="browse-title">Browse Available Medicines</h2>
@@ -13,8 +11,6 @@
             </div>
             <div class="results-count"><%= medicines ? medicines.length : 0 %> available medicines</div>
         </div>
-        
-        <!-- Filters -->
         <div class="filters-container">
             <div class="filter-group">
                 <label class="filter-label">Medicine Name</label>
@@ -44,7 +40,7 @@
                         <option value="50" <%= currentFilters.distance === '50' ? 'selected' : '' %>>Within 50 km</option>
                         <option value="custom" <%= currentFilters.distance === 'custom' ? 'selected' : '' %>>Custom Distance</option>
                         <option value="all" <%= currentFilters.distance === 'all' ? 'selected' : '' %>>Any Distance</option>
-                    </select>
+                </select>
                     <input type="number" class="filter-input custom-distance-input" id="customDistanceInput" 
                            placeholder="Enter km" min="1" max="1000" 
                            value="<%= currentFilters.customDistance || '' %>"
@@ -86,20 +82,20 @@
                                 <img src="<%= medicine.imageUrl %>" alt="<%= medicine.name %>">
                             <% } else { %>
                                 <div class="default-medicine-image" data-category="<%= medicine.category || 'general' %>">
-                                    <i class="fas fa-capsules"></i>
+                                <i class="fas fa-capsules"></i>
                                     <div class="image-overlay">
                                         <span class="category-label"><%= medicine.category || 'Medicine' %></span>
                                     </div>
                                 </div>
                             <% } %>
-                            <div class="medicine-status status-<%= medicine.status.toLowerCase() %>"><%= medicine.status %></div>
+                            <div class="medicine-status status-<%= (medicine.displayStatus || medicine.status).toLowerCase() %>"><%= medicine.displayStatus || medicine.status %></div>
                         </div>
                         <div class="medicine-details">
                             <h4 class="medicine-name"><%= medicine.name %></h4>
                             <div class="medicine-info">
                                 <div class="info-item">
                                     <i class="fas fa-capsules"></i>
-                                    <span><%= medicine.quantity %> <%= medicine.unit || 'tablets' %></span>
+                                    <span><%= medicine.availableQuantity || medicine.quantity %> <%= medicine.unit || 'tablets' %></span>
                                 </div>
                                 <div class="info-item">
                                     <i class="fas fa-calendar"></i>
@@ -123,7 +119,7 @@
                                 <button class="action-button btn-details view-details" data-id="<%= medicine._id %>">
                                     View Details
                                 </button>
-                                <button class="action-button btn-request" onclick="requestMedicine('<%= medicine._id %>')">
+                                <button class="action-button btn-request" data-id="<%= medicine._id %>">
                                     Request
                                 </button>
                             </div>
@@ -251,50 +247,58 @@
             
             return iconMap[category] || 'fas fa-capsules';
         }
-        
-        // Open modal function
-        function openModal(medicineId) {
-            const medicine = medicines.find(m => m._id === medicineId);
-            if (!medicine) return;
             
-            // Update modal content
-            document.getElementById('medName').textContent = medicine.name;
-            document.getElementById('medDesc').textContent = medicine.description || 'No description available';
-            document.getElementById('medQty').textContent = `${medicine.quantity} ${medicine.unit || 'tablets'}`;
-            document.getElementById('medExpiry').textContent = new Date(medicine.expiry).toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            document.getElementById('medCategory').textContent = medicine.category || 'Uncategorized';
-            document.getElementById('medDonor').textContent = medicine.donor ? 
-                (medicine.donor.firstName || medicine.donor.email.split('@')[0]) : 'Anonymous';
-            document.getElementById('medDonatedOn').textContent = new Date(medicine.createdAt).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+            // Open modal function
+            function openModal(medicineId) {
+                const medicine = medicines.find(m => m._id === medicineId);
+                if (!medicine) return;
+                
+                // Update modal content
+                document.getElementById('medName').textContent = medicine.name;
+                document.getElementById('medDesc').textContent = medicine.description || 'No description available';
+                document.getElementById('medQty').textContent = `${medicine.quantity} ${medicine.unit || 'tablets'}`;
+                document.getElementById('medExpiry').textContent = new Date(medicine.expiry).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                document.getElementById('medCategory').textContent = medicine.category || 'Uncategorized';
+                document.getElementById('medDonor').textContent = medicine.donor ? 
+                    (medicine.donor.firstName || medicine.donor.email.split('@')[0]) : 'Anonymous';
+                document.getElementById('medDonatedOn').textContent = new Date(medicine.createdAt).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            
+            // Debug: Log medicine data
+            console.log('🔍 Medicine data:', {
+                name: medicine.name,
+                imageUrl: medicine.imageUrl,
+                imageUrlType: typeof medicine.imageUrl,
+                hasImageUrl: !!medicine.imageUrl
             });
             
             // Update modal image gallery
             updateModalImageGallery(medicine);
-            
-            // Address
-            let address = 'Location not available';
-            if (medicine.donor && medicine.donor.addressLine1) {
-                address = `${medicine.donor.addressLine1}`;
-                if (medicine.donor.city) address += `, ${medicine.donor.city}`;
-                if (medicine.donor.state) address += `, ${medicine.donor.state}`;
-                if (medicine.donor.pincode) address += ` ${medicine.donor.pincode}`;
+                
+                // Address
+                let address = 'Location not available';
+                if (medicine.donor && medicine.donor.addressLine1) {
+                    address = `${medicine.donor.addressLine1}`;
+                    if (medicine.donor.city) address += `, ${medicine.donor.city}`;
+                    if (medicine.donor.state) address += `, ${medicine.donor.state}`;
+                    if (medicine.donor.pincode) address += ` ${medicine.donor.pincode}`;
+                }
+                document.getElementById('medAddress').textContent = address;
+                
+                // Set request button data
+                document.getElementById('modalRequestBtn').setAttribute('data-id', medicineId);
+                
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
             }
-            document.getElementById('medAddress').textContent = address;
-            
-            // Set request button data
-            document.getElementById('modalRequestBtn').setAttribute('data-id', medicineId);
-            
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
         
         // Update modal image gallery
         function updateModalImageGallery(medicine) {
@@ -310,9 +314,35 @@
             // Get images (support for multiple images)
             const images = [];
             if (medicine.imageUrl) {
-                // Split by comma if multiple images
-                const imageUrls = medicine.imageUrl.split(',').map(url => url.trim());
-                images.push(...imageUrls);
+                // Handle different image formats
+                if (Array.isArray(medicine.imageUrl)) {
+                    // If it's already an array
+                    images.push(...medicine.imageUrl);
+                } else if (typeof medicine.imageUrl === 'string') {
+                    // If it's a string, split by comma
+                    const imageUrls = medicine.imageUrl.split(',').map(url => url.trim());
+                    images.push(...imageUrls);
+                }
+                console.log('🖼️ Found images:', images.length, images);
+            }
+            
+            // For testing: Add some sample images if no images found
+            if (images.length === 0 && medicine.imageUrl) {
+                // If there's an imageUrl but parsing failed, treat it as a single image
+                images.push(medicine.imageUrl);
+                console.log('🖼️ Added single image:', medicine.imageUrl);
+            }
+            
+            // For testing: Add sample images to demonstrate gallery functionality
+            // Remove this section once you confirm the gallery works
+            if (images.length === 1) {
+                // Add 2 more sample images for testing
+                const sampleImages = [
+                    'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop',
+                    'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop'
+                ];
+                images.push(...sampleImages);
+                console.log('🧪 Added test images for gallery demonstration');
             }
             
             if (images.length === 0) {
@@ -352,50 +382,62 @@
                     nextBtn.style.display = 'flex';
                     indicators.style.display = 'flex';
                     
+                    console.log('🖼️ Setting up navigation for', images.length, 'images');
+                    
                     // Set up navigation
                     let currentImage = 0;
                     
                     prevBtn.onclick = () => {
                         currentImage = (currentImage - 1 + images.length) % images.length;
+                        console.log('🖼️ Previous clicked, showing image:', currentImage);
                         showImage(currentImage);
                     };
                     
                     nextBtn.onclick = () => {
                         currentImage = (currentImage + 1) % images.length;
+                        console.log('🖼️ Next clicked, showing image:', currentImage);
                         showImage(currentImage);
                     };
-                    
-                    function showImage(index) {
-                        // Hide all slides
-                        document.querySelectorAll('.modal-image-slide').forEach(slide => {
-                            slide.classList.remove('active');
-                        });
-                        
-                        // Remove active from all indicators
-                        document.querySelectorAll('.image-indicator').forEach(ind => {
-                            ind.classList.remove('active');
-                        });
-                        
-                        // Show selected slide and indicator
-                        document.querySelectorAll('.modal-image-slide')[index].classList.add('active');
-                        document.querySelectorAll('.image-indicator')[index].classList.add('active');
-                        
-                        currentImage = index;
-                    }
                 } else {
                     prevBtn.style.display = 'none';
                     nextBtn.style.display = 'none';
                     indicators.style.display = 'none';
+                    console.log('🖼️ Single image, hiding navigation');
                 }
             }
-        }
-        
-        // Close modal function
-        function closeModalFunc() {
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-        
+            
+            // Global showImage function
+            window.showImage = function(index) {
+                console.log('🖼️ Showing image:', index);
+                // Hide all slides
+                document.querySelectorAll('.modal-image-slide').forEach(slide => {
+                    slide.classList.remove('active');
+                });
+                
+                // Remove active from all indicators
+                document.querySelectorAll('.image-indicator').forEach(ind => {
+                    ind.classList.remove('active');
+                });
+                
+                // Show selected slide and indicator
+                const slides = document.querySelectorAll('.modal-image-slide');
+                const indicators = document.querySelectorAll('.image-indicator');
+                
+                if (slides[index]) {
+                    slides[index].classList.add('active');
+                }
+                if (indicators[index]) {
+                    indicators[index].classList.add('active');
+                }
+            };
+            }
+            
+            // Close modal function
+            function closeModalFunc() {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
         document.addEventListener('DOMContentLoaded', function() {
             modal = document.getElementById('medicineModal');
             closeModal = document.getElementById('closeModal');
@@ -407,6 +449,7 @@
 
             
             // Initial event listeners setup
+            setupEventDelegation();
             attachEventListeners();
             
             // Update default medicine images with category-specific icons
@@ -516,8 +559,8 @@
                         distanceFormatted: medicine.distanceFormatted,
                         hasDistance: !!medicine.distance,
                         hasDistanceFormatted: !!medicine.distanceFormatted
-                    });
                 });
+            });
                 
                 const medicinesHTML = medicines.map(medicine => `
                     <div class="medicine-card">
@@ -531,14 +574,14 @@
                                     </div>
                                 </div>`
                             }
-                            <div class="medicine-status status-${medicine.status.toLowerCase()}">${medicine.status}</div>
+                            <div class="medicine-status status-${(medicine.displayStatus || medicine.status).toLowerCase()}">${medicine.displayStatus || medicine.status}</div>
                         </div>
                         <div class="medicine-details">
                             <h4 class="medicine-name">${medicine.name}</h4>
                             <div class="medicine-info">
                                 <div class="info-item">
                                     <i class="fas fa-capsules"></i>
-                                    <span>${medicine.quantity} ${medicine.unit || 'tablets'}</span>
+                                    <span>${medicine.availableQuantity || medicine.quantity} ${medicine.unit || 'tablets'}</span>
                                 </div>
                                 <div class="info-item">
                                     <i class="fas fa-calendar"></i>
@@ -569,7 +612,7 @@
                                 <button class="action-button btn-details view-details" data-id="${medicine._id}">
                                     View Details
                                 </button>
-                                <button class="action-button btn-request" onclick="requestMedicine('${medicine._id}')">
+                                <button class="action-button btn-request" data-id="${medicine._id}">
                                     Request
                                 </button>
                             </div>
@@ -579,8 +622,7 @@
                 
                 medicinesGrid.innerHTML = medicinesHTML;
                 
-                // Re-attach event listeners
-                attachEventListeners();
+                // Update default images (event listeners are handled by delegation)
                 updateDefaultImages();
             }
             
@@ -602,38 +644,48 @@
                 applyFilters();
             }
             
-            // Attach event listeners to new elements
-            function attachEventListeners() {
-                // Re-attach view details buttons
-                const viewButtons = document.querySelectorAll('.view-details');
-                viewButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const medicineId = this.getAttribute('data-id');
-                        openModal(medicineId);
-                    });
-                });
-                
-                // Re-attach modal close event listeners
-                closeModal.addEventListener('click', closeModalFunc);
-                closeModalBtn.addEventListener('click', closeModalFunc);
-                
-                // Close modal when clicking outside
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        closeModalFunc();
+            // Use event delegation to prevent duplicate listeners
+            function setupEventDelegation() {
+                // Use event delegation for view details buttons
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest('.view-details')) {
+                        const button = e.target.closest('.view-details');
+                        const medicineId = button.getAttribute('data-id');
+                        if (medicineId) {
+                            openModal(medicineId);
+                        }
                     }
-                });
-                
-                // Request button functionality
-                const requestButtons = document.querySelectorAll('.btn-request');
-                requestButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const medicineId = this.getAttribute('data-id') || this.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+                    
+                    // Use event delegation for request buttons
+                    if (e.target.closest('.btn-request')) {
+                        const button = e.target.closest('.btn-request');
+                        const medicineId = button.getAttribute('data-id');
+                        console.log('🔘 Request button clicked, medicineId:', medicineId);
                         if (medicineId) {
                             requestMedicine(medicineId);
                         }
-                    });
+                    }
                 });
+            }
+            
+            // Attach event listeners to new elements (simplified)
+            function attachEventListeners() {
+                // Re-attach modal close event listeners (these are static)
+                if (closeModal) {
+            closeModal.addEventListener('click', closeModalFunc);
+                }
+                if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeModalFunc);
+                }
+            
+            // Close modal when clicking outside
+                if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModalFunc();
+                }
+            });
+                }
             }
             
             // Handle custom distance input visibility
@@ -666,23 +718,64 @@
         
         // Request medicine function
         async function requestMedicine(medicineId) {
-            if (confirm('Are you sure you want to request this medicine? The donor will be notified.')) {
+            // Get medicine details to show available quantity
+            const medicineCard = document.querySelector(`[data-id="${medicineId}"]`).closest('.medicine-card');
+            const quantityText = medicineCard.querySelector('.info-item span').textContent;
+            
+            // More robust quantity and unit extraction
+            const quantityMatch = quantityText.match(/(\d+)\s*([a-zA-Z]+)/);
+            if (!quantityMatch) {
+                showErrorModal('Could not determine available quantity');
+                return;
+            }
+            
+            const availableQuantity = parseInt(quantityMatch[1]);
+            const unit = quantityMatch[2];
+            
+            console.log('Medicine details:', { availableQuantity, unit, quantityText });
+            
+            showConfirmationModal('Please specify the quantity you want to request:', async () => {
                 try {
+                    const quantityInput = document.querySelector('#requestQuantity');
+                    const requestedQuantity = parseInt(quantityInput.value) || 1;
+                    const message = document.querySelector('#requestMessage').value || 'I would like to request this medicine.';
+                    
+                    if (requestedQuantity > availableQuantity) {
+                        showErrorModal(`You can only request up to ${availableQuantity} ${unit}`);
+                        return;
+                    }
+                    
+                    if (requestedQuantity <= 0) {
+                        showErrorModal('Please enter a valid quantity');
+                        return;
+                    }
+                    
+                    console.log('Sending request:', { medicineId, requestedQuantity, message });
+                    
                     const response = await fetch(`/dashboard/request-medicine/${medicineId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            quantity: 1, // Default quantity, can be enhanced with a form
-                            message: 'I would like to request this medicine.'
+                            quantity: requestedQuantity,
+                            message: message
                         })
                     });
                     
+                    console.log('Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Server error response:', errorText);
+                        throw new Error(`Server error: ${response.status} - ${errorText}`);
+                    }
+                    
                     const result = await response.json();
+                    console.log('Response result:', result);
                     
                     if (result.success) {
-                        alert('Request submitted successfully! The donor will contact you to arrange pickup.');
+                        showSuccessModal('Request submitted successfully! The donor will contact you to arrange pickup.');
                         // Close modal if open
                         const modal = document.getElementById('medicineModal');
                         if (modal.classList.contains('active')) {
@@ -692,14 +785,185 @@
                         // Refresh the page after a short delay to show updated status
                         setTimeout(() => {
                             window.location.reload();
-                        }, 1000);
+                        }, 2000);
                     } else {
-                        alert('Error: ' + result.error);
+                        showErrorModal('Error: ' + result.error);
                     }
                 } catch (error) {
                     console.error('Request error:', error);
-                    alert('Error submitting request. Please try again.');
+                    showErrorModal('Error submitting request. Please try again.');
                 }
+            }, availableQuantity, unit);
+        }
+        
+        // Show confirmation modal
+        function showConfirmationModal(message, onConfirm, availableQuantity, unit) {
+            const confirmationModal = document.createElement('div');
+            confirmationModal.className = 'confirmation-modal-overlay';
+            confirmationModal.innerHTML = `
+                <div class="confirmation-modal">
+                    <div class="confirmation-header">
+                        <i class="fas fa-hand-holding-medical"></i>
+                        <h3>Request Medicine</h3>
+                    </div>
+                    <div class="confirmation-content">
+                        <p>${message}</p>
+                        <div class="quantity-selection">
+                            <label for="requestQuantity">
+                                <i class="fas fa-capsules"></i> Quantity
+                                <span class="available-info">(Available: ${availableQuantity} ${unit})</span>
+                            </label>
+                            <div class="quantity-input-wrapper">
+                                <input type="number" id="requestQuantity" min="1" max="${availableQuantity}" value="1" class="quantity-input">
+                                <div class="quantity-buttons">
+                                    <button type="button" class="qty-btn" onclick="adjustQuantity(-1)">-</button>
+                                    <button type="button" class="qty-btn" onclick="adjustQuantity(1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-selection">
+                            <label for="requestMessage">
+                                <i class="fas fa-comment-alt"></i> Message to Donor
+                                <span class="optional-text">(optional)</span>
+                            </label>
+                            <textarea id="requestMessage" placeholder="Tell the donor why you need this medicine or any special requirements..." class="message-input"></textarea>
+                        </div>
+                    </div>
+                    <div class="confirmation-actions">
+                        <button class="btn-cancel" onclick="closeConfirmationModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button class="btn-confirm" onclick="confirmRequest()">
+                            <i class="fas fa-paper-plane"></i> Send Request
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmationModal);
+            
+            // Store the callback
+            window.confirmCallback = onConfirm;
+            
+            // Show modal with animation
+            setTimeout(() => {
+                confirmationModal.classList.add('active');
+            }, 10);
+        }
+        
+        // Show success modal
+        function showSuccessModal(message) {
+            const successModal = document.createElement('div');
+            successModal.className = 'success-modal-overlay';
+            successModal.innerHTML = `
+                <div class="success-modal">
+                    <div class="success-header">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Success!</h3>
+                    </div>
+                    <div class="success-content">
+                        <p>${message}</p>
+                    </div>
+                    <div class="success-actions">
+                        <button class="btn-ok" onclick="closeSuccessModal()">
+                            <i class="fas fa-check"></i> OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(successModal);
+            
+            // Show modal with animation
+            setTimeout(() => {
+                successModal.classList.add('active');
+            }, 10);
+        }
+        
+        // Show error modal
+        function showErrorModal(message) {
+            const errorModal = document.createElement('div');
+            errorModal.className = 'error-modal-overlay';
+            errorModal.innerHTML = `
+                <div class="error-modal">
+                    <div class="error-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error</h3>
+                    </div>
+                    <div class="error-content">
+                        <p>${message}</p>
+                    </div>
+                    <div class="error-actions">
+                        <button class="btn-ok" onclick="closeErrorModal()">
+                            <i class="fas fa-times"></i> OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(errorModal);
+            
+            // Show modal with animation
+            setTimeout(() => {
+                errorModal.classList.add('active');
+            }, 10);
+        }
+        
+        // Close confirmation modal
+        function closeConfirmationModal() {
+            const modal = document.querySelector('.confirmation-modal-overlay');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
+        }
+        
+        // Adjust quantity function
+        function adjustQuantity(change) {
+            const quantityInput = document.getElementById('requestQuantity');
+            if (quantityInput) {
+                const currentValue = parseInt(quantityInput.value) || 1;
+                const maxValue = parseInt(quantityInput.max) || 1;
+                const newValue = Math.max(1, Math.min(maxValue, currentValue + change));
+                quantityInput.value = newValue;
+                
+                // Add visual feedback
+                quantityInput.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    quantityInput.style.transform = 'scale(1)';
+                }, 150);
+            }
+        }
+        
+        // Confirm request
+        function confirmRequest() {
+            if (window.confirmCallback) {
+                window.confirmCallback();
+            }
+            closeConfirmationModal();
+        }
+        
+        // Close success modal
+        function closeSuccessModal() {
+            const modal = document.querySelector('.success-modal-overlay');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
+        }
+        
+        // Close error modal
+        function closeErrorModal() {
+            const modal = document.querySelector('.error-modal-overlay');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
             }
         }
     </script>

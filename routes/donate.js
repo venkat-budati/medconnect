@@ -6,6 +6,11 @@ const Notification = require('../models/Notification');
 const { isLoggedIn } = require('./middleware');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
+
+// Helper function to check if request is AJAX
+function isAjaxRequest(req) {
+  return req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest' || (req.headers.accept && req.headers.accept.indexOf('json') > -1);
+}
 const upload = multer({ 
   storage: multer.memoryStorage(),
   limits: {
@@ -76,19 +81,42 @@ router.get('/', isLoggedIn, async (req, res) => {
 router.post('/', isLoggedIn, (req, res, next) => {
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
+      let errorMessage;
       if (err.code === 'LIMIT_FILE_COUNT') {
-        req.flash('error', 'Too many files. Maximum 3 images allowed.');
-        return res.redirect('/donate');
+        errorMessage = 'Too many files. Maximum 3 images allowed.';
       } else if (err.code === 'LIMIT_FILE_SIZE') {
-        req.flash('error', 'File too large. Maximum 5MB per file.');
-        return res.redirect('/donate');
+        errorMessage = 'File too large. Maximum 5MB per file.';
       } else {
-        req.flash('error', 'File upload error: ' + err.message);
+        errorMessage = 'File upload error: ' + err.message;
+      }
+      
+      // Check if it's an AJAX request
+      const isAjax = isAjaxRequest(req);
+      
+      if (isAjax) {
+        return res.status(400).json({ 
+          success: false, 
+          error: errorMessage 
+        });
+      } else {
+        req.flash('error', errorMessage);
         return res.redirect('/donate');
       }
     } else if (err) {
-      req.flash('error', 'File upload error: ' + err.message);
-      return res.redirect('/donate');
+      const errorMessage = 'File upload error: ' + err.message;
+      
+      // Check if it's an AJAX request
+      const isAjax = isAjaxRequest(req);
+      
+      if (isAjax) {
+        return res.status(400).json({ 
+          success: false, 
+          error: errorMessage 
+        });
+      } else {
+        req.flash('error', errorMessage);
+        return res.redirect('/donate');
+      }
     }
     // If no error, continue to the next middleware
     next();
@@ -131,21 +159,57 @@ router.post('/', isLoggedIn, (req, res, next) => {
     }
 
     if (errors.length > 0) {
-      req.flash('error', errors.join(' '));
-      return res.redirect('/donate');
+      const errorMessage = errors.join(' ');
+      
+      // Check if it's an AJAX request
+      const isAjax = isAjaxRequest(req);
+      
+      if (isAjax) {
+        return res.status(400).json({ 
+          success: false, 
+          error: errorMessage 
+        });
+      } else {
+        req.flash('error', errorMessage);
+        return res.redirect('/donate');
+      }
     }
 
     // Get user data for pickup location
     const user = await User.findById(req.session.user.id);
     if (!user) {
-      req.flash('error', 'User not found.');
-      return res.redirect('/donate');
+      const errorMessage = 'User not found.';
+      
+      // Check if it's an AJAX request
+      const isAjax = isAjaxRequest(req);
+      
+      if (isAjax) {
+        return res.status(400).json({ 
+          success: false, 
+          error: errorMessage 
+        });
+      } else {
+        req.flash('error', errorMessage);
+        return res.redirect('/donate');
+      }
     }
 
     // Check if user has address information
     if (!user.addressLine1 || !user.city || !user.state || !user.pincode) {
-      req.flash('error', 'Please complete your profile address information before donating medicines. This is required for pickup arrangements.');
-      return res.redirect('/donate');
+      const errorMessage = 'Please complete your profile address information before donating medicines. This is required for pickup arrangements.';
+      
+      // Check if it's an AJAX request
+      const isAjax = isAjaxRequest(req);
+      
+      if (isAjax) {
+        return res.status(400).json({ 
+          success: false, 
+          error: errorMessage 
+        });
+      } else {
+        req.flash('error', errorMessage);
+        return res.redirect('/donate');
+      }
     }
 
     // Upload images to Cloudinary
@@ -177,8 +241,20 @@ router.post('/', isLoggedIn, (req, res, next) => {
         imageUrls = await Promise.all(uploadPromises);
       } catch (uploadError) {
         console.error('Image upload error:', uploadError);
-        req.flash('error', 'Failed to upload images. Please try again.');
-        return res.redirect('/donate');
+        const errorMessage = 'Failed to upload images. Please try again.';
+        
+        // Check if it's an AJAX request
+        const isAjax = isAjaxRequest(req);
+        
+        if (isAjax) {
+          return res.status(400).json({ 
+            success: false, 
+            error: errorMessage 
+          });
+        } else {
+          req.flash('error', errorMessage);
+          return res.redirect('/donate');
+        }
       }
     }
 
@@ -243,13 +319,44 @@ router.post('/', isLoggedIn, (req, res, next) => {
       await Promise.all(notificationPromises);
     }
 
-    req.flash('success', 'Medicine donated successfully! It is now available for requests.');
-    res.redirect('/dashboard');
+    // Check if it's an AJAX request
+    const isAjax = isAjaxRequest(req);
+    
+    if (isAjax) {
+      res.json({ 
+        success: true, 
+        message: 'Medicine donated successfully! It is now available for requests.',
+        medicineId: medicine._id
+      });
+    } else {
+      req.flash('success', 'Medicine donated successfully! It is now available for requests.');
+      res.redirect('/dashboard');
+    }
 
   } catch (error) {
     console.error('Donation error:', error);
-    req.flash('error', 'Failed to submit donation. Please try again.');
-    res.redirect('/donate');
+    
+    // Check if it's an AJAX request
+    const isAjax = isAjaxRequest(req);
+    
+    if (isAjax) {
+      let errorMessage = 'Failed to submit donation. Please try again.';
+      
+      // Provide more specific error messages
+      if (error.name === 'ValidationError') {
+        errorMessage = 'Please check your input and try again.';
+      } else if (error.code === 11000) {
+        errorMessage = 'This medicine already exists. Please check your input.';
+      }
+      
+      res.status(400).json({ 
+        success: false, 
+        error: errorMessage 
+      });
+    } else {
+      req.flash('error', 'Failed to submit donation. Please try again.');
+      res.redirect('/donate');
+    }
   }
 });
 

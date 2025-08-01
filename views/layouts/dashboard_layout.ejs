@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="/css/dashboard-sidebar.css">
+    <% if (typeof activePage !== 'undefined' && activePage === 'donate') { %>
+    <link rel="stylesheet" href="/css/donate.css">
+    <% } %>
 </head>
 <body>
     <header class="header">
@@ -44,7 +47,7 @@
             </a>
             <a href="/dashboard/donor" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'donor') ? ' active' : '' %>">
                 <i class="fas fa-history"></i>
-                <span>Donation History</span>
+                <span>My Donations</span>
             </a>
             <a href="/dashboard/requests" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'requests') ? ' active' : '' %>">
                 <i class="fas fa-hand-holding-medical"></i>
@@ -66,53 +69,112 @@
         <%- body %>
     </div>
     
+    <!-- Logout Confirmation Modal -->
+    <div class="modal" id="logoutModal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3>Confirm Logout</h3>
+                        <p class="header-subtitle">Are you sure you want to logout from MedConnect?</p>
+                    </div>
+                </div>
+                <button class="close-modal" onclick="closeLogoutModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <p>You will be logged out of your account and redirected to the login page. Any unsaved changes will be lost.</p>
+                    <div class="logout-summary">
+                        <div class="summary-item">
+                            <i class="fas fa-user"></i>
+                            <span>You will be logged out of your account</span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Any unsaved changes will be lost</span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span style="text-align: left;">You'll need to login again to access dashboard</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeLogoutModal()">Stay Logged In</button>
+                <button class="btn-danger" id="confirmLogoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Yes, Logout
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle logout with confirmation
+            // Handle logout with confirmation modal
             const logoutLink = document.querySelector('a[href="/dashboard/logout"]');
+            
             if (logoutLink) {
                 logoutLink.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
-                    // Show confirmation dialog
-                    if (confirm('Are you sure you want to logout?')) {
-                        // Show loading state
-                        const originalText = this.innerHTML;
-                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Logging out...</span>';
-                        this.style.pointerEvents = 'none';
-                        
-                        // Redirect to logout
-                        window.location.href = '/dashboard/logout';
+                    openLogoutModal();
+                });
+            }
+            
+            // Setup logout modal event listeners
+            setupLogoutModalListeners();
+        });
+        
+        function openLogoutModal() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        function setupLogoutModalListeners() {
+            const logoutModal = document.getElementById('logoutModal');
+            const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
+            
+            if (logoutModal) {
+                // Close modal when clicking outside
+                logoutModal.addEventListener('click', function(e) {
+                    if (e.target === logoutModal) {
+                        closeLogoutModal();
                     }
                 });
             }
             
-            // Handle logout via AJAX (alternative method)
-            function logoutViaAjax() {
-                fetch('/dashboard/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = data.redirect;
-                    } else {
-                        alert('Logout failed. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Logout error:', error);
-                    // Fallback to regular logout
+            if (confirmLogoutBtn) {
+                // Handle logout confirmation
+                confirmLogoutBtn.addEventListener('click', function() {
+                    // Show loading state
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+                    this.disabled = true;
+                    
+                    // Redirect to logout
                     window.location.href = '/dashboard/logout';
                 });
             }
-            
-            // Make logout function globally available
-            window.logoutViaAjax = logoutViaAjax;
-        });
+        }
     </script>
 </body>
 </html>

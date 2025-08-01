@@ -52,6 +52,243 @@
     </div>
 </div>
 
+<!-- Request Details Modal -->
+<div id="requestDetailsModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Request Details</h3>
+            <button class="close-modal" id="closeRequestModal">&times;</button>
+        </div>
+        <div class="modal-content">
+            <div class="request-details">
+                <!-- Medicine Information -->
+                <div class="detail-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-capsules"></i>
+                        Medicine Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Medicine Name</span>
+                            <span class="detail-value" id="modalMedicineName">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Category</span>
+                            <span class="detail-value" id="modalMedicineCategory">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Quantity Requested</span>
+                            <span class="detail-value" id="modalQuantity">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Expiry Date</span>
+                            <span class="detail-value" id="modalExpiry">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requester Information -->
+                <div class="detail-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Requester Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Name</span>
+                            <span class="detail-value" id="modalRequesterName">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value" id="modalRequesterLocation">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Distance</span>
+                            <span class="detail-value" id="modalDistance">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Request Date</span>
+                            <span class="detail-value" id="modalRequestDate">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Message -->
+                <div class="detail-section" id="messageSection" style="display: none;">
+                    <h4 class="section-title">
+                        <i class="fas fa-comment"></i>
+                        Request Message
+                    </h4>
+                    <div class="message-content" id="modalMessage">-</div>
+                </div>
+
+                <!-- Status Information -->
+                <div class="detail-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Status Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Current Status</span>
+                            <span class="detail-value">
+                                <span class="status-badge" id="modalStatus">-</span>
+                            </span>
+                        </div>
+                        <div class="detail-item" id="responseSection" style="display: none;">
+                            <span class="detail-label">Your Response</span>
+                            <span class="detail-value" id="modalResponse">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" id="closeModalBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Donation Details Modal -->
+<div id="donationDetailsModal" class="modal-overlay">
+    <div class="modal donation-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-pills"></i>
+                Donation Details
+            </h3>
+            <button class="close-modal" id="closeDonationModal">&times;</button>
+        </div>
+        <div class="modal-content">
+            <div class="donation-details">
+                <!-- Medicine Information -->
+                <div class="detail-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-capsules"></i>
+                        Medicine Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Medicine Name</span>
+                            <span class="detail-value" id="modalDonationName">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Category</span>
+                            <span class="detail-value" id="modalDonationCategory">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Quantity</span>
+                            <span class="detail-value" id="modalDonationQuantity">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Unit</span>
+                            <span class="detail-value" id="modalDonationUnit">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Dosage</span>
+                            <span class="detail-value" id="modalDonationDosage">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Manufacturer</span>
+                            <span class="detail-value" id="modalDonationManufacturer">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Expiry Date</span>
+                            <span class="detail-value" id="modalDonationExpiry">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Condition</span>
+                            <span class="detail-value" id="modalDonationCondition">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donation Information -->
+                <div class="detail-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-heart"></i>
+                        Donation Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Donation Date</span>
+                            <span class="detail-value" id="modalDonationDate">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value">
+                                <span class="status-badge" id="modalDonationStatus">-</span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Requests</span>
+                            <span class="detail-value" id="modalDonationRequests">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Completed Requests</span>
+                            <span class="detail-value" id="modalDonationCompleted">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pickup Location -->
+                <div class="detail-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Pickup Location
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Address</span>
+                            <span class="detail-value" id="modalDonationAddress">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">City</span>
+                            <span class="detail-value" id="modalDonationCity">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">State</span>
+                            <span class="detail-value" id="modalDonationState">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Pincode</span>
+                            <span class="detail-value" id="modalDonationPincode">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="detail-section" id="additionalInfoSection">
+                    <h4 class="section-title">
+                        <i class="fas fa-notes-medical"></i>
+                        Additional Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Description</span>
+                            <span class="detail-value" id="modalDonationDescription">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request History -->
+                <div class="detail-section" id="requestHistorySection">
+                    <h4 class="section-title">
+                        <i class="fas fa-history"></i>
+                        Request History
+                    </h4>
+                    <div class="request-history-list" id="modalRequestHistory">
+                        <!-- Request history will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" id="closeDonationModalBtn">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const requestsTab = document.getElementById('requestsTab');
@@ -136,12 +373,25 @@
         
         // Function to display requests
         function displayRequests(requests) {
+            console.log('📋 Displaying requests:', requests);
+            
+            // Store requests globally for modal access
+            currentRequests = requests;
+            
             if (requests.length === 0) {
                 requestsGrid.innerHTML = '<div class="no-data"><p>No requests found</p></div>';
                 return;
             }
             
             const requestsHTML = requests.map(request => {
+                console.log('📋 Request data:', {
+                    id: request._id,
+                    medicine: request.medicine,
+                    requester: request.requester,
+                    status: request.status,
+                    distance: request.distance,
+                    distanceFormatted: request.distanceFormatted
+                });
                 const statusClass = getStatusClass(request.status);
                 const actionButtons = getActionButtons(request);
                 const requesterInitials = getInitials(request.requester.firstName, request.requester.lastName);
@@ -152,8 +402,8 @@
                             <div class="medicine-icon">
                                 <i class="fas fa-capsules"></i>
                             </div>
-                            <div class="medicine-info">
-                                <div class="medicine-name">${request.medicine.name}</div>
+                            <div class="medicine-info" style=" display: flex; flex-direction: column; margin-bottom: 0px;height: 100%; align-items: flex-start; gap: 0px;">
+                                <div class="medicine-name">${request.medicine?.name || 'Medicine not found'}</div>
                                 <div class="request-date">
                                     <i class="fas fa-calendar"></i> Requested: ${formatDate(request.createdAt)}
                                 </div>
@@ -162,11 +412,11 @@
                         <div class="card-body">
                             <div class="info-item">
                                 <span class="info-label">Quantity</span>
-                                <span class="info-value">${request.quantity} ${request.medicine.unit}</span>
+                                <span class="info-value">${request.quantity} ${request.medicine?.unit || 'units'}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Expiry Date</span>
-                                <span class="info-value">${formatDate(request.medicine.expiry)}</span>
+                                <span class="info-value">${request.medicine?.expiry ? formatDate(request.medicine.expiry) : 'Not specified'}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Status</span>
@@ -174,15 +424,15 @@
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Distance</span>
-                                <span class="info-value">${request.requester.city}, ${request.requester.state}</span>
+                                <span class="info-value">${request.distanceFormatted || 'Distance unknown'}</span>
                             </div>
                         </div>
                         <div class="card-footer">
                             <div class="requester-info">
                                 <div class="requester-avatar">${requesterInitials}</div>
                                 <div>
-                                    <div class="requester-name">${request.requester.firstName} ${request.requester.lastName}</div>
-                                    <div class="requester-location">${request.requester.city}, ${request.requester.state}</div>
+                                    <div class="requester-name">${request.requester?.firstName || 'Unknown'} ${request.requester?.lastName || ''}</div>
+                                    <div class="requester-location">${request.requester?.city || 'Unknown'}, ${request.requester?.state || 'Unknown'}</div>
                                 </div>
                             </div>
                             <div class="action-buttons">
@@ -232,10 +482,15 @@
                                 <span class="donation-value">${donation.completedCount || 0} completed</span>
                             </div>
                             <div class="donation-item">
-                                <span class="donation-label">Status</span>
-                                <span class="donation-value">${donation.status}</span>
+                                <span class="donation-label">Available</span>
+                                <span class="donation-value">${donation.remainingQuantity || donation.quantity} ${donation.unit}</span>
                             </div>
-                            <div class="donation-status">${donation.status}</div>
+                        </div>
+                        <div class="donation-footer">
+                            <div class="donation-status">${donation.displayStatus || donation.status}</div>
+                            <button class="view-details-btn" onclick="viewDonationDetails('${donation._id}')">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
                         </div>
                     </div>
                 `;
@@ -251,26 +506,34 @@
                 'Accepted': 'status-accepted',
                 'Rejected': 'status-rejected',
                 'Completed': 'status-completed',
-                'Failed': 'status-failed'
+                'Failed': 'status-failed',
+                'Available': 'status-available',
+                'Stock Finished': 'status-stock-finished',
+                'Expired': 'status-expired',
+                'Requested': 'status-pending'
             };
             return statusClasses[status] || 'status-pending';
         }
         
         function getActionButtons(request) {
+            let buttons = `<button class="action-button btn-details" data-request-id="${request._id}">View Details</button>`;
+            
             switch (request.status) {
                 case 'Pending':
-                    return `
+                    buttons += `
                         <button class="action-button btn-accept" data-request-id="${request._id}">Accept</button>
                         <button class="action-button btn-reject" data-request-id="${request._id}">Reject</button>
                     `;
+                    break;
                 case 'Accepted':
-                    return `
+                    buttons += `
                         <button class="action-button btn-complete" data-request-id="${request._id}">Completed</button>
                         <button class="action-button btn-failed" data-request-id="${request._id}">Failed</button>
                     `;
-                default:
-                    return '';
+                    break;
             }
+            
+            return buttons;
         }
         
         function getInitials(firstName, lastName) {
@@ -286,8 +549,22 @@
             });
         }
         
+        // Global variables for modal
+        let currentRequests = [];
+        const modal = document.getElementById('requestDetailsModal');
+        const closeModal = document.getElementById('closeRequestModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
         // Attach event listeners to action buttons
         function attachEventListeners() {
+            // View Details buttons
+            document.querySelectorAll('.btn-details').forEach(button => {
+                button.addEventListener('click', function() {
+                    const requestId = this.dataset.requestId;
+                    openRequestModal(requestId);
+                });
+            });
+            
             // Accept buttons
             document.querySelectorAll('.btn-accept').forEach(button => {
                 button.addEventListener('click', async function() {
@@ -320,6 +597,67 @@
                 });
             });
         }
+
+        // Modal functions
+        function openRequestModal(requestId) {
+            const request = currentRequests.find(r => r._id === requestId);
+            if (!request) {
+                console.error('Request not found:', requestId);
+                return;
+            }
+
+            // Populate modal with request data
+            document.getElementById('modalMedicineName').textContent = request.medicine?.name || 'Medicine not found';
+            document.getElementById('modalMedicineCategory').textContent = request.medicine?.category || 'Not specified';
+            document.getElementById('modalQuantity').textContent = `${request.quantity} ${request.medicine?.unit || 'units'}`;
+            document.getElementById('modalExpiry').textContent = request.medicine?.expiry ? formatDate(request.medicine.expiry) : 'Not specified';
+            
+            document.getElementById('modalRequesterName').textContent = `${request.requester?.firstName || 'Unknown'} ${request.requester?.lastName || ''}`;
+            document.getElementById('modalRequesterLocation').textContent = `${request.requester?.city || 'Unknown'}, ${request.requester?.state || 'Unknown'}`;
+            document.getElementById('modalDistance').textContent = request.distanceFormatted || 'Distance unknown';
+            document.getElementById('modalRequestDate').textContent = formatDate(request.createdAt);
+            
+            // Set status with proper class
+            const statusElement = document.getElementById('modalStatus');
+            statusElement.textContent = request.status;
+            statusElement.className = `status-badge ${getStatusClass(request.status)}`;
+            
+            // Handle message section
+            const messageSection = document.getElementById('messageSection');
+            const messageContent = document.getElementById('modalMessage');
+            if (request.message && request.message.trim()) {
+                messageContent.textContent = request.message;
+                messageSection.style.display = 'block';
+            } else {
+                messageSection.style.display = 'none';
+            }
+            
+            // Handle response section
+            const responseSection = document.getElementById('responseSection');
+            const responseContent = document.getElementById('modalResponse');
+            if (request.donorResponse && request.donorResponse.message) {
+                responseContent.textContent = request.donorResponse.message;
+                responseSection.style.display = 'block';
+            } else {
+                responseSection.style.display = 'none';
+            }
+            
+            // Show modal
+            modal.style.display = 'flex';
+        }
+
+        function closeRequestModal() {
+            modal.style.display = 'none';
+        }
+
+        // Modal event listeners
+        closeModal.addEventListener('click', closeRequestModal);
+        closeModalBtn.addEventListener('click', closeRequestModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeRequestModal();
+            }
+        });
         
         // Function to update request status
         async function updateRequestStatus(requestId, action) {
@@ -363,5 +701,128 @@
                 notification.remove();
             }, 3000);
         }
+
+        // Donation Details Modal Functions
+        const donationModal = document.getElementById('donationDetailsModal');
+        const closeDonationModalBtn = document.getElementById('closeDonationModalBtn');
+
+        // Global function to view donation details
+        window.viewDonationDetails = async function(donationId) {
+            try {
+                const response = await fetch(`/dashboard/api/donations/${donationId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const donation = data.donation;
+                    populateDonationModal(donation);
+                    donationModal.style.display = 'flex';
+                } else {
+                    showNotification('Error loading donation details', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading donation details:', error);
+                showNotification('Error loading donation details', 'error');
+            }
+        };
+
+        function populateDonationModal(donation) {
+            // Medicine Information
+            document.getElementById('modalDonationName').textContent = donation.name || 'Not specified';
+            document.getElementById('modalDonationCategory').textContent = donation.category || 'Not specified';
+            document.getElementById('modalDonationQuantity').textContent = donation.quantity || 'Not specified';
+            document.getElementById('modalDonationUnit').textContent = donation.unit || 'Not specified';
+            document.getElementById('modalDonationDosage').textContent = donation.dosage || 'Not specified';
+            document.getElementById('modalDonationManufacturer').textContent = donation.manufacturer || 'Not specified';
+            document.getElementById('modalDonationExpiry').textContent = donation.expiry ? formatDate(donation.expiry) : 'Not specified';
+            document.getElementById('modalDonationCondition').textContent = donation.condition || 'Not specified';
+
+            // Donation Information
+            document.getElementById('modalDonationDate').textContent = formatDate(donation.createdAt);
+            document.getElementById('modalDonationRequests').textContent = donation.requestCount || 0;
+            document.getElementById('modalDonationCompleted').textContent = donation.completedCount || 0;
+
+            // Set status with proper class
+            const statusElement = document.getElementById('modalDonationStatus');
+            statusElement.textContent = donation.status;
+            statusElement.className = `status-badge ${getStatusClass(donation.status)}`;
+
+            // Pickup Location
+            const pickupLocation = donation.pickupLocation || {};
+            document.getElementById('modalDonationAddress').textContent = pickupLocation.addressLine1 || 'Not specified';
+            document.getElementById('modalDonationCity').textContent = pickupLocation.city || 'Not specified';
+            document.getElementById('modalDonationState').textContent = pickupLocation.state || 'Not specified';
+            document.getElementById('modalDonationPincode').textContent = pickupLocation.pincode || 'Not specified';
+
+            // Additional Information
+            const description = donation.description || 'No additional information provided';
+            document.getElementById('modalDonationDescription').textContent = description;
+            
+            // Show/hide additional info section based on content
+            const additionalInfoSection = document.getElementById('additionalInfoSection');
+            if (description && description !== 'No additional information provided') {
+                additionalInfoSection.style.display = 'block';
+            } else {
+                additionalInfoSection.style.display = 'none';
+            }
+
+            // Load request history
+            loadRequestHistory(donation._id);
+        }
+
+        async function loadRequestHistory(donationId) {
+            try {
+                const response = await fetch(`/dashboard/api/donations/${donationId}/requests`);
+                const data = await response.json();
+                
+                const requestHistoryContainer = document.getElementById('modalRequestHistory');
+                const requestHistorySection = document.getElementById('requestHistorySection');
+                
+                if (data.success && data.requests.length > 0) {
+                    const historyHTML = data.requests.map(request => {
+                        const requesterInitials = getInitials(request.requester?.firstName, request.requester?.lastName);
+                        const statusClass = getStatusClass(request.status);
+                        
+                        return `
+                            <div class="request-history-item">
+                                <div class="request-header">
+                                    <div class="requester-avatar">${requesterInitials}</div>
+                                    <div class="request-info">
+                                        <div class="requester-name">${request.requester?.firstName || 'Unknown'} ${request.requester?.lastName || ''}</div>
+                                        <div class="request-date">${formatDate(request.createdAt)}</div>
+                                    </div>
+                                    <span class="status-badge ${statusClass}">${request.status}</span>
+                                </div>
+                                <div class="request-details">
+                                    <div class="request-quantity">Quantity: ${request.quantity} ${request.medicine?.unit || 'units'}</div>
+                                    ${request.message ? `<div class="request-message">"${request.message}"</div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    requestHistoryContainer.innerHTML = historyHTML;
+                    requestHistorySection.style.display = 'block';
+                } else {
+                    requestHistoryContainer.innerHTML = '<div class="no-requests">No requests for this donation yet.</div>';
+                    requestHistorySection.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading request history:', error);
+                document.getElementById('modalRequestHistory').innerHTML = '<div class="error">Error loading request history.</div>';
+            }
+        }
+
+        function closeDonationModal() {
+            donationModal.style.display = 'none';
+        }
+
+        // Donation modal event listeners
+        document.getElementById('closeDonationModal').addEventListener('click', closeDonationModal);
+        closeDonationModalBtn.addEventListener('click', closeDonationModal);
+        donationModal.addEventListener('click', function(e) {
+            if (e.target === donationModal) {
+                closeDonationModal();
+            }
+        });
     });
 </script>
