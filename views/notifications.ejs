@@ -42,22 +42,10 @@
     </div>
   </div>
 
-  <div id="pagination" class="pagination" style="display: none;">
-    <button id="prevPage" class="btn btn-outline">
-      <i class="fas fa-chevron-left"></i>
-      Previous
-    </button>
-    <span id="pageInfo" class="page-info">Page 1 of 1</span>
-    <button id="nextPage" class="btn btn-outline">
-      Next
-      <i class="fas fa-chevron-right"></i>
-    </button>
-  </div>
+
 </section>
 
 <script>
-let currentPage = 1;
-let totalPages = 1;
 let currentFilter = '';
 
 // Load notifications on page load
@@ -68,20 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead);
   document.getElementById('filterType').addEventListener('change', function() {
     currentFilter = this.value;
-    currentPage = 1;
     loadNotifications();
-  });
-  document.getElementById('prevPage').addEventListener('click', function() {
-    if (currentPage > 1) {
-      currentPage--;
-      loadNotifications();
-    }
-  });
-  document.getElementById('nextPage').addEventListener('click', function() {
-    if (currentPage < totalPages) {
-      currentPage++;
-      loadNotifications();
-    }
   });
 });
 
@@ -90,19 +65,15 @@ async function loadNotifications() {
   const loadingDiv = document.getElementById('loadingNotifications');
   const noNotificationsDiv = document.getElementById('noNotifications');
   const errorDiv = document.getElementById('notificationsError');
-  const paginationDiv = document.getElementById('pagination');
   
   // Show loading
   notificationsList.innerHTML = '';
   loadingDiv.style.display = 'flex';
   noNotificationsDiv.style.display = 'none';
   errorDiv.style.display = 'none';
-  paginationDiv.style.display = 'none';
   
   try {
-    const params = new URLSearchParams({
-      page: currentPage
-    });
+    const params = new URLSearchParams();
     
     if (currentFilter) {
       params.append('type', currentFilter);
@@ -116,8 +87,6 @@ async function loadNotifications() {
       
       if (data.notifications && data.notifications.length > 0) {
         displayNotifications(data.notifications);
-        updatePagination(data.currentPage, data.totalPages);
-        paginationDiv.style.display = 'flex';
       } else {
         noNotificationsDiv.style.display = 'flex';
       }
@@ -135,21 +104,21 @@ function displayNotifications(notifications) {
   const notificationsList = document.getElementById('notificationsList');
   
   notificationsList.innerHTML = notifications.map(notification => `
-    <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification._id}">
+    <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification._id || ''}">
       <div class="notification-icon">
         ${getNotificationIcon(notification.type)}
       </div>
       <div class="notification-content">
         <div class="notification-header">
-          <h4 class="notification-title">${notification.title}</h4>
+          <h4 class="notification-title">${notification.title || 'Notification'}</h4>
           <span class="notification-time">${formatTimeAgo(notification.createdAt)}</span>
         </div>
-        <p class="notification-message">${notification.message}</p>
-        ${notification.relatedMedicine ? `<p class="notification-related">Related: ${notification.relatedMedicine.name}</p>` : ''}
-        ${notification.relatedRequest ? `<p class="notification-related">Request Status: ${notification.relatedRequest.status}</p>` : ''}
+        <p class="notification-message">${notification.message || 'No message available'}</p>
+        ${notification.relatedMedicine && notification.relatedMedicine.name ? `<p class="notification-related">Related: ${notification.relatedMedicine.name}</p>` : ''}
+        ${notification.relatedRequest && notification.relatedRequest.status ? `<p class="notification-related">Request Status: ${notification.relatedRequest.status}</p>` : ''}
       </div>
       ${!notification.read ? '<div class="notification-unread-dot"></div>' : ''}
-      ${!notification.read ? `<button class="mark-read-btn" onclick="markAsRead('${notification._id}')">
+      ${!notification.read ? `<button class="mark-read-btn" onclick="markAsRead('${notification._id || ''}')">
         <i class="fas fa-check"></i>
       </button>` : ''}
     </div>
@@ -169,7 +138,18 @@ function getNotificationIcon(type) {
 }
 
 function formatTimeAgo(dateString) {
+  // Handle undefined, null, or invalid date strings
+  if (!dateString) {
+    return 'Recently';
+  }
+  
   const date = new Date(dateString);
+  
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return 'Recently';
+  }
+  
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);
   
@@ -181,15 +161,7 @@ function formatTimeAgo(dateString) {
   return date.toLocaleDateString();
 }
 
-function updatePagination(currentPage, totalPages) {
-  const pageInfo = document.getElementById('pageInfo');
-  const prevBtn = document.getElementById('prevPage');
-  const nextBtn = document.getElementById('nextPage');
-  
-  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-  prevBtn.disabled = currentPage <= 1;
-  nextBtn.disabled = currentPage >= totalPages;
-}
+
 
 async function markAsRead(notificationId) {
   try {

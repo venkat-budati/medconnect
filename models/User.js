@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: function() { return !this.email; },
+    required: true,
     unique: true,
     sparse: true,
     match: /^\d{10,15}$/
@@ -45,11 +45,7 @@ const userSchema = new mongoose.Schema({
     sparse: true,
     trim: true
   },
-  mobile: {
-    type: String,
-    trim: true,
-    match: /^[\+]?[1-9][\d]{0,15}$/
-  },
+
   
   // Address fields
   addressLine1: {
@@ -194,6 +190,26 @@ userSchema.methods.updateStats = async function() {
   this.peopleHelped = completedRequests.length;
   
   await this.save();
+};
+
+// Method to check if profile is complete
+userSchema.methods.isProfileComplete = function() {
+  // Check if essential profile fields are filled
+  const requiredFields = [
+    this.firstName,
+    this.lastName,
+    this.username,
+    this.phone,
+    this.addressLine1,
+    this.city,
+    this.state,
+    this.country,
+    this.district,
+    this.pincode
+  ];
+  
+  // Return true if all required fields have non-empty values
+  return requiredFields.every(field => field && field.trim() !== '');
 };
 
 module.exports = mongoose.model('User', userSchema); 

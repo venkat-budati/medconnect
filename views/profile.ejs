@@ -1,44 +1,135 @@
-<style>
-    .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        border-radius: 8px;
-        padding: 15px 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 1000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        max-width: 300px;
-    }
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 380px;
+            min-width: 280px;
+            height: auto;
+            min-height: 48px;
+            max-height: 90px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-success {
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        
+        .notification-error {
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .notification i {
+            font-size: 16px;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            line-height: 1;
+            vertical-align: middle;
+            position: relative;
+            top: 0;
+            transform: translateY(0);
+        }
+        
+        .notification .fas {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+        
+        .notification span {
+            font-size: 14px;
+            line-height: 1.3;
+            flex: 1;
+            display: inline-block;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-height: 55px;
+            overflow: hidden;
+            text-align: center;
+            vertical-align: middle;
+            position: relative;
+            top: 0;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 0;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-left: auto;
+            line-height: 1;
+            vertical-align: middle;
+            position: relative;
+            top: 0;
+            transform: translateY(0);
+        }
+        
+        .notification-close .fas {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+        
+        .notification-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        
+        .save-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Style for "Not provided" text */
+        .info-value:contains("Not provided") {
+            color: #6c757d !important;
+            font-style: italic !important;
+        }
+    </style>
     
-    .notification.show {
-        transform: translateX(0);
-    }
-    
-    .notification-success {
-        border-left: 4px solid #28a745;
-        color: #155724;
-    }
-    
-    .notification-error {
-        border-left: 4px solid #dc3545;
-        color: #721c24;
-    }
-    
-    .notification i {
-        font-size: 18px;
-    }
-    
-    .save-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-</style>
+    <script>
+        // Apply styling to "Not provided" text on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const infoValues = document.querySelectorAll('.info-value');
+            infoValues.forEach(element => {
+                if (element.textContent === 'Not provided') {
+                    element.style.color = '#6c757d';
+                    element.style.fontStyle = 'italic';
+                }
+            });
+        });
+    </script>
  <link rel="stylesheet" href="/css/profile.css">
  <div class="main-content">
 
@@ -53,6 +144,26 @@
             </div>
         </div>
         
+        <!-- Profile Completion Banner -->
+        <% if (!isProfileComplete) { %>
+        <div class="profile-completion-banner" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; margin: 20px 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="font-size: 24px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Complete Your Profile</h4>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+                        Please complete your profile information to access all features of MedConnect. 
+                        This helps us provide better service and connect you with nearby medicines.
+                    </p>
+                </div>
+                <div style="font-size: 14px; opacity: 0.8;">
+                </div>
+            </div>
+        </div>
+        <% } %>
+        
         <!-- Profile Info -->
         <div class="profile-info">
             <button class="edit-button" id="editButton" onclick="console.log('Edit button clicked via onclick'); window.testEditMode && window.testEditMode();" style="cursor: pointer; z-index: 1000;">
@@ -65,19 +176,20 @@
                 <div class="info-grid">
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-user"></i> First Name</span>
-                        <div class="info-value" id="firstName"><%= user.firstName || '' %></div>
+                        <div class="info-value" id="firstName"><%= user.firstName || 'Not provided' %></div>
                         <input type="text" class="info-input" id="firstNameInput" value="<%= user.firstName || '' %>" style="display: none;">
                     </div>
                     
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-user"></i> Last Name</span>
-                        <div class="info-value" id="lastName"><%= user.lastName || '' %></div>
+                        <div class="info-value" id="lastName"><%= user.lastName || 'Not provided' %></div>
                         <input type="text" class="info-input" id="lastNameInput" value="<%= user.lastName || '' %>" style="display: none;">
                     </div>
                     
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-at"></i> Username</span>
-                        <div class="info-value"><%= user.username || '' %></div>
+                        <div class="info-value" id="username"><%= user.username || 'Not provided' %></div>
+                        <input type="text" class="info-input" id="usernameInput" value="<%= user.username || '' %>" placeholder="Enter username (letters, numbers, underscores only)" style="display: none;">
                     </div>
                     
                     <div class="info-group">
@@ -86,14 +198,14 @@
                     </div>
                     
                     <div class="info-group">
-                        <span class="info-label"><i class="fas fa-mobile-alt"></i> Mobile Number</span>
-                        <div class="info-value" id="mobile"><%= user.mobile || '' %></div>
-                        <input type="text" class="info-input" id="mobileInput" value="<%= user.mobile || '' %>" style="display: none;">
+                        <span class="info-label"><i class="fas fa-phone"></i> Phone Number</span>
+                        <div class="info-value" id="phone"><%= user.phone || 'Not provided' %></div>
+                        <input type="text" class="info-input" id="phoneInput" value="<%= user.phone || '' %>" style="display: none;">
                     </div>
                     
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-map-marker-alt"></i> Address Line 1</span>
-                        <div class="info-value" id="addressLine1"><%= user.addressLine1 || '' %></div>
+                        <div class="info-value" id="addressLine1"><%= user.addressLine1 || 'Not provided' %></div>
                         <div style="position: relative;">
                             <input type="text" class="info-input" id="addressLine1Input" value="<%= user.addressLine1 || '' %>" placeholder="Start typing your address..." style="display: none;">
                             <div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #6c757d; pointer-events: none; display: none;" id="autocompleteIcon">
@@ -113,33 +225,33 @@
                     
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-globe"></i> Country</span>
-                        <div class="info-value" id="country"><%= user.country || '' %></div>
+                        <div class="info-value" id="country"><%= user.country || 'Not provided' %></div>
                         <input type="text" class="info-input" id="countryInput" value="<%= user.country || '' %>" style="display: none;" readonly>
                     </div>
                     
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-map"></i> State/Province</span>
-                        <div class="info-value" id="state"><%= user.state || '' %></div>
+                        <div class="info-value" id="state"><%= user.state || 'Not provided' %></div>
                         <input type="text" class="info-input" id="stateInput" value="<%= user.state || '' %>" style="display: none;" readonly>
                     </div>
 
                     <div class="info-group">
                         <span class="info-label"><i class="fas fa-globe"></i> District</span>
-                        <div class="info-value" id="district"><%= user.district || '' %></div>
+                        <div class="info-value" id="district"><%= user.district || 'Not provided' %></div>
                         <input type="text" class="info-input" id="districtInput" value="<%= user.district || '' %>" style="display: none;">
                     </div>
 
-                                         <div class="info-group">
-                         <span class="info-label"><i class="fas fa-city"></i> City</span>
-                         <div class="info-value" id="city"><%= user.city || '' %></div>
-                         <input type="text" class="info-input" id="cityInput" value="<%= user.city || '' %>" style="display: none;">
-                     </div>
-                     
-                     <div class="info-group">
-                         <span class="info-label"><i class="fas fa-mail-bulk"></i> Postal Code</span>
-                         <div class="info-value" id="pincode"><%= user.pincode || '' %></div>
-                         <input type="text" class="info-input" id="pincodeInput" value="<%= user.pincode || '' %>" style="display: none;">
-                     </div>
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-city"></i> City</span>
+                        <div class="info-value" id="city"><%= user.city || 'Not provided' %></div>
+                        <input type="text" class="info-input" id="cityInput" value="<%= user.city || '' %>" style="display: none;">
+                    </div>
+                    
+                    <div class="info-group">
+                        <span class="info-label"><i class="fas fa-mail-bulk"></i> Postal Code</span>
+                        <div class="info-value" id="pincode"><%= user.pincode || 'Not provided' %></div>
+                        <input type="text" class="info-input" id="pincodeInput" value="<%= user.pincode || '' %>" style="display: none;">
+                    </div>
                     
                     <!-- Location Services Section -->
                     <div class="info-group location-services" style="grid-column: 1 / -1; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
@@ -247,7 +359,8 @@
             // Editable fields
             const firstName = document.getElementById('firstName');
             const lastName = document.getElementById('lastName');
-            const mobile = document.getElementById('mobile');
+            const username = document.getElementById('username');
+            const phone = document.getElementById('phone');
                      const addressLine1 = document.getElementById('addressLine1');
              const country = document.getElementById('country');
              const state = document.getElementById('state');
@@ -258,7 +371,8 @@
             // Input fields
             const firstNameInput = document.getElementById('firstNameInput');
             const lastNameInput = document.getElementById('lastNameInput');
-            const mobileInput = document.getElementById('mobileInput');
+            const usernameInput = document.getElementById('usernameInput');
+            const phoneInput = document.getElementById('phoneInput');
                      const addressLine1Input = document.getElementById('addressLine1Input');
              const countryInput = document.getElementById('countryInput');
              const stateInput = document.getElementById('stateInput');
@@ -274,15 +388,16 @@
         
         // Store original values
         const originalValues = {
-            firstName: firstName.textContent,
-            lastName: lastName.textContent,
-            mobile: mobile.textContent,
-            addressLine1: addressLine1.textContent,
-            country: country.textContent,
-            state: state.textContent,
-            city: city.textContent,
-            district: district.textContent,
-            pincode: pincode.textContent
+            firstName: firstName.textContent === 'Not provided' ? '' : firstName.textContent,
+            lastName: lastName.textContent === 'Not provided' ? '' : lastName.textContent,
+            username: username.textContent === 'Not provided' ? '' : username.textContent,
+            phone: phone.textContent === 'Not provided' ? '' : phone.textContent,
+            addressLine1: addressLine1.textContent === 'Not provided' ? '' : addressLine1.textContent,
+            country: country.textContent === 'Not provided' ? '' : country.textContent,
+            state: state.textContent === 'Not provided' ? '' : state.textContent,
+            city: city.textContent === 'Not provided' ? '' : city.textContent,
+            district: district.textContent === 'Not provided' ? '' : district.textContent,
+            pincode: pincode.textContent === 'Not provided' ? '' : pincode.textContent
         };
         
         console.log('Original values:', originalValues);
@@ -295,7 +410,8 @@
                 // Hide static values
                 if (firstName) firstName.style.display = 'none';
                 if (lastName) lastName.style.display = 'none';
-                if (mobile) mobile.style.display = 'none';
+                if (username) username.style.display = 'none';
+                if (phone) phone.style.display = 'none';
                 if (addressLine1) addressLine1.style.display = 'none';
                 if (country) country.style.display = 'none';
                 if (state) state.style.display = 'none';
@@ -308,7 +424,8 @@
                 // Show input fields
                 if (firstNameInput) firstNameInput.style.display = 'block';
                 if (lastNameInput) lastNameInput.style.display = 'block';
-                if (mobileInput) mobileInput.style.display = 'block';
+                if (usernameInput) usernameInput.style.display = 'block';
+                if (phoneInput) phoneInput.style.display = 'block';
                 if (addressLine1Input) addressLine1Input.style.display = 'block';
                 if (countryInput) countryInput.style.display = 'block';
                 if (stateInput) stateInput.style.display = 'block';
@@ -350,7 +467,8 @@
                 // Show static values
                 if (firstName) firstName.style.display = 'block';
                 if (lastName) lastName.style.display = 'block';
-                if (mobile) mobile.style.display = 'block';
+                if (username) username.style.display = 'block';
+                if (phone) phone.style.display = 'block';
                 if (addressLine1) addressLine1.style.display = 'block';
                 if (country) country.style.display = 'block';
                 if (state) state.style.display = 'block';
@@ -361,7 +479,8 @@
                 // Hide input fields
                 if (firstNameInput) firstNameInput.style.display = 'none';
                 if (lastNameInput) lastNameInput.style.display = 'none';
-                if (mobileInput) mobileInput.style.display = 'none';
+                if (usernameInput) usernameInput.style.display = 'none';
+                if (phoneInput) phoneInput.style.display = 'none';
                 if (addressLine1Input) addressLine1Input.style.display = 'none';
                 if (countryInput) countryInput.style.display = 'none';
                 if (stateInput) stateInput.style.display = 'none';
@@ -378,7 +497,8 @@
                 // Reset input values to original
                 if (firstNameInput) firstNameInput.value = originalValues.firstName;
                 if (lastNameInput) lastNameInput.value = originalValues.lastName;
-                if (mobileInput) mobileInput.value = originalValues.mobile;
+                if (usernameInput) usernameInput.value = originalValues.username;
+                if (phoneInput) phoneInput.value = originalValues.phone;
                 if (addressLine1Input) addressLine1Input.value = originalValues.addressLine1;
                 if (countryInput) countryInput.value = originalValues.country;
                 if (stateInput) stateInput.value = originalValues.state;
@@ -400,7 +520,8 @@
             const formData = {
                 firstName: firstNameInput.value.trim(),
                 lastName: lastNameInput.value.trim(),
-                mobile: mobileInput.value.trim(),
+                username: usernameInput.value.trim(),
+                phone: phoneInput.value.trim(),
                 addressLine1: addressLine1Input.value.trim(),
                 country: countryInput.value.trim(),
                 state: stateInput.value.trim(),
@@ -411,9 +532,32 @@
             
             console.log('Form data:', formData);
             
-            // Client-side validation
-            if (!formData.firstName || !formData.lastName) {
-                showNotification('First name and last name are required.', 'error');
+            // Client-side validation for all required fields
+            const requiredFields = [
+                { field: 'firstName', name: 'First Name' },
+                { field: 'lastName', name: 'Last Name' },
+                { field: 'username', name: 'Username' },
+                { field: 'phone', name: 'Phone Number' },
+                { field: 'addressLine1', name: 'Address' },
+                { field: 'city', name: 'City' },
+                { field: 'state', name: 'State' },
+                { field: 'country', name: 'Country' },
+                { field: 'district', name: 'District' },
+                { field: 'pincode', name: 'Pincode' }
+            ];
+            
+            // Check if any required field is empty
+            for (const requiredField of requiredFields) {
+                if (!formData[requiredField.field] || formData[requiredField.field].trim() === '') {
+                    showNotification(`${requiredField.name} is required.`, 'error');
+                    return;
+                }
+            }
+            
+            // Username validation - only alphanumeric and underscores
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usernameRegex.test(formData.username)) {
+                showNotification('Username can only contain letters, numbers, and underscores.', 'error');
                 return;
             }
             
@@ -435,15 +579,27 @@
                 
                 if (data.success) {
                     // Update static values
-                    firstName.textContent = formData.firstName;
-                    lastName.textContent = formData.lastName;
-                    mobile.textContent = formData.mobile;
-                    addressLine1.textContent = formData.addressLine1;
-                    country.textContent = formData.country;
-                    state.textContent = formData.state;
-                    city.textContent = formData.city;
-                    district.textContent = formData.district;
-                    pincode.textContent = formData.pincode;
+                    firstName.textContent = formData.firstName || 'Not provided';
+                    lastName.textContent = formData.lastName || 'Not provided';
+                    username.textContent = formData.username || 'Not provided';
+                    phone.textContent = formData.phone || 'Not provided';
+                    addressLine1.textContent = formData.addressLine1 || 'Not provided';
+                    country.textContent = formData.country || 'Not provided';
+                    state.textContent = formData.state || 'Not provided';
+                    city.textContent = formData.city || 'Not provided';
+                    district.textContent = formData.district || 'Not provided';
+                    pincode.textContent = formData.pincode || 'Not provided';
+                    
+                    // Apply styling to "Not provided" text
+                    [firstName, lastName, username, phone, addressLine1, country, state, city, district, pincode].forEach(element => {
+                        if (element.textContent === 'Not provided') {
+                            element.style.color = '#6c757d';
+                            element.style.fontStyle = 'italic';
+                        } else {
+                            element.style.color = '';
+                            element.style.fontStyle = '';
+                        }
+                    });
                     
                     // Update original values
                     Object.assign(originalValues, formData);
@@ -460,8 +616,20 @@
                     const last = formData.lastName ? formData.lastName.charAt(0) : '';
                     profileAvatar.textContent = (first + last).toUpperCase();
                     
+                    // Check if profile is now complete
+                    const isProfileComplete = checkProfileCompletion(formData);
+                    
                     // Show success message
-                    showNotification('Profile updated successfully!', 'success');
+                    if (isProfileComplete) {
+                        showNotification('Profile completed successfully! You can now access all features.', 'success');
+                        // Remove the completion banner if it exists
+                        const banner = document.querySelector('.profile-completion-banner');
+                        if (banner) {
+                            banner.style.display = 'none';
+                        }
+                    } else {
+                        showNotification('Profile updated successfully!', 'success');
+                    }
                 
                 // Exit edit mode
                 cancelEdit();
@@ -478,6 +646,24 @@
             }
         }
         
+        // Check if profile is complete
+        function checkProfileCompletion(formData) {
+            const requiredFields = [
+                formData.firstName,
+                formData.lastName,
+                formData.username,
+                formData.phone,
+                formData.addressLine1,
+                formData.city,
+                formData.state,
+                formData.country,
+                formData.district,
+                formData.pincode
+            ];
+            
+            return requiredFields.every(field => field && field.trim() !== '');
+        }
+        
         // Show notification function
         function showNotification(message, type = 'info') {
             console.log('Showing notification:', message, type);
@@ -488,6 +674,9 @@
             notification.innerHTML = `
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
                 <span>${message}</span>
+                <button class="notification-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
             
             // Add to page
@@ -496,12 +685,14 @@
             // Show notification
             setTimeout(() => notification.classList.add('show'), 100);
             
-            // Remove after 3 seconds
+            // Remove after 5 seconds (increased from 3 seconds)
             setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-            }
+                if (notification.parentElement) {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 5000);
+        }
             
             // Event listeners
         if (editButton) {
@@ -545,7 +736,7 @@
         }
         
         // Handle Enter key in input fields
-        const inputs = [firstNameInput, lastNameInput, mobileInput, addressLine1Input, countryInput, stateInput, cityInput, districtInput, pincodeInput];
+                    const inputs = [firstNameInput, lastNameInput, phoneInput, addressLine1Input, countryInput, stateInput, cityInput, districtInput, pincodeInput];
         inputs.forEach(input => {
             if (input) {
                 input.addEventListener('keypress', function(e) {

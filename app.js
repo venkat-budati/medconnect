@@ -41,9 +41,17 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({ 
     mongoUrl: process.env.MONGODB_URI,
-    collectionName: 'sessions'
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // 24 hours
+    autoRemove: 'native'
   }),
-  cookie: { maxAge: 1000 * 60 * 60 * 24 },
+  cookie: { 
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
+  },
+  name: 'medconnect.sid'
 }));
 app.use(flash());
 

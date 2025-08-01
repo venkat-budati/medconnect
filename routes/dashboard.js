@@ -9,8 +9,47 @@ const Review = require('../models/Review');
 const { isLoggedIn } = require('./middleware');
 const { geocodeAddress, calculateHaversineDistance, formatDistance } = require('../utils/geocoding');
 
+// Middleware to check if user's profile is complete
+const requireCompleteProfile = async (req, res, next) => {
+  try {
+    const userId = req.session.user.id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      req.flash('error', 'User not found.');
+      return res.redirect('/auth/login');
+    }
+
+    if (!user.isProfileComplete()) {
+      // Check if it's an AJAX request
+      if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
+        return res.status(403).json({
+          success: false,
+          message: 'Please complete your profile to access all features.',
+          requiresProfileCompletion: true
+        });
+      }
+      
+      req.flash('info', 'Please complete your profile to access all features.');
+      return res.redirect('/dashboard/profile');
+    }
+
+    next();
+  } catch (error) {
+    console.error('Profile completion check error:', error);
+    if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({
+        success: false,
+        message: 'Error checking profile completion.'
+      });
+    }
+    req.flash('error', 'Error checking profile completion.');
+    res.redirect('/dashboard/profile');
+  }
+};
+
 // Main Dashboard
-router.get('/', isLoggedIn, async (req, res) => {
+router.get('/', isLoggedIn, requireCompleteProfile, async (req, res) => {
   try {
     const userId = req.session.user.id;
     
@@ -136,7 +175,7 @@ function getMedicineIcon(category) {
 }
 
 // Browse Medicines
-router.get('/browse', isLoggedIn, async (req, res) => {
+router.get('/browse', isLoggedIn, requireCompleteProfile, async (req, res) => {
   try {
     const { 
       category, 
@@ -477,7 +516,7 @@ router.post('/request-medicine/:medicineId', isLoggedIn, async (req, res) => {
 });
 
 // Get medicine details for modal
-router.get('/medicine/:medicineId', isLoggedIn, async (req, res) => {
+router.get('/medicine/:medicineId', isLoggedIn, requireCompleteProfile, async (req, res) => {
   try {
     const { medicineId } = req.params;
     
@@ -497,7 +536,7 @@ router.get('/medicine/:medicineId', isLoggedIn, async (req, res) => {
 });
 
 // My Requests
-router.get('/requests', isLoggedIn, async (req, res) => {
+router.get('/requests', isLoggedIn, requireCompleteProfile, async (req, res) => {
   try {
     const userId = req.session.user.id;
     const user = await User.findById(userId);
@@ -649,7 +688,7 @@ router.post('/requests/:requestId/cancel', isLoggedIn, async (req, res) => {
 });
 
 // Donation History
-router.get('/donor', isLoggedIn, async (req, res) => {
+router.get('/donor', isLoggedIn, requireCompleteProfile, async (req, res) => {
   try {
     const userId = req.session.user.id;
     const user = await User.findById(userId);
@@ -720,6 +759,9 @@ router.get('/profile', isLoggedIn, async (req, res) => {
       return res.redirect('/dashboard');
     }
     
+    // Check if profile is complete
+    const isProfileComplete = user.isProfileComplete();
+    
     // Get user stats
     const stats = await getUserStats(userId);
     
@@ -730,6 +772,7 @@ router.get('/profile', isLoggedIn, async (req, res) => {
       user,
       stats,
       unreadNotifications,
+      isProfileComplete,
       layout: 'layouts/dashboard_layout',
       activePage: 'profile'
     });
@@ -747,7 +790,8 @@ router.post('/profile/update', isLoggedIn, async (req, res) => {
     const {
       firstName,
       lastName,
-      mobile,
+      username,
+      phone,
       addressLine1,
       country,
       state,
@@ -761,16 +805,54 @@ router.post('/profile/update', isLoggedIn, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Update user fields
-    user.firstName = firstName || user.firstName;
-    user.lastName = lastName || user.lastName;
-    user.mobile = mobile || user.mobile;
-    user.addressLine1 = addressLine1 || user.addressLine1;
-    user.country = country || user.country;
-    user.state = state || user.state;
-    user.city = city || user.city;
-    user.district = district || user.district;
-    user.pincode = pincode || user.pincode;
+    // Server-side validation for all required fields
+    const requiredFields = [
+      { field: 'firstName', name: 'First Name' },
+      { field: 'lastName', name: 'Last Name' },
+      { field: 'username', name: 'Username' },
+      { field: 'phone', name: 'Phone Number' },
+      { field: 'addressLine1', name: 'Address' },
+      { field: 'city', name: 'City' },
+      { field: 'state', name: 'State' },
+      { field: 'country', name: 'Country' },
+      { field: 'district', name: 'District' },
+      { field: 'pincode', name: 'Pincode' }
+    ];
+    
+    // Check if any required field is empty
+    for (const requiredField of requiredFields) {
+      const fieldValue = req.body[requiredField.field];
+      if (!fieldValue || fieldValue.trim() === '') {
+        return res.status(400).json({ error: `${requiredField.name} is required.` });
+      }
+    }
+    
+    // Validate username if provided
+    if (username && username !== user.username) {
+      // Check if username is valid format
+      const usernameRegex = /^[a-zA-Z0-9_]+$/;
+      if (!usernameRegex.test(username)) {
+        return res.status(400).json({ error: 'Username can only contain letters, numbers, and underscores.' });
+      }
+      
+      // Check if username is already taken
+      const existingUser = await User.findOne({ username: username });
+      if (existingUser && existingUser._id.toString() !== userId) {
+        return res.status(400).json({ error: 'Username is already taken.' });
+      }
+    }
+    
+    // Update user fields with validated values
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.username = username;
+    user.phone = phone;
+    user.addressLine1 = addressLine1;
+    user.country = country;
+    user.state = state;
+    user.city = city;
+    user.district = district;
+    user.pincode = pincode;
     
     await user.save();
     
@@ -951,21 +1033,36 @@ router.post('/settings/change-password', isLoggedIn, async (req, res) => {
 // Logout route for dashboard
 router.get('/logout', isLoggedIn, (req, res) => {
   try {
-    // Clear session data before destroying
+    console.log('Logout initiated for user:', req.session.user);
+    
+    // Clear session data
     if (req.session) {
+      // Clear all session data
       req.session.user = null;
-      req.session.destroy((err) => {
+      req.session.otp = null;
+      req.session.otpEmail = null;
+      req.session.otpExpires = null;
+      
+      // Regenerate session ID to prevent session fixation
+      req.session.regenerate((err) => {
         if (err) {
-          console.error('Logout error:', err);
-          // Can't use req.flash() after session destruction, so redirect with query param
+          console.error('Session regeneration error:', err);
           return res.redirect('/auth/login?error=logout_failed');
         }
         
-        // Can't use req.flash() after session destruction, so redirect with query param
-        res.redirect('/auth/login?success=logged_out');
+        // Destroy the new session
+        req.session.destroy((destroyErr) => {
+          if (destroyErr) {
+            console.error('Session destruction error:', destroyErr);
+            return res.redirect('/auth/login?error=logout_failed');
+          }
+          
+          console.log('Session destroyed successfully');
+          res.redirect('/auth/login?success=logged_out');
+        });
       });
     } else {
-      // No session exists, redirect to login
+      console.log('No session found during logout');
       res.redirect('/auth/login?success=logged_out');
     }
   } catch (error) {
@@ -974,29 +1071,59 @@ router.get('/logout', isLoggedIn, (req, res) => {
   }
 });
 
+// Debug session route (remove in production)
+router.get('/debug-session', (req, res) => {
+  res.json({
+    sessionExists: !!req.session,
+    sessionId: req.session ? req.session.id : null,
+    user: req.session ? req.session.user : null,
+    isLoggedIn: !!(req.session && req.session.user)
+  });
+});
+
 // Logout API endpoint (for AJAX requests)
 router.post('/logout', isLoggedIn, (req, res) => {
   try {
-    // Clear session data before destroying
+    console.log('AJAX logout initiated for user:', req.session.user);
+    
+    // Clear session data
     if (req.session) {
+      // Clear all session data
       req.session.user = null;
-      req.session.destroy((err) => {
+      req.session.otp = null;
+      req.session.otpEmail = null;
+      req.session.otpExpires = null;
+      
+      // Regenerate session ID to prevent session fixation
+      req.session.regenerate((err) => {
         if (err) {
-          console.error('Logout error:', err);
+          console.error('Session regeneration error:', err);
           return res.status(500).json({
             success: false,
             error: 'Error during logout'
           });
         }
         
-        res.json({
-          success: true,
-          message: 'Logged out successfully',
-          redirect: '/auth/login'
+        // Destroy the new session
+        req.session.destroy((destroyErr) => {
+          if (destroyErr) {
+            console.error('Session destruction error:', destroyErr);
+            return res.status(500).json({
+              success: false,
+              error: 'Error during logout'
+            });
+          }
+          
+          console.log('Session destroyed successfully via AJAX');
+          res.json({
+            success: true,
+            message: 'Logged out successfully',
+            redirect: '/auth/login'
+          });
         });
       });
     } else {
-      // No session exists, return success
+      console.log('No session found during AJAX logout');
       res.json({
         success: true,
         message: 'Logged out successfully',
@@ -1076,9 +1203,7 @@ router.get('/notifications-page', isLoggedIn, async (req, res) => {
 router.get('/notifications', isLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { page = 1, type } = req.query;
-    const limit = 20;
-    const skip = (page - 1) * limit;
+    const { type } = req.query;
     
     // Build query
     const query = { recipient: userId };
@@ -1086,24 +1211,14 @@ router.get('/notifications', isLoggedIn, async (req, res) => {
       query.type = type;
     }
     
-    const [notifications, totalNotifications] = await Promise.all([
-      Notification.find(query)
-        .populate('sender', 'firstName lastName')
-        .populate('relatedMedicine', 'name')
-        .populate('relatedRequest', 'status')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Notification.countDocuments(query)
-    ]);
-    
-    const totalPages = Math.ceil(totalNotifications / limit);
+    const notifications = await Notification.find(query)
+      .populate('sender', 'firstName lastName')
+      .populate('relatedMedicine', 'name')
+      .populate('relatedRequest', 'status')
+      .sort({ createdAt: -1 });
     
     res.json({
-      notifications,
-      currentPage: parseInt(page),
-      totalPages,
-      hasMore: page < totalPages
+      notifications
     });
   } catch (error) {
     console.error('Notifications error:', error);
