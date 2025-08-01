@@ -65,5 +65,54 @@
         </aside>
         <%- body %>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle logout with confirmation
+            const logoutLink = document.querySelector('a[href="/dashboard/logout"]');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Show confirmation dialog
+                    if (confirm('Are you sure you want to logout?')) {
+                        // Show loading state
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Logging out...</span>';
+                        this.style.pointerEvents = 'none';
+                        
+                        // Redirect to logout
+                        window.location.href = '/dashboard/logout';
+                    }
+                });
+            }
+            
+            // Handle logout via AJAX (alternative method)
+            function logoutViaAjax() {
+                fetch('/dashboard/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    } else {
+                        alert('Logout failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    // Fallback to regular logout
+                    window.location.href = '/dashboard/logout';
+                });
+            }
+            
+            // Make logout function globally available
+            window.logoutViaAjax = logoutViaAjax;
+        });
+    </script>
 </body>
 </html>

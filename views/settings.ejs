@@ -169,44 +169,145 @@
             });
             
             // Form submission
-            passwordForm.addEventListener('submit', function(e) {
+            passwordForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 // Basic validation
                 if (newPassword.value !== confirmPassword.value) {
-                    alert('New passwords do not match. Please try again.');
+                    showError('New passwords do not match. Please try again.');
                     return;
                 }
                 
                 if (newPassword.value.length < 8) {
-                    alert('Password must be at least 8 characters long.');
+                    showError('Password must be at least 8 characters long.');
                     return;
                 }
                 
-                // In a real app, you would send this to your backend
-                // For this demo, we'll just show a success message
+                // Show loading state
+                const submitButton = this.querySelector('.submit-button');
+                const originalText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing Password...';
                 
-                // Reset form
-                passwordForm.reset();
-                strengthMeter.style.width = '0';
-                strengthText.textContent = 'Password strength: None';
-                strengthText.style.color = 'var(--gray)';
-                
-                // Hide requirement validations
-                document.querySelectorAll('.requirements-list li').forEach(li => {
-                    li.classList.remove('valid');
-                });
-                
-                // Show success message
-                successMessage.style.display = 'block';
-                
-                // Scroll to success message
-                successMessage.scrollIntoView({ behavior: 'smooth' });
-                
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 5000);
+                try {
+                    const response = await fetch('/dashboard/settings/change-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            currentPassword: currentPassword.value,
+                            newPassword: newPassword.value,
+                            confirmPassword: confirmPassword.value
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Reset form
+                        passwordForm.reset();
+                        strengthMeter.style.width = '0';
+                        strengthText.textContent = 'Password strength: None';
+                        strengthText.style.color = 'var(--gray)';
+                        
+                        // Hide requirement validations
+                        document.querySelectorAll('.requirements-list li').forEach(li => {
+                            li.classList.remove('valid');
+                        });
+                        
+                        // Show success message
+                        successMessage.style.display = 'block';
+                        
+                        // Scroll to success message
+                        successMessage.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // Redirect to login page after 3 seconds
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 3000);
+                    } else {
+                        showError(data.error || 'Failed to change password');
+                    }
+                } catch (error) {
+                    console.error('Change password error:', error);
+                    showError('Network error. Please try again.');
+                } finally {
+                    // Reset button state
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                }
             });
+            
+            // Function to show error messages
+            function showError(message) {
+                // Create error notification
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-notification';
+                errorDiv.innerHTML = `
+                    <div class="error-content">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${message}</span>
+                        <button class="error-close" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Add styles
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #dc3545;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
+                    z-index: 1000;
+                    max-width: 400px;
+                    animation: slideIn 0.3s ease;
+                `;
+                
+                errorDiv.querySelector('.error-content').style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                `;
+                
+                errorDiv.querySelector('.error-close').style.cssText = `
+                    background: none;
+                    border: none;
+                    color: white;
+                    cursor: pointer;
+                    margin-left: auto;
+                `;
+                
+                // Add to page
+                document.body.appendChild(errorDiv);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    if (errorDiv.parentElement) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         });
     </script>

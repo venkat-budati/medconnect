@@ -160,6 +160,67 @@
                 this.classList.toggle('fa-eye');
                 this.classList.toggle('fa-eye-slash');
             });
+            
+            // Handle query parameters for logout messages
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            
+            if (success === 'logged_out') {
+                showMessage('Logged out successfully!', 'success');
+            } else if (error === 'logout_failed') {
+                showMessage('Error during logout. Please try again.', 'error');
+            }
+            
+            function showMessage(message, type) {
+                // Create message element
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flash ${type}`;
+                messageDiv.textContent = message;
+                messageDiv.style.cssText = `
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                    font-weight: 500;
+                    text-align: center;
+                    animation: slideIn 0.3s ease;
+                `;
+                
+                if (type === 'success') {
+                    messageDiv.style.background = '#d4edda';
+                    messageDiv.style.color = '#155724';
+                    messageDiv.style.border = '1px solid #c3e6cb';
+                } else {
+                    messageDiv.style.background = '#f8d7da';
+                    messageDiv.style.color = '#721c24';
+                    messageDiv.style.border = '1px solid #f5c6cb';
+                }
+                
+                // Insert before the form
+                const form = document.getElementById('loginForm');
+                form.parentNode.insertBefore(messageDiv, form);
+                
+                // Remove message after 5 seconds
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateY(-20px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         });
     </script>
 </body>

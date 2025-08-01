@@ -653,6 +653,206 @@ router.get('/settings', isLoggedIn, async (req, res) => {
   }
 });
 
+// Change Password API with rate limiting
+const passwordChangeAttempts = new Map();
+
+router.post('/settings/change-password', isLoggedIn, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const userIP = req.ip || req.connection.remoteAddress;
+    
+    // Rate limiting: max 5 attempts per hour per user
+    const userKey = `${userId}-${userIP}`;
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+    
+    if (!passwordChangeAttempts.has(userKey)) {
+      passwordChangeAttempts.set(userKey, { count: 0, resetTime: now + oneHour });
+    }
+    
+    const userAttempts = passwordChangeAttempts.get(userKey);
+    
+    // Reset counter if hour has passed
+    if (now > userAttempts.resetTime) {
+      userAttempts.count = 0;
+      userAttempts.resetTime = now + oneHour;
+    }
+    
+    // Check if user has exceeded attempts
+    if (userAttempts.count >= 5) {
+      return res.status(429).json({
+        success: false,
+        error: 'Too many password change attempts. Please try again in an hour.'
+      });
+    }
+    
+        // Increment attempt counter
+    userAttempts.count++;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    
+    // Validate input
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'All fields are required'
+      });
+    }
+    
+    // Check if new passwords match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'New passwords do not match'
+      });
+    }
+    
+    // Get user first
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+    
+    // Validate password strength using the model method
+    const passwordValidation = user.validatePasswordStrength(newPassword);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        error: passwordValidation.errors.join(', ')
+      });
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        error: 'Current password is incorrect'
+      });
+    }
+    
+    // Check if new password is same as current
+    const isNewPasswordSame = await user.comparePassword(newPassword);
+    if (isNewPasswordSame) {
+      return res.status(400).json({
+        success: false,
+        error: 'New password must be different from current password'
+      });
+    }
+    
+    // Check if password contains email or phone (security measure)
+    const emailDomain = user.email ? user.email.split('@')[0] : '';
+    const phoneLast4 = user.phone ? user.phone.slice(-4) : '';
+    
+    if (emailDomain && newPassword.toLowerCase().includes(emailDomain.toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password should not contain your email address'
+      });
+    }
+    
+    if (phoneLast4 && newPassword.includes(phoneLast4)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password should not contain your phone number'
+      });
+    }
+    
+    // Update password
+    user.password = newPassword;
+    await user.save();
+    
+    // Reset attempt counter on successful password change
+    passwordChangeAttempts.delete(userKey);
+    
+    // Destroy session to force re-login
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destruction error:', err);
+      }
+      
+      res.json({
+        success: true,
+        message: 'Password changed successfully. Please log in again with your new password.',
+        redirect: '/auth/login'
+      });
+    });
+    
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error changing password'
+    });
+  }
+});
+
+// Logout route for dashboard
+router.get('/logout', isLoggedIn, (req, res) => {
+  try {
+    // Clear session data before destroying
+    if (req.session) {
+      req.session.user = null;
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Logout error:', err);
+          // Can't use req.flash() after session destruction, so redirect with query param
+          return res.redirect('/auth/login?error=logout_failed');
+        }
+        
+        // Can't use req.flash() after session destruction, so redirect with query param
+        res.redirect('/auth/login?success=logged_out');
+      });
+    } else {
+      // No session exists, redirect to login
+      res.redirect('/auth/login?success=logged_out');
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.redirect('/auth/login?error=logout_failed');
+  }
+});
+
+// Logout API endpoint (for AJAX requests)
+router.post('/logout', isLoggedIn, (req, res) => {
+  try {
+    // Clear session data before destroying
+    if (req.session) {
+      req.session.user = null;
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Logout error:', err);
+          return res.status(500).json({
+            success: false,
+            error: 'Error during logout'
+          });
+        }
+        
+        res.json({
+          success: true,
+          message: 'Logged out successfully',
+          redirect: '/auth/login'
+        });
+      });
+    } else {
+      // No session exists, return success
+      res.json({
+        success: true,
+        message: 'Logged out successfully',
+        redirect: '/auth/login'
+      });
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error during logout'
+    });
+  }
+});
+
 // Cancel request
 router.post('/cancel/:id', isLoggedIn, async (req, res) => {
   try {
