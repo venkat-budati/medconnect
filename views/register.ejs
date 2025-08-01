@@ -453,6 +453,82 @@
              border: 1px solid rgba(255, 193, 7, 0.3);
          }
          
+         /* Password Strength Checker Styles */
+         .password-strength-container {
+             margin-top: 10px;
+             padding: 15px;
+             background: #f8f9fa;
+             border-radius: 8px;
+             border: 1px solid #e9ecef;
+         }
+         
+         .strength-meter {
+             width: 100%;
+             height: 6px;
+             background: #e9ecef;
+             border-radius: 3px;
+             margin-bottom: 10px;
+             overflow: hidden;
+         }
+         
+         .strength-fill {
+             height: 100%;
+             width: 0%;
+             transition: all 0.3s ease;
+             border-radius: 3px;
+         }
+         
+         .strength-fill.very-weak { background: #dc3545; width: 20%; }
+         .strength-fill.weak { background: #fd7e14; width: 40%; }
+         .strength-fill.fair { background: #ffc107; width: 60%; }
+         .strength-fill.good { background: #20c997; width: 80%; }
+         .strength-fill.strong { background: #28a745; width: 100%; }
+         
+         .strength-text {
+             font-size: 14px;
+             font-weight: 500;
+             margin-bottom: 8px;
+         }
+         
+         .strength-text.very-weak { color: #dc3545; }
+         .strength-text.weak { color: #fd7e14; }
+         .strength-text.fair { color: #ffc107; }
+         .strength-text.good { color: #20c997; }
+         .strength-text.strong { color: #28a745; }
+         
+         .strength-requirements {
+             display: grid;
+             grid-template-columns: 1fr 1fr;
+             gap: 8px;
+             font-size: 12px;
+         }
+         
+         .requirement {
+             display: flex;
+             align-items: center;
+             gap: 6px;
+             padding: 4px 8px;
+             border-radius: 4px;
+             background: white;
+             border: 1px solid #e9ecef;
+         }
+         
+         .requirement.met {
+             background: rgba(40, 167, 69, 0.1);
+             border-color: rgba(40, 167, 69, 0.3);
+             color: #28a745;
+         }
+         
+         .requirement.not-met {
+             background: rgba(220, 53, 69, 0.1);
+             border-color: rgba(220, 53, 69, 0.3);
+             color: #dc3545;
+         }
+         
+         .requirement i {
+             font-size: 10px;
+         }
+         
          /* Loader styles */
          .btn.loading {
              position: relative;
@@ -589,6 +665,40 @@
                             <input type="password" id="password" name="password" placeholder="Create a password" required>
                             <i class="fas fa-eye toggle-password" id="togglePassword"></i>
                         </div>
+                        
+                        <!-- Password Strength Checker -->
+                        <div class="password-strength-container" id="passwordStrengthContainer" style="display: none;">
+                            <div class="strength-meter">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText"></div>
+                            <div class="strength-requirements">
+                                <div class="requirement" id="reqLength">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 8 characters</span>
+                                </div>
+                                <div class="requirement" id="reqUppercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One uppercase letter</span>
+                                </div>
+                                <div class="requirement" id="reqLowercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One lowercase letter</span>
+                                </div>
+                                <div class="requirement" id="reqNumber">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One number</span>
+                                </div>
+                                <div class="requirement" id="reqSpecial">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One special character</span>
+                                </div>
+                                <div class="requirement" id="reqNoCommon">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Not a common password</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                                          <div class="input-group">
@@ -715,15 +825,88 @@
                 countdown.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
             
-                         // Password validation function
+                         // Password strength checker and validation function
+             function checkPasswordStrength(password) {
+                 const strengthContainer = document.getElementById('passwordStrengthContainer');
+                 const strengthFill = document.getElementById('strengthFill');
+                 const strengthText = document.getElementById('strengthText');
+                 
+                 // Common passwords to check against
+                 const commonPasswords = [
+                     'password', '123456', '123456789', 'qwerty', 'abc123', 
+                     'password123', 'admin', 'letmein', 'welcome', 'monkey',
+                     '12345678', '1234567', '1234567890', 'qwerty123', 'password1'
+                 ];
+                 
+                 // Requirements
+                 const requirements = {
+                     length: password.length >= 8,
+                     uppercase: /[A-Z]/.test(password),
+                     lowercase: /[a-z]/.test(password),
+                     number: /\d/.test(password),
+                     special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+                     noCommon: !commonPasswords.includes(password.toLowerCase())
+                 };
+                 
+                 // Update requirement indicators
+                 document.getElementById('reqLength').className = `requirement ${requirements.length ? 'met' : 'not-met'}`;
+                 document.getElementById('reqUppercase').className = `requirement ${requirements.uppercase ? 'met' : 'not-met'}`;
+                 document.getElementById('reqLowercase').className = `requirement ${requirements.lowercase ? 'met' : 'not-met'}`;
+                 document.getElementById('reqNumber').className = `requirement ${requirements.number ? 'met' : 'not-met'}`;
+                 document.getElementById('reqSpecial').className = `requirement ${requirements.special ? 'met' : 'not-met'}`;
+                 document.getElementById('reqNoCommon').className = `requirement ${requirements.noCommon ? 'met' : 'not-met'}`;
+                 
+                 // Update requirement icons
+                 document.querySelectorAll('.requirement i').forEach((icon, index) => {
+                     const reqKeys = Object.keys(requirements);
+                     const isMet = requirements[reqKeys[index]];
+                     icon.className = isMet ? 'fas fa-check' : 'fas fa-times';
+                 });
+                 
+                 // Calculate strength score
+                 const metRequirements = Object.values(requirements).filter(Boolean).length;
+                 let strength = 'very-weak';
+                 let strengthLabel = 'Very Weak';
+                 
+                 if (metRequirements >= 5 && password.length >= 8) {
+                     strength = 'strong';
+                     strengthLabel = 'Strong';
+                 } else if (metRequirements >= 4 && password.length >= 8) {
+                     strength = 'good';
+                     strengthLabel = 'Good';
+                 } else if (metRequirements >= 3) {
+                     strength = 'fair';
+                     strengthLabel = 'Fair';
+                 } else if (metRequirements >= 2) {
+                     strength = 'weak';
+                     strengthLabel = 'Weak';
+                 }
+                 
+                 // Update strength meter and text
+                 strengthFill.className = `strength-fill ${strength}`;
+                 strengthText.className = `strength-text ${strength}`;
+                 strengthText.textContent = strengthLabel;
+                 
+                 return { strength, requirements, metRequirements };
+             }
+             
              function validatePassword() {
                  const password = document.getElementById('password').value;
                  const confirmPassword = document.getElementById('confirmPassword').value;
                  const validationDiv = document.getElementById('passwordValidation');
                  const validationMessage = document.getElementById('validationMessage');
+                 const strengthContainer = document.getElementById('passwordStrengthContainer');
                  
                  // Remove existing classes
                  validationDiv.classList.remove('success', 'error', 'warning');
+                 
+                 // Show/hide strength checker based on password input
+                 if (password) {
+                     strengthContainer.style.display = 'block';
+                     checkPasswordStrength(password);
+                 } else {
+                     strengthContainer.style.display = 'none';
+                 }
                  
                  // Check if both fields are empty
                  if (!password && !confirmPassword) {
@@ -747,11 +930,14 @@
                      return false;
                  }
                  
-                 // Check password strength
-                 if (password.length < 6) {
+                 // Check password strength requirements
+                 const strengthResult = checkPasswordStrength(password);
+                 const minRequirements = 4; // At least 4 requirements must be met
+                 
+                 if (strengthResult.metRequirements < minRequirements || password.length < 8) {
                      validationDiv.style.display = 'block';
                      validationDiv.classList.add('warning');
-                     validationMessage.textContent = 'Password must be at least 6 characters long.';
+                     validationMessage.textContent = 'Password does not meet minimum security requirements.';
                      return false;
                  }
                  
@@ -766,12 +952,25 @@
                  // Passwords match and meet requirements
                  validationDiv.style.display = 'block';
                  validationDiv.classList.add('success');
-                 validationMessage.textContent = 'Passwords match! ✓';
+                 validationMessage.textContent = 'Passwords match and meet security requirements! ✓';
                  return true;
              }
              
              // Add event listeners for password validation
-             document.getElementById('password').addEventListener('input', validatePassword);
+             document.getElementById('password').addEventListener('input', function() {
+                 const password = this.value;
+                 const strengthContainer = document.getElementById('passwordStrengthContainer');
+                 
+                 if (password) {
+                     strengthContainer.style.display = 'block';
+                     checkPasswordStrength(password);
+                 } else {
+                     strengthContainer.style.display = 'none';
+                 }
+                 
+                 validatePassword();
+             });
+             
              document.getElementById('confirmPassword').addEventListener('input', validatePassword);
              
                            sendOTP.addEventListener('click', function() {

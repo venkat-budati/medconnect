@@ -149,26 +149,36 @@ router.post('/login', async (req, res) => {
     return res.redirect('/auth/login');
   }
   
+  // Validate that password is provided
+  if (!password) {
+    req.flash('error', 'Password is required.');
+    return res.redirect('/auth/login');
+  }
+  
   try {
     let user;
+    let credentialType = '';
     
     // If both email and phone are provided, check if they belong to the same account
     if (email && phone) {
       user = await User.findOne({ email, phone });
+      credentialType = 'email and phone';
       if (!user) {
-        req.flash('error', 'The phone number you entered is not associated with this email address. Please check your credentials.');
+        req.flash('error', 'The email and phone number combination is not found. Please check your credentials.');
         return res.redirect('/auth/login');
       }
     } else if (email) {
       // Login with email only
       user = await User.findOne({ email });
+      credentialType = 'email';
       if (!user) {
-        req.flash('error', 'No account found with this email.');
+        req.flash('error', 'No account found with this email address.');
         return res.redirect('/auth/login');
       }
     } else if (phone) {
       // Login with phone only
       user = await User.findOne({ phone });
+      credentialType = 'phone number';
       if (!user) {
         req.flash('error', 'No account found with this phone number.');
         return res.redirect('/auth/login');
@@ -182,10 +192,11 @@ router.post('/login', async (req, res) => {
       return res.redirect('/auth/login');
     }
     
+    // Validate password
     const match = await user.comparePassword(password);
     console.log('Password match:', match);
     if (!match) {
-      req.flash('error', 'Invalid password.');
+      req.flash('error', `Invalid password for the provided ${credentialType}.`);
       return res.redirect('/auth/login');
     }
     req.session.user = { 

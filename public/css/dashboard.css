@@ -1425,9 +1425,10 @@ body {
 /* Notifications Page Styles */
 .notifications-section {
     padding: 30px;
-    min-width: 80%;
-    max-width: 1000px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 .notifications-header {
@@ -1552,8 +1553,9 @@ body {
 }
 
 .notifications-list {
-    max-height: 600px;
+    max-height: calc(100vh - 300px);
     overflow-y: auto;
+    min-height: 400px;
 }
 
 .notifications-list::-webkit-scrollbar {

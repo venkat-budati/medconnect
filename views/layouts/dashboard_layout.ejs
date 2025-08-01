@@ -177,16 +177,162 @@
                 width: 100%;
             }
         }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(42, 124, 199, 0.1);
+            transform: scale(1.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--dark);
+        }
+
+        /* Responsive Sidebar */
+        @media (max-width: 1100px) {
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar-header {
+                display: flex;
+            }
+
+            .sidebar-close {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -300px;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .dashboard-container {
+                margin-left: 0;
+            }
+
+            /* Overlay when sidebar is open */
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 0 20px;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .sidebar {
+                width: 280px;
+                left: -280px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+
+            .sidebar .nav-item {
+                padding: 20px 25px;
+                font-size: 18px;
+            }
+
+            .sidebar .nav-item i {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="header-container">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-heartbeat"></i>
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h1>MedConnect</h1>
                 </div>
-                <h1>MedConnect</h1>
             </div>
             <div class="user-info">
                 <div class="notifications" id="notificationIcon">
@@ -216,9 +362,18 @@
             </div>
         </div>
     </header>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="dashboard-container">
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Menu</h3>
+                <button class="sidebar-close" id="sidebarClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <a href="/dashboard" class="nav-item<%= (typeof activePage !== 'undefined' && activePage === 'dashboard') ? ' active' : '' %>">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
@@ -328,6 +483,51 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle functionality
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            // Toggle sidebar
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    sidebarOverlay.classList.toggle('active');
+                    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+                });
+            }
+            
+            // Close sidebar when clicking overlay
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+            
+            // Close sidebar when clicking close button
+            const sidebarClose = document.getElementById('sidebarClose');
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+            
+            // Close sidebar when clicking on a nav item (mobile)
+            const navItems = document.querySelectorAll('.sidebar .nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 1100) {
+                        sidebar.classList.remove('active');
+                        sidebarOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+            
             // Handle logout with confirmation modal
             const logoutLink = document.querySelector('a[href="/dashboard/logout"]');
             

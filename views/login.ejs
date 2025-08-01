@@ -70,6 +70,23 @@
         .login-link a:hover { text-decoration: underline; }
         .terms { margin-top: 20px; font-size: 14px; color: var(--gray); text-align: center; }
         .terms a { color: var(--primary); text-decoration: none; }
+        
+        /* Required field indicator */
+        .required {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        /* Form validation styles */
+        .input-group.error input {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+        }
+        
+        .input-group.success input {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+        }
         @media (max-width: 900px) { .container { flex-direction: column; } .left-panel { padding: 40px 30px; } .right-panel { padding: 40px 30px; } .panel-content h2 { font-size: 28px; } }
         @media (max-width: 480px) { .input-group input { padding: 12px 12px 12px 40px; } .input-icon { top: 37px; } }
     </style>
@@ -117,16 +134,16 @@
                 <p>Access your dashboard and manage your medicines</p>
             </div>
             <div class="form-container">
-                <form action="/auth/login" method="POST" id="loginForm">
+                <form action="/auth/login" method="POST" id="loginForm" novalidate>
                     <div class="input-group">
-                        <label for="email">Email Address</label>
+                        <label for="email">Email Address <span class="required">*</span></label>
                         <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="email" name="email" placeholder="Enter your email">
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
                     </div>
                     <div class="input-group">
-                        <label for="phone">Phone Number</label>
+                        <label for="phone">Phone Number <span class="required">*</span></label>
                         <i class="fas fa-phone input-icon"></i>
-                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
                     </div>
                     <div class="input-group">
                         <label for="password">Password</label>
@@ -151,6 +168,115 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const passwordInput = document.getElementById('password');
+            
+            // Add custom validation that works with browser's required attributes
+            // We'll use a different approach to allow either email OR phone
+            
+            // Function to update field validation states
+            function updateFieldValidation() {
+                const email = emailInput.value.trim();
+                const phone = phoneInput.value.trim();
+                const password = passwordInput.value.trim();
+                
+                // Reset all field states
+                emailInput.parentElement.classList.remove('error', 'success');
+                phoneInput.parentElement.classList.remove('error', 'success');
+                passwordInput.parentElement.classList.remove('error', 'success');
+                
+                // Validate email field
+                if (email) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (emailRegex.test(email)) {
+                        emailInput.parentElement.classList.add('success');
+                    } else {
+                        emailInput.parentElement.classList.add('error');
+                    }
+                }
+                
+                // Validate phone field
+                if (phone) {
+                    const phoneRegex = /^\d{10,15}$/;
+                    if (phoneRegex.test(phone.replace(/\D/g, ''))) {
+                        phoneInput.parentElement.classList.add('success');
+                    } else {
+                        phoneInput.parentElement.classList.add('error');
+                    }
+                }
+                
+                // Validate password field
+                if (password) {
+                    passwordInput.parentElement.classList.add('success');
+                }
+            }
+            
+            // Add input event listeners for real-time validation
+            emailInput.addEventListener('input', updateFieldValidation);
+            phoneInput.addEventListener('input', updateFieldValidation);
+            passwordInput.addEventListener('input', updateFieldValidation);
+            
+            // Add custom validation that works with browser's required attributes
+            loginForm.addEventListener('submit', function(e) {
+                const email = emailInput.value.trim();
+                const phone = phoneInput.value.trim();
+                const password = passwordInput.value.trim();
+                
+                // Check if at least one of email or phone is provided
+                if (!email && !phone) {
+                    e.preventDefault();
+                    showMessage('Please provide either email or phone number.', 'error');
+                    // Highlight empty fields
+                    if (!email) emailInput.parentElement.classList.add('error');
+                    if (!phone) phoneInput.parentElement.classList.add('error');
+                    return false;
+                }
+                
+                // Check if password is provided
+                if (!password) {
+                    e.preventDefault();
+                    showMessage('Password is required.', 'error');
+                    passwordInput.parentElement.classList.add('error');
+                    return false;
+                }
+                
+                // If both email and phone are provided, validate email format
+                if (email && phone) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        e.preventDefault();
+                        showMessage('Please enter a valid email address.', 'error');
+                        emailInput.parentElement.classList.add('error');
+                        return false;
+                    }
+                }
+                
+                // If only email is provided, validate email format
+                if (email && !phone) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        e.preventDefault();
+                        showMessage('Please enter a valid email address.', 'error');
+                        emailInput.parentElement.classList.add('error');
+                        return false;
+                    }
+                }
+                
+                // If only phone is provided, validate phone format (basic validation)
+                if (phone && !email) {
+                    const phoneRegex = /^\d{10,15}$/;
+                    if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
+                        e.preventDefault();
+                        showMessage('Please enter a valid phone number (10-15 digits).', 'error');
+                        phoneInput.parentElement.classList.add('error');
+                        return false;
+                    }
+                }
+            });
+            
             // Password visibility toggle
             const togglePassword = document.getElementById('togglePassword');
             const password = document.getElementById('password');
