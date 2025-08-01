@@ -81,7 +81,12 @@
                             <% if (medicine.imageUrl) { %>
                                 <img src="<%= medicine.imageUrl %>" alt="<%= medicine.name %>">
                             <% } else { %>
-                                <i class="fas fa-capsules"></i>
+                                <div class="default-medicine-image" data-category="<%= medicine.category || 'general' %>">
+                                    <i class="fas fa-capsules"></i>
+                                    <div class="image-overlay">
+                                        <span class="category-label"><%= medicine.category || 'Medicine' %></span>
+                                    </div>
+                                </div>
                             <% } %>
                             <div class="medicine-status status-<%= medicine.status.toLowerCase() %>"><%= medicine.status %></div>
                         </div>
@@ -143,7 +148,12 @@
             </div>
             <div class="modal-content">
                 <div class="modal-image">
-                    <i class="fas fa-capsules" id="modalImage"></i>
+                    <div class="modal-image-container" id="modalImageContainer">
+                        <i class="fas fa-capsules" id="modalImage"></i>
+                        <div class="modal-image-overlay" id="modalImageOverlay">
+                            <span class="modal-category-label" id="modalCategoryLabel">Medicine</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-details">
                     <div class="detail-group">
@@ -209,6 +219,31 @@
             // Medicine data from backend
             const medicines = <%- JSON.stringify(medicines || []) %>;
             
+            // Helper function to get medicine icon based on category
+            function getMedicineIcon(category) {
+                const iconMap = {
+                    'Pain Relief': 'fas fa-head-side-cough',
+                    'Fever': 'fas fa-thermometer-half',
+                    'Antibiotics': 'fas fa-shield-virus',
+                    'Vitamins': 'fas fa-apple-alt',
+                    'Diabetes': 'fas fa-tint',
+                    'Blood Pressure': 'fas fa-heartbeat',
+                    'Allergy': 'fas fa-wind',
+                    'Cough & Cold': 'fas fa-lungs',
+                    'Digestive': 'fas fa-stomach',
+                    'Skin Care': 'fas fa-spa',
+                    'Eye Care': 'fas fa-eye',
+                    'Dental': 'fas fa-tooth',
+                    'Women Health': 'fas fa-female',
+                    'Children': 'fas fa-baby',
+                    'Elderly': 'fas fa-user-plus',
+                    'First Aid': 'fas fa-first-aid',
+                    'General': 'fas fa-capsules'
+                };
+                
+                return iconMap[category] || 'fas fa-capsules';
+            }
+            
             // Open modal function
             function openModal(medicineId) {
                 const medicine = medicines.find(m => m._id === medicineId);
@@ -232,6 +267,29 @@
                     month: 'long', 
                     day: 'numeric' 
                 });
+                
+                // Update modal image
+                const modalImage = document.getElementById('modalImage');
+                const modalCategoryLabel = document.getElementById('modalCategoryLabel');
+                const modalImageContainer = document.getElementById('modalImageContainer');
+                
+                if (medicine.imageUrl) {
+                    // If medicine has an image, show it
+                    modalImageContainer.innerHTML = `<img src="${medicine.imageUrl}" alt="${medicine.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">`;
+                } else {
+                    // Show default image with category-specific icon
+                    const icon = getMedicineIcon(medicine.category);
+                    modalImageContainer.innerHTML = `
+                        <i class="${icon}"></i>
+                        <div class="modal-image-overlay">
+                            <span class="modal-category-label">${medicine.category || 'Medicine'}</span>
+                        </div>
+                    `;
+                    
+                    // Apply category-specific styling
+                    modalImageContainer.className = 'modal-image-container';
+                    modalImageContainer.setAttribute('data-category', medicine.category || 'general');
+                }
                 
                 // Address
                 let address = 'Location not available';
@@ -284,6 +342,22 @@
                     }
                 });
             });
+            
+            // Update default medicine images with category-specific icons
+            function updateDefaultImages() {
+                const defaultImages = document.querySelectorAll('.default-medicine-image');
+                defaultImages.forEach(container => {
+                    const category = container.getAttribute('data-category');
+                    const icon = container.querySelector('i');
+                    if (icon && category) {
+                        const newIcon = getMedicineIcon(category);
+                        icon.className = newIcon;
+                    }
+                });
+            }
+            
+            // Initialize default images
+            updateDefaultImages();
         });
         
         // Request medicine function

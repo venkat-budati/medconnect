@@ -88,14 +88,15 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="category">
-                                <i class="fas fa-tag"></i> Category
+                                <i class="fas fa-tag"></i> Category<span class="required-star">*</span>
                             </label>
-                            <select id="category" name="category" class="form-select">
+                            <select id="category" name="category" class="form-select" required>
                                 <option value="">Select category</option>
                                 <% categories.forEach(category => { %>
                                     <option value="<%= category.value %>"><%= category.label %></option>
                                 <% }); %>
                             </select>
+                            <div class="validation-message" id="category-validation"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="condition">
@@ -182,8 +183,10 @@
             // Validation elements
             const nameInput = document.getElementById('name');
             const expiryInput = document.getElementById('expiry');
+            const categoryInput = document.getElementById('category');
             const nameValidation = document.getElementById('name-validation');
             const expiryValidation = document.getElementById('expiry-validation');
+            const categoryValidation = document.getElementById('category-validation');
             
             // Check profile completeness on page load
             checkProfileCompleteness();
@@ -299,6 +302,18 @@
                 }, 300);
             });
             
+            // Real-time category validation
+            categoryInput.addEventListener('change', function() {
+                const category = categoryInput.value;
+                if (!category) {
+                    categoryValidation.textContent = 'Please select a category';
+                    categoryValidation.className = 'validation-message error';
+                } else {
+                    categoryValidation.textContent = '';
+                    categoryValidation.className = 'validation-message valid';
+                }
+            });
+            
             // File upload handling
             uploadArea.addEventListener('click', () => {
                 fileInput.click();
@@ -394,11 +409,10 @@
                 const name = nameInput.value.trim();
                 const quantity = document.getElementById('quantity').value;
                 const expiry = expiryInput.value;
+                const category = categoryInput.value;
                 const condition = document.getElementById('condition').value;
                 
-
-                
-                if (!name || !quantity || !expiry || !condition) {
+                if (!name || !quantity || !expiry || !category || !condition) {
                     alert('Please fill in all required fields');
                     return;
                 }

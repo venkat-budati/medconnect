@@ -40,12 +40,22 @@ router.get('/', isLoggedIn, async (req, res) => {
     // Get categories for the form
     const categories = [
       { value: 'Pain Relief', label: 'Pain Relief', icon: 'fas fa-head-side-cough' },
-      { value: 'Antibiotics', label: 'Antibiotics', icon: 'fas fa-bacteria' },
-      { value: 'Vitamins', label: 'Vitamins & Supplements', icon: 'fas fa-vitamin' },
-      { value: 'Diabetes', label: 'Diabetes', icon: 'fas fa-syringe' },
-      { value: 'Heart', label: 'Heart & Blood Pressure', icon: 'fas fa-heartbeat' },
-      { value: 'Respiratory', label: 'Respiratory', icon: 'fas fa-lungs' },
-      { value: 'Other', label: 'Other', icon: 'fas fa-pills' }
+      { value: 'Fever', label: 'Fever', icon: 'fas fa-thermometer-half' },
+      { value: 'Antibiotics', label: 'Antibiotics', icon: 'fas fa-shield-virus' },
+      { value: 'Vitamins', label: 'Vitamins & Supplements', icon: 'fas fa-apple-alt' },
+      { value: 'Diabetes', label: 'Diabetes', icon: 'fas fa-tint' },
+      { value: 'Blood Pressure', label: 'Blood Pressure', icon: 'fas fa-heartbeat' },
+      { value: 'Allergy', label: 'Allergy', icon: 'fas fa-wind' },
+      { value: 'Cough & Cold', label: 'Cough & Cold', icon: 'fas fa-lungs' },
+      { value: 'Digestive', label: 'Digestive', icon: 'fas fa-stomach' },
+      { value: 'Skin Care', label: 'Skin Care', icon: 'fas fa-spa' },
+      { value: 'Eye Care', label: 'Eye Care', icon: 'fas fa-eye' },
+      { value: 'Dental', label: 'Dental', icon: 'fas fa-tooth' },
+      { value: 'Women Health', label: 'Women Health', icon: 'fas fa-female' },
+      { value: 'Children', label: 'Children', icon: 'fas fa-baby' },
+      { value: 'Elderly', label: 'Elderly', icon: 'fas fa-user-plus' },
+      { value: 'First Aid', label: 'First Aid', icon: 'fas fa-first-aid' },
+      { value: 'General', label: 'General', icon: 'fas fa-capsules' }
     ];
 
     res.render('donate', { 
@@ -113,6 +123,9 @@ router.post('/', isLoggedIn, (req, res, next) => {
     if (expiry && new Date(expiry) <= new Date()) {
       errors.push('Expiry date must be in the future.');
     }
+    if (!category) {
+      errors.push('Please select a category for the medicine.');
+    }
     if (!condition) {
       errors.push('Please select the condition of the medicine.');
     }
@@ -179,7 +192,7 @@ router.post('/', isLoggedIn, (req, res, next) => {
       expiry: new Date(expiry),
       dosage: dosage || '',
       manufacturer: manufacturer || '',
-      category: category || 'Other',
+      category: category,
       description: description || notes || '',
       imageUrl: imageUrls.length > 0 ? imageUrls[0] : '',
       additionalImages: imageUrls.slice(1),
@@ -245,12 +258,22 @@ router.get('/categories', isLoggedIn, async (req, res) => {
   try {
     const categories = [
       { value: 'Pain Relief', label: 'Pain Relief', icon: 'fas fa-head-side-cough' },
-      { value: 'Antibiotics', label: 'Antibiotics', icon: 'fas fa-bacteria' },
-      { value: 'Vitamins', label: 'Vitamins & Supplements', icon: 'fas fa-vitamin' },
-      { value: 'Diabetes', label: 'Diabetes', icon: 'fas fa-syringe' },
-      { value: 'Heart', label: 'Heart & Blood Pressure', icon: 'fas fa-heartbeat' },
-      { value: 'Respiratory', label: 'Respiratory', icon: 'fas fa-lungs' },
-      { value: 'Other', label: 'Other', icon: 'fas fa-pills' }
+      { value: 'Fever', label: 'Fever', icon: 'fas fa-thermometer-half' },
+      { value: 'Antibiotics', label: 'Antibiotics', icon: 'fas fa-shield-virus' },
+      { value: 'Vitamins', label: 'Vitamins & Supplements', icon: 'fas fa-apple-alt' },
+      { value: 'Diabetes', label: 'Diabetes', icon: 'fas fa-tint' },
+      { value: 'Blood Pressure', label: 'Blood Pressure', icon: 'fas fa-heartbeat' },
+      { value: 'Allergy', label: 'Allergy', icon: 'fas fa-wind' },
+      { value: 'Cough & Cold', label: 'Cough & Cold', icon: 'fas fa-lungs' },
+      { value: 'Digestive', label: 'Digestive', icon: 'fas fa-stomach' },
+      { value: 'Skin Care', label: 'Skin Care', icon: 'fas fa-spa' },
+      { value: 'Eye Care', label: 'Eye Care', icon: 'fas fa-eye' },
+      { value: 'Dental', label: 'Dental', icon: 'fas fa-tooth' },
+      { value: 'Women Health', label: 'Women Health', icon: 'fas fa-female' },
+      { value: 'Children', label: 'Children', icon: 'fas fa-baby' },
+      { value: 'Elderly', label: 'Elderly', icon: 'fas fa-user-plus' },
+      { value: 'First Aid', label: 'First Aid', icon: 'fas fa-first-aid' },
+      { value: 'General', label: 'General', icon: 'fas fa-capsules' }
     ];
     
     res.json(categories);

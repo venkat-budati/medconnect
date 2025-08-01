@@ -102,6 +102,31 @@ async function getUserStats(userId) {
 
 
 
+// Helper function to get medicine icon based on category
+function getMedicineIcon(category) {
+  const iconMap = {
+    'Pain Relief': 'fas fa-head-side-cough',
+    'Fever': 'fas fa-thermometer-half',
+    'Antibiotics': 'fas fa-shield-virus',
+    'Vitamins': 'fas fa-apple-alt',
+    'Diabetes': 'fas fa-tint',
+    'Blood Pressure': 'fas fa-heartbeat',
+    'Allergy': 'fas fa-wind',
+    'Cough & Cold': 'fas fa-lungs',
+    'Digestive': 'fas fa-stomach',
+    'Skin Care': 'fas fa-spa',
+    'Eye Care': 'fas fa-eye',
+    'Dental': 'fas fa-tooth',
+    'Women Health': 'fas fa-female',
+    'Children': 'fas fa-baby',
+    'Elderly': 'fas fa-user-plus',
+    'First Aid': 'fas fa-first-aid',
+    'General': 'fas fa-capsules'
+  };
+  
+  return iconMap[category] || 'fas fa-capsules';
+}
+
 // Browse Medicines
 router.get('/browse', isLoggedIn, async (req, res) => {
   try {
@@ -194,6 +219,7 @@ router.get('/browse', isLoggedIn, async (req, res) => {
       categories,
       userLocation,
       currentFilters: { category, search, sort, distance },
+      getMedicineIcon: getMedicineIcon,
       layout: 'layouts/dashboard_layout',
       activePage: 'browse'
     });

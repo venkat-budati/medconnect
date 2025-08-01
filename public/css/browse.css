@@ -174,6 +174,163 @@ body::before {
     opacity: 0.7;
 }
 
+/* Default Medicine Image Styles */
+.default-medicine-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: linear-gradient(135deg, #e6f2ff, #f0f9ff);
+    border-radius: 12px;
+}
+
+.default-medicine-image i {
+    font-size: 60px;
+    color: var(--primary);
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+.image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(42, 124, 199, 0.1);
+    padding: 8px;
+    text-align: center;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.category-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Category-specific colors */
+.default-medicine-image[data-category="Pain Relief"] {
+    background: linear-gradient(135deg, #ffe6e6, #fff0f0);
+}
+.default-medicine-image[data-category="Pain Relief"] i {
+    color: #ff6b6b;
+}
+
+
+
+
+
+.default-medicine-image[data-category="Fever"] {
+    background: linear-gradient(135deg, #fff3e0, #fff8e1);
+}
+.default-medicine-image[data-category="Fever"] i {
+    color: #ff9800;
+}
+
+.default-medicine-image[data-category="Antibiotics"] {
+    background: linear-gradient(135deg, #e8f5e8, #f1f8f1);
+}
+.default-medicine-image[data-category="Antibiotics"] i {
+    color: #4caf50;
+}
+
+.default-medicine-image[data-category="Vitamins"] {
+    background: linear-gradient(135deg, #fff8e1, #fffde7);
+}
+.default-medicine-image[data-category="Vitamins"] i {
+    color: #ffc107;
+}
+
+.default-medicine-image[data-category="Diabetes"] {
+    background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+}
+.default-medicine-image[data-category="Diabetes"] i {
+    color: #9c27b0;
+}
+
+.default-medicine-image[data-category="Blood Pressure"] {
+    background: linear-gradient(135deg, #ffebee, #fce4ec);
+}
+.default-medicine-image[data-category="Blood Pressure"] i {
+    color: #e91e63;
+}
+
+.default-medicine-image[data-category="Allergy"] {
+    background: linear-gradient(135deg, #e0f2f1, #e8f5e8);
+}
+.default-medicine-image[data-category="Allergy"] i {
+    color: #009688;
+}
+
+.default-medicine-image[data-category="Cough & Cold"] {
+    background: linear-gradient(135deg, #f3e5f5, #e8eaf6);
+}
+.default-medicine-image[data-category="Cough & Cold"] i {
+    color: #673ab7;
+}
+
+.default-medicine-image[data-category="Digestive"] {
+    background: linear-gradient(135deg, #fff3e0, #fbe9e7);
+}
+.default-medicine-image[data-category="Digestive"] i {
+    color: #ff5722;
+}
+
+.default-medicine-image[data-category="Skin Care"] {
+    background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+}
+.default-medicine-image[data-category="Skin Care"] i {
+    color: #e91e63;
+}
+
+.default-medicine-image[data-category="Eye Care"] {
+    background: linear-gradient(135deg, #e8eaf6, #e3f2fd);
+}
+.default-medicine-image[data-category="Eye Care"] i {
+    color: #3f51b5;
+}
+
+.default-medicine-image[data-category="Dental"] {
+    background: linear-gradient(135deg, #f1f8e9, #f9fbe7);
+}
+.default-medicine-image[data-category="Dental"] i {
+    color: #8bc34a;
+}
+
+.default-medicine-image[data-category="Women Health"] {
+    background: linear-gradient(135deg, #fce4ec, #fff3e0);
+}
+.default-medicine-image[data-category="Women Health"] i {
+    color: #ff4081;
+}
+
+.default-medicine-image[data-category="Children"] {
+    background: linear-gradient(135deg, #e8f5e8, #fff8e1);
+}
+.default-medicine-image[data-category="Children"] i {
+    color: #4caf50;
+}
+
+.default-medicine-image[data-category="Elderly"] {
+    background: linear-gradient(135deg, #f3e5f5, #e8eaf6);
+}
+.default-medicine-image[data-category="Elderly"] i {
+    color: #9c27b0;
+}
+
+.default-medicine-image[data-category="First Aid"] {
+    background: linear-gradient(135deg, #ffebee, #fff3e0);
+}
+.default-medicine-image[data-category="First Aid"] i {
+    color: #f44336;
+}
+
 .medicine-status {
     position: absolute;
     top: 15px;
@@ -377,6 +534,43 @@ body::before {
     justify-content: center;
     font-size: 80px;
     color: var(--primary);
+}
+
+.modal-image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.modal-image-container i {
+    font-size: 80px;
+    color: var(--primary);
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+.modal-image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(42, 124, 199, 0.15);
+    padding: 10px;
+    text-align: center;
+}
+
+.modal-category-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .modal-details {
