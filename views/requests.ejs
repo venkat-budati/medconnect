@@ -486,7 +486,7 @@
         
         // Show modal
         document.getElementById('requestModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        // Don't change body overflow to prevent scroll bars
     }
 
     function openConfirmationModal(requestId) {
@@ -502,17 +502,17 @@
         `;
         document.getElementById('confirmCancelBtn').setAttribute('data-request-id', requestId);
         document.getElementById('confirmationModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        // Don't change body overflow to prevent scroll bars
     }
 
     function closeConfirmationModal() {
         document.getElementById('confirmationModal').classList.remove('active');
-        document.body.style.overflow = 'auto';
+        // Don't change body overflow to prevent scroll bars
     }
     
     function closeModalFunc() {
         document.getElementById('requestModal').classList.remove('active');
-        document.body.style.overflow = 'auto';
+        // Don't change body overflow to prevent scroll bars
     }
     
     function cancelRequest(requestId) {

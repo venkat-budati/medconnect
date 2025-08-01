@@ -563,7 +563,7 @@
                             
                             // Show success modal
                             successModal.style.display = 'block';
-                            document.body.style.overflow = 'hidden';
+                            // Don't change body overflow to prevent scroll bars
                         } else {
                             // Show error toast with form data preserved
                             showToast('error', 'Donation Failed', result.error || 'Failed to submit donation. Please try again.');
@@ -607,7 +607,7 @@
             // Close modal function
             window.closeSuccessModal = function() {
                 successModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
+                // Don't change body overflow to prevent scroll bars
             };
 
             // Close modal when clicking overlay

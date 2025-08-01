@@ -297,7 +297,7 @@
                 document.getElementById('modalRequestBtn').setAttribute('data-id', medicineId);
                 
                 modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
+                // Don't change body overflow to prevent scroll bars
             }
         
         // Update modal image gallery
@@ -435,7 +435,7 @@
             // Close modal function
             function closeModalFunc() {
                 modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
+                // Don't change body overflow to prevent scroll bars
             }
             
         document.addEventListener('DOMContentLoaded', function() {
@@ -780,7 +780,7 @@
                         const modal = document.getElementById('medicineModal');
                         if (modal.classList.contains('active')) {
                             modal.classList.remove('active');
-                            document.body.style.overflow = 'auto';
+                            // Don't change body overflow to prevent scroll bars
                         }
                         // Refresh the page after a short delay to show updated status
                         setTimeout(() => {

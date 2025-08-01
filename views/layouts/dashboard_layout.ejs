@@ -350,7 +350,7 @@
             const modal = document.getElementById('logoutModal');
             if (modal) {
                 modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
+                // Don't change body overflow to prevent scroll bars
             }
         }
         
@@ -358,7 +358,7 @@
             const modal = document.getElementById('logoutModal');
             if (modal) {
                 modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
+                // Don't change body overflow to prevent scroll bars
             }
         }
         
