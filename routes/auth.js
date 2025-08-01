@@ -118,12 +118,20 @@ router.post('/register', async (req, res) => {
     await user.save();
     user.verified = true;
     await user.save();
+    
     // Clear OTP from session
     delete req.session.otp;
     delete req.session.otpEmail;
     delete req.session.otpExpires;
-    req.flash('success', 'Registration successful. Please log in.');
-    res.redirect('/auth/login');
+    
+    // Save session to ensure OTP cleanup is persisted
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error during registration:', err);
+      }
+      req.flash('success', 'Registration successful. Please log in.');
+      res.redirect('/auth/login');
+    });
   } catch (err) {
     req.flash('error', 'Email or phone already in use.');
     res.redirect('/auth/register');
@@ -208,8 +216,23 @@ router.post('/login', async (req, res) => {
       state: user.state,
       pincode: user.pincode
     };
-    req.flash('success', 'Logged in successfully.');
-    res.redirect('/dashboard');
+    
+    // Save session explicitly and add debugging
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        req.flash('error', 'Session error occurred.');
+        return res.redirect('/auth/login');
+      }
+      
+      console.log('Session saved successfully:');
+      console.log('- Session ID:', req.session.id);
+      console.log('- Session user:', req.session.user);
+      console.log('- Session exists:', !!req.session);
+      
+      req.flash('success', 'Logged in successfully.');
+      res.redirect('/dashboard');
+    });
   } catch (err) {
     console.error('Login error:', err);
     req.flash('error', 'Login failed.');
@@ -221,6 +244,50 @@ router.post('/login', async (req, res) => {
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/');
+  });
+});
+
+// Session test route for debugging
+router.get('/session-test', (req, res) => {
+  console.log('Session test route:');
+  console.log('- Session exists:', !!req.session);
+  console.log('- Session ID:', req.session ? req.session.id : 'No session');
+  console.log('- Session user:', req.session ? req.session.user : 'No user');
+  console.log('- Session data:', req.session);
+  
+  // Test setting a simple session value
+  req.session.testValue = 'test-' + Date.now();
+  req.session.save((err) => {
+    if (err) {
+      console.error('Session save error in test:', err);
+    }
+    
+    res.json({
+      sessionExists: !!req.session,
+      sessionId: req.session ? req.session.id : null,
+      sessionUser: req.session ? req.session.user : null,
+      testValue: req.session ? req.session.testValue : null,
+      sessionData: req.session
+    });
+  });
+});
+
+// Session setter test route
+router.get('/session-set/:value', (req, res) => {
+  const testValue = req.params.value;
+  req.session.testValue = testValue;
+  req.session.save((err) => {
+    if (err) {
+      console.error('Session save error in setter:', err);
+      return res.json({ error: 'Session save failed', details: err.message });
+    }
+    
+    res.json({
+      success: true,
+      message: `Session value set to: ${testValue}`,
+      sessionId: req.session.id,
+      testValue: req.session.testValue
+    });
   });
 });
 

@@ -37,7 +37,7 @@ app.use(methodOverride('_method'));
 // Session
 app.use(session({
   secret: process.env.SESSION_SECRET,
-  resave: false,
+  resave: true,
   saveUninitialized: false,
   store: MongoStore.create({ 
     mongoUrl: process.env.MONGODB_URI,
@@ -47,7 +47,7 @@ app.use(session({
   }),
   cookie: { 
     maxAge: 1000 * 60 * 60 * 24, // 24 hours
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Changed to false for deployment compatibility
     httpOnly: true,
     sameSite: 'lax'
   },
